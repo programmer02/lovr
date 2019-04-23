@@ -59,12 +59,12 @@ bool lovrFilesystemInit(const char* argExe, const char* argGame, const char* arg
 
   // Try to mount either an archive fused to the executable or an archive from the command line
   lovrFilesystemGetExecutablePath(state.source, LOVR_PATH_MAX);
-  if (lovrFilesystemMount(state.source, NULL, 1, argRoot)) { // Attempt to load fused. If that fails...
+  if (!lovrFilesystemMount(state.source, NULL, 1, argRoot)) { // Attempt to load fused. If that fails...
     state.isFused = false;
 
     if (argGame) {
       strncpy(state.source, argGame, LOVR_PATH_MAX);
-      if (!lovrFilesystemMount(state.source, NULL, 1, argRoot)) { // Attempt to load from arg. If success, init is done
+      if (lovrFilesystemMount(state.source, NULL, 1, argRoot)) { // Attempt to load from arg. If success, init is done
         return true;
       }
     }
