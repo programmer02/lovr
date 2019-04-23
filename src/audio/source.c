@@ -2,7 +2,7 @@
 #include "audio/audio.h"
 #include "data/audioStream.h"
 #include "data/soundData.h"
-#include "util.h"
+#include "lib/maf.h"
 #include <stdlib.h>
 
 static ALenum lovrSourceGetState(Source* source) {
@@ -44,11 +44,11 @@ SourceType lovrSourceGetType(Source* source) {
   return source->type;
 }
 
-int lovrSourceGetBitDepth(Source* source) {
+u32 lovrSourceGetBitDepth(Source* source) {
   return source->type == SOURCE_STATIC ? source->soundData->bitDepth : source->stream->bitDepth;
 }
 
-void lovrSourceGetCone(Source* source, float* innerAngle, float* outerAngle, float* outerGain) {
+void lovrSourceGetCone(Source* source, f32* innerAngle, f32* outerAngle, f32* outerGain) {
   alGetSourcef(source->id, AL_CONE_INNER_ANGLE, innerAngle);
   alGetSourcef(source->id, AL_CONE_OUTER_ANGLE, outerAngle);
   alGetSourcef(source->id, AL_CONE_OUTER_GAIN, outerGain);
@@ -56,28 +56,28 @@ void lovrSourceGetCone(Source* source, float* innerAngle, float* outerAngle, flo
   *outerAngle *= PI / 180.f;
 }
 
-int lovrSourceGetChannelCount(Source* source) {
+u32 lovrSourceGetChannelCount(Source* source) {
   return source->type == SOURCE_STATIC ? source->soundData->channelCount : source->stream->channelCount;
 }
 
 void lovrSourceGetOrientation(Source* source, quat orientation) {
-  float v[3], forward[3] = { 0.f, 0.f, -1.f };
+  f32 v[3], forward[3] = { 0.f, 0.f, -1.f };
   alGetSourcefv(source->id, AL_DIRECTION, v);
   quat_between(orientation, forward, v);
 }
 
-int lovrSourceGetDuration(Source* source) {
+usize lovrSourceGetDuration(Source* source) {
   return source->type == SOURCE_STATIC ? source->soundData->samples : source->stream->samples;
 }
 
-void lovrSourceGetFalloff(Source* source, float* reference, float* max, float* rolloff) {
+void lovrSourceGetFalloff(Source* source, f32* reference, f32* max, f32* rolloff) {
   alGetSourcef(source->id, AL_REFERENCE_DISTANCE, reference);
   alGetSourcef(source->id, AL_MAX_DISTANCE, max);
   alGetSourcef(source->id, AL_ROLLOFF_FACTOR, rolloff);
 }
 
-float lovrSourceGetPitch(Source* source) {
-  float pitch;
+f32 lovrSourceGetPitch(Source* source) {
+  f32 pitch;
   alGetSourcef(source->id, AL_PITCH, &pitch);
   return pitch;
 }
@@ -86,7 +86,7 @@ void lovrSourceGetPosition(Source* source, vec3 position) {
   alGetSourcefv(source->id, AL_POSITION, position);
 }
 
-int lovrSourceGetSampleRate(Source* source) {
+u32 lovrSourceGetSampleRate(Source* source) {
   return source->type == SOURCE_STATIC ? source->soundData->sampleRate : source->stream->sampleRate;
 }
 
@@ -95,12 +95,12 @@ void lovrSourceGetVelocity(Source* source, vec3 velocity) {
 }
 
 float lovrSourceGetVolume(Source* source) {
-  float volume;
+  f32 volume;
   alGetSourcef(source->id, AL_GAIN, &volume);
   return volume;
 }
 
-void lovrSourceGetVolumeLimits(Source* source, float* min, float* max) {
+void lovrSourceGetVolumeLimits(Source* source, f32* min, f32* max) {
   alGetSourcef(source->id, AL_MIN_GAIN, min);
   alGetSourcef(source->id, AL_MAX_GAIN, max);
 }
@@ -165,7 +165,7 @@ void lovrSourceRewind(Source* source) {
   }
 }
 
-void lovrSourceSeek(Source* source, int sample) {
+void lovrSourceSeek(Source* source, usize sample) {
   switch (source->type) {
     case SOURCE_STATIC:
       alSourcef(source->id, AL_SAMPLE_OFFSET, sample);
@@ -184,19 +184,19 @@ void lovrSourceSeek(Source* source, int sample) {
   }
 }
 
-void lovrSourceSetCone(Source* source, float innerAngle, float outerAngle, float outerGain) {
+void lovrSourceSetCone(Source* source, f32 innerAngle, f32 outerAngle, f32 outerGain) {
   alSourcef(source->id, AL_CONE_INNER_ANGLE, innerAngle * 180.f / PI);
   alSourcef(source->id, AL_CONE_OUTER_ANGLE, outerAngle * 180.f / PI);
   alSourcef(source->id, AL_CONE_OUTER_GAIN, outerGain);
 }
 
 void lovrSourceSetOrientation(Source* source, quat orientation) {
-  float v[3] = { 0.f, 0.f, -1.f };
+  f32 v[3] = { 0.f, 0.f, -1.f };
   quat_rotate(orientation, v);
   alSource3f(source->id, AL_DIRECTION, v[0], v[1], v[2]);
 }
 
-void lovrSourceSetFalloff(Source* source, float reference, float max, float rolloff) {
+void lovrSourceSetFalloff(Source* source, f32 reference, f32 max, f32 rolloff) {
   lovrAssert(lovrSourceGetChannelCount(source) == 1, "Positional audio is only supported for mono sources");
   alSourcef(source->id, AL_REFERENCE_DISTANCE, reference);
   alSourcef(source->id, AL_MAX_DISTANCE, max);
@@ -210,7 +210,7 @@ void lovrSourceSetLooping(Source* source, bool isLooping) {
   }
 }
 
-void lovrSourceSetPitch(Source* source, float pitch) {
+void lovrSourceSetPitch(Source* source, f32 pitch) {
   alSourcef(source->id, AL_PITCH, pitch);
 }
 
@@ -227,11 +227,11 @@ void lovrSourceSetVelocity(Source* source, vec3 velocity) {
   alSource3f(source->id, AL_VELOCITY, velocity[0], velocity[1], velocity[2]);
 }
 
-void lovrSourceSetVolume(Source* source, float volume) {
+void lovrSourceSetVolume(Source* source, f32 volume) {
   alSourcef(source->id, AL_GAIN, volume);
 }
 
-void lovrSourceSetVolumeLimits(Source* source, float min, float max) {
+void lovrSourceSetVolumeLimits(Source* source, f32 min, f32 max) {
   alSourcef(source->id, AL_MIN_GAIN, min);
   alSourcef(source->id, AL_MAX_GAIN, max);
 }
@@ -249,7 +249,7 @@ void lovrSourceStop(Source* source) {
     case SOURCE_STREAM: {
 
       // Empty the buffers
-      int count = 0;
+      ALsizei count = 0;
       alGetSourcei(source->id, AL_BUFFERS_QUEUED, &count);
       alSourceUnqueueBuffers(source->id, count, NULL);
 
@@ -265,16 +265,16 @@ void lovrSourceStop(Source* source) {
 }
 
 // Fills buffers with data and queues them, called once initially and over time to stream more data
-void lovrSourceStream(Source* source, ALuint* buffers, int count) {
+void lovrSourceStream(Source* source, ALuint* buffers, usize count) {
   if (source->type == SOURCE_STATIC) {
     return;
   }
 
   AudioStream* stream = source->stream;
   ALenum format = lovrAudioConvertFormat(stream->bitDepth, stream->channelCount);
-  int frequency = stream->sampleRate;
-  int samples = 0;
-  int n = 0;
+  u32 frequency = stream->sampleRate;
+  usize samples = 0;
+  usize n = 0;
 
   // Keep decoding until there is nothing left to decode or all the buffers are filled
   while (n < count && (samples = lovrAudioStreamDecode(stream, NULL, 0)) != 0) {
@@ -290,7 +290,7 @@ void lovrSourceStream(Source* source, ALuint* buffers, int count) {
   }
 }
 
-int lovrSourceTell(Source* source) {
+usize lovrSourceTell(Source* source) {
   switch (source->type) {
     case SOURCE_STATIC: {
       float offset;
@@ -299,13 +299,13 @@ int lovrSourceTell(Source* source) {
     }
 
     case SOURCE_STREAM: {
-      int decoderOffset = lovrAudioStreamTell(source->stream);
-      int samplesPerBuffer = source->stream->bufferSize / source->stream->channelCount / sizeof(ALshort);
-      int queuedBuffers, sampleOffset;
+      usize decoderOffset = lovrAudioStreamTell(source->stream);
+      usize samplesPerBuffer = source->stream->bufferSize / source->stream->channelCount / sizeof(ALshort);
+      ALsizei queuedBuffers, sampleOffset;
       alGetSourcei(source->id, AL_BUFFERS_QUEUED, &queuedBuffers);
       alGetSourcei(source->id, AL_SAMPLE_OFFSET, &sampleOffset);
 
-      int offset = decoderOffset - queuedBuffers * samplesPerBuffer + sampleOffset;
+      usize offset = decoderOffset - queuedBuffers * samplesPerBuffer + sampleOffset;
 
       if (offset < 0) {
         return offset + source->stream->samples;
