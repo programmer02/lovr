@@ -2,10 +2,23 @@
 #include "audio/source.h"
 #include "data/audioStream.h"
 #include "lib/maf.h"
+#include "lib/vec/vec.h"
 #include "util.h"
 #include <stdlib.h>
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alext.h>
 
-static AudioState state;
+static struct {
+  bool initialized;
+  ALCdevice* device;
+  ALCcontext* context;
+  vec_void_t sources;
+  bool isSpatialized;
+  f32 orientation[4];
+  f32 position[3];
+  f32 velocity[3];
+} state;
 
 ALenum lovrAudioConvertFormat(int bitDepth, int channelCount) {
   if (bitDepth == 8 && channelCount == 1) {
@@ -57,7 +70,7 @@ void lovrAudioDestroy() {
     lovrRelease(Source, state.sources.data[i]);
   }
   vec_deinit(&state.sources);
-  memset(&state, 0, sizeof(AudioState));
+  memset(&state, 0, sizeof(state));
 }
 
 void lovrAudioUpdate() {
@@ -93,12 +106,12 @@ void lovrAudioAdd(Source* source) {
   }
 }
 
-void lovrAudioGetDopplerEffect(float* factor, float* speedOfSound) {
+void lovrAudioGetDopplerEffect(f32* factor, f32* speedOfSound) {
   alGetFloatv(AL_DOPPLER_FACTOR, factor);
   alGetFloatv(AL_SPEED_OF_SOUND, speedOfSound);
 }
 
-void lovrAudioGetMicrophoneNames(const char* names[MAX_MICROPHONES], uint8_t* count) {
+void lovrAudioGetMicrophoneNames(const char* names[MAX_MICROPHONES], u8* count) {
   const char* name = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
   *count = 0;
   while (*name) {
@@ -119,8 +132,8 @@ void lovrAudioGetVelocity(vec3 velocity) {
   vec3_init(velocity, state.velocity);
 }
 
-float lovrAudioGetVolume() {
-  float volume;
+f32 lovrAudioGetVolume() {
+  f32 volume;
   alGetListenerf(AL_GAIN, &volume);
   return volume;
 }
@@ -156,7 +169,7 @@ void lovrAudioRewind() {
   }
 }
 
-void lovrAudioSetDopplerEffect(float factor, float speedOfSound) {
+void lovrAudioSetDopplerEffect(f32 factor, f32 speedOfSound) {
   alDopplerFactor(factor);
   alSpeedOfSound(speedOfSound);
 }
@@ -164,8 +177,8 @@ void lovrAudioSetDopplerEffect(float factor, float speedOfSound) {
 void lovrAudioSetOrientation(quat orientation) {
 
   // Rotate the unit forward/up vectors by the quaternion derived from the specified angle/axis
-  float f[3] = { 0, 0, -1 };
-  float u[3] = { 0, 1, 0 };
+  f32 f[3] = { 0.f, 0.f, -1.f };
+  f32 u[3] = { 0.f, 1.f,  0.f };
   quat_init(state.orientation, orientation);
   quat_rotate(state.orientation, f);
   quat_rotate(state.orientation, u);
@@ -185,7 +198,7 @@ void lovrAudioSetVelocity(vec3 velocity) {
   alListenerfv(AL_VELOCITY, velocity);
 }
 
-void lovrAudioSetVolume(float volume) {
+void lovrAudioSetVolume(f32 volume) {
   alListenerf(AL_GAIN, volume);
 }
 

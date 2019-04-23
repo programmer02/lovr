@@ -6,6 +6,7 @@
 #include "audio/source.h"
 #include "data/audioStream.h"
 #include "data/soundData.h"
+#include <stdlib.h>
 
 const char* SourceTypes[] = {
   [SOURCE_STATIC] = "static",
