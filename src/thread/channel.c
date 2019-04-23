@@ -1,7 +1,5 @@
 #include "thread/channel.h"
-#include "util.h"
 #include <math.h>
-#include <stdlib.h>
 
 Channel* lovrChannelInit(Channel* channel) {
   vec_init(&channel->messages);
@@ -18,7 +16,7 @@ void lovrChannelDestroy(void* ref) {
   cnd_destroy(&channel->cond);
 }
 
-bool lovrChannelPush(Channel* channel, Variant variant, double timeout, uint64_t* id) {
+bool lovrChannelPush(Channel* channel, Variant variant, f64 timeout, u64* id) {
   mtx_lock(&channel->lock);
   if (channel->messages.length == 0) {
     lovrRetain(channel);
@@ -32,7 +30,7 @@ bool lovrChannelPush(Channel* channel, Variant variant, double timeout, uint64_t
     return false;
   }
 
-  while (channel->received < *id && timeout >= 0) {
+  while (channel->received < *id && timeout >= 0.) {
     if (isinf(timeout)) {
       cnd_wait(&channel->cond, &channel->lock);
     } else {
@@ -40,13 +38,13 @@ bool lovrChannelPush(Channel* channel, Variant variant, double timeout, uint64_t
       struct timespec until;
       struct timespec stop;
       timespec_get(&start, TIME_UTC);
-      double whole, fraction;
+      f64 whole, fraction;
       fraction = modf(timeout, &whole);
       until.tv_sec = start.tv_sec + whole;
       until.tv_nsec = start.tv_nsec + fraction * 1e9;
       cnd_timedwait(&channel->cond, &channel->lock, &until);
       timespec_get(&stop, TIME_UTC);
-      timeout -= (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / (double) 1e9;
+      timeout -= (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / (f64) 1e9;
     }
   }
 
@@ -55,7 +53,7 @@ bool lovrChannelPush(Channel* channel, Variant variant, double timeout, uint64_t
   return read;
 }
 
-bool lovrChannelPop(Channel* channel, Variant* variant, double timeout) {
+bool lovrChannelPop(Channel* channel, Variant* variant, f64 timeout) {
   mtx_lock(&channel->lock);
 
   do {
@@ -68,7 +66,7 @@ bool lovrChannelPop(Channel* channel, Variant* variant, double timeout) {
       cnd_broadcast(&channel->cond);
       mtx_unlock(&channel->lock);
       return true;
-    } else if (isnan(timeout) || timeout < 0) {
+    } else if (isnan(timeout) || timeout < 0.) {
       mtx_unlock(&channel->lock);
       return false;
     }
@@ -80,13 +78,13 @@ bool lovrChannelPop(Channel* channel, Variant* variant, double timeout) {
       struct timespec until;
       struct timespec stop;
       timespec_get(&start, TIME_UTC);
-      double whole, fraction;
+      f64 whole, fraction;
       fraction = modf(timeout, &whole);
       until.tv_sec = start.tv_sec + whole;
       until.tv_nsec = start.tv_nsec + fraction * 1e9;
       cnd_timedwait(&channel->cond, &channel->lock, &until);
       timespec_get(&stop, TIME_UTC);
-      timeout -= (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / (double) 1e9;
+      timeout -= (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / (f64) 1e9;
     }
   } while (true);
 }
@@ -115,14 +113,14 @@ void lovrChannelClear(Channel* channel) {
   mtx_unlock(&channel->lock);
 }
 
-uint64_t lovrChannelGetCount(Channel* channel) {
+u64 lovrChannelGetCount(Channel* channel) {
   mtx_lock(&channel->lock);
-  uint64_t length = channel->messages.length;
+  u64 length = channel->messages.length;
   mtx_unlock(&channel->lock);
   return length;
 }
 
-bool lovrChannelHasRead(Channel* channel, uint64_t id) {
+bool lovrChannelHasRead(Channel* channel, u64 id) {
   mtx_lock(&channel->lock);
   bool received = channel->received >= id;
   mtx_unlock(&channel->lock);

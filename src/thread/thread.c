@@ -1,9 +1,11 @@
 #include "thread/thread.h"
 #include "thread/channel.h"
-#include "util.h"
-#include <stdlib.h>
+#include "lib/map/map.h"
 
-static ThreadState state;
+static struct {
+  bool initialized;
+  map_void_t channels;
+} state;
 
 bool lovrThreadModuleInit() {
   if (state.initialized) return false;
