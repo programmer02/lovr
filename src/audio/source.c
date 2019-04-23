@@ -2,7 +2,7 @@
 #include "audio/audio.h"
 #include "data/audioStream.h"
 #include "data/soundData.h"
-#include <math.h>
+#include "util.h"
 #include <stdlib.h>
 
 static ALenum lovrSourceGetState(Source* source) {
@@ -52,8 +52,8 @@ void lovrSourceGetCone(Source* source, float* innerAngle, float* outerAngle, flo
   alGetSourcef(source->id, AL_CONE_INNER_ANGLE, innerAngle);
   alGetSourcef(source->id, AL_CONE_OUTER_ANGLE, outerAngle);
   alGetSourcef(source->id, AL_CONE_OUTER_GAIN, outerGain);
-  *innerAngle *= (float) M_PI / 180.f;
-  *outerAngle *= (float) M_PI / 180.f;
+  *innerAngle *= PI / 180.f;
+  *outerAngle *= PI / 180.f;
 }
 
 int lovrSourceGetChannelCount(Source* source) {
@@ -185,8 +185,8 @@ void lovrSourceSeek(Source* source, int sample) {
 }
 
 void lovrSourceSetCone(Source* source, float innerAngle, float outerAngle, float outerGain) {
-  alSourcef(source->id, AL_CONE_INNER_ANGLE, innerAngle * 180.f / (float) M_PI);
-  alSourcef(source->id, AL_CONE_OUTER_ANGLE, outerAngle * 180.f / (float) M_PI);
+  alSourcef(source->id, AL_CONE_INNER_ANGLE, innerAngle * 180.f / PI);
+  alSourcef(source->id, AL_CONE_OUTER_ANGLE, outerAngle * 180.f / PI);
   alSourcef(source->id, AL_CONE_OUTER_GAIN, outerGain);
 }
 

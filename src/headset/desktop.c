@@ -2,6 +2,7 @@
 #include "graphics/graphics.h"
 #include "lib/maf.h"
 #include "platform.h"
+#include "util.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -146,7 +147,7 @@ static void renderTo(void (*callback)(void*), void* userdata) {
   uint32_t width, height;
   getDisplayDimensions(&width, &height);
   Camera camera = { .canvas = NULL, .viewMatrix = { MAT4_IDENTITY }, .stereo = true };
-  mat4_perspective(camera.projection[0], state.clipNear, state.clipFar, 67.f * M_PI / 180.f, (float) width / 2.f / height);
+  mat4_perspective(camera.projection[0], state.clipNear, state.clipFar, 67.f * PI / 180.f, (float) width / 2.f / height);
   mat4_multiply(camera.viewMatrix[0], state.transform);
   mat4_invertPose(camera.viewMatrix[0]);
   mat4_set(camera.projection[1], camera.projection[0]);
@@ -207,7 +208,7 @@ static void update(float dt) {
   vec3_add(state.position, state.velocity);
 
   // Update orientation
-  state.pitch = CLAMP(state.pitch - state.angularVelocity[0] * turnspeed, -(float) M_PI / 2.f, (float) M_PI / 2.f);
+  state.pitch = CLAMP(state.pitch - state.angularVelocity[0] * turnspeed, -PI / 2.f, PI / 2.f);
   state.yaw -= state.angularVelocity[1] * turnspeed;
 
   // Update transform

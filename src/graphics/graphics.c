@@ -233,8 +233,8 @@ void lovrGraphicsSetCamera(Camera* camera, bool clear) {
     memset(&state.camera, 0, sizeof(Camera));
     mat4_identity(state.camera.viewMatrix[0]);
     mat4_identity(state.camera.viewMatrix[1]);
-    mat4_perspective(state.camera.projection[0], .01f, 100.f, 67.f * M_PI / 180.f, (float) state.width / state.height);
-    mat4_perspective(state.camera.projection[1], .01f, 100.f, 67.f * M_PI / 180.f, (float) state.width / state.height);
+    mat4_perspective(state.camera.projection[0], .01f, 100.f, 67.f * PI / 180.f, (float) state.width / state.height);
+    mat4_perspective(state.camera.projection[1], .01f, 100.f, 67.f * PI / 180.f, (float) state.width / state.height);
   } else {
     state.camera = *camera;
   }
@@ -913,9 +913,9 @@ void lovrGraphicsBox(DrawStyle style, Material* material, mat4 transform) {
 void lovrGraphicsArc(DrawStyle style, ArcMode mode, Material* material, mat4 transform, float r1, float r2, int segments) {
   bool hasCenterPoint = false;
 
-  if (fabsf(r1 - r2) >= 2.f * (float) M_PI) {
+  if (fabsf(r1 - r2) >= 2.f * PI) {
     r1 = 0.f;
-    r2 = 2.f * (float) M_PI;
+    r2 = 2.f * PI;
   } else {
     hasCenterPoint = mode == ARC_MODE_PIE;
   }
@@ -958,7 +958,7 @@ void lovrGraphicsArc(DrawStyle style, ArcMode mode, Material* material, mat4 tra
 }
 
 void lovrGraphicsCircle(DrawStyle style, Material* material, mat4 transform, int segments) {
-  lovrGraphicsArc(style, ARC_MODE_OPEN, material, transform, 0, 2. * M_PI, segments);
+  lovrGraphicsArc(style, ARC_MODE_OPEN, material, transform, 0, 2.f * PI, segments);
 }
 
 void lovrGraphicsCylinder(Material* material, mat4 transform, float r1, float r2, bool capped, int segments) {
@@ -994,7 +994,7 @@ void lovrGraphicsCylinder(Material* material, mat4 transform, float r1, float r2
 
     // Ring
     for (int i = 0; i <= segments; i++) {
-      float theta = i * (2 * M_PI) / segments;
+      float theta = i * (2.f * PI) / segments;
       float X = cosf(theta);
       float Y = sinf(theta);
       memcpy(vertices, (float[16]) {
@@ -1069,13 +1069,13 @@ void lovrGraphicsSphere(Material* material, mat4 transform, int segments) {
   if (vertices) {
     for (int i = 0; i <= segments; i++) {
       float v = i / (float) segments;
-      float sinV = sinf(v * (float) M_PI);
-      float cosV = cosf(v * (float) M_PI);
+      float sinV = sinf(v * PI);
+      float cosV = cosf(v * PI);
       for (int k = 0; k <= segments; k++) {
         float u = k / (float) segments;
-        float x = sinf(u * 2.f * (float) M_PI) * sinV;
+        float x = sinf(u * 2.f * PI) * sinV;
         float y = cosV;
-        float z = -cosf(u * 2.f * (float) M_PI) * sinV;
+        float z = -cosf(u * 2.f * PI) * sinV;
         memcpy(vertices, ((float[8]) { x, y, z, x, y, z, u, 1.f - v }), 8 * sizeof(float));
         vertices += 8;
       }
