@@ -1,17 +1,21 @@
 #include "math.h"
+#include "math/randomGenerator.h"
+#include "lib/maf.h"
 #include "lib/noise1234/noise1234.h"
-#include "util.h"
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 
-static MathState state;
+static struct {
+  bool initialized;
+  RandomGenerator* generator;
+} state;
 
 bool lovrMathInit() {
   if (state.initialized) return false;
   state.generator = lovrRandomGeneratorCreate();
-  Seed seed = { .b64 = (uint64_t) time(0) };
+  Seed seed = { .b64 = (u64) time(0) };
   lovrRandomGeneratorSetSeed(state.generator, seed);
   return state.initialized = true;
 }
@@ -19,22 +23,22 @@ bool lovrMathInit() {
 void lovrMathDestroy() {
   if (!state.initialized) return;
   lovrRelease(RandomGenerator, state.generator);
-  memset(&state, 0, sizeof(MathState));
+  memset(&state, 0, sizeof(state));
 }
 
 RandomGenerator* lovrMathGetRandomGenerator() {
   return state.generator;
 }
 
-void lovrMathOrientationToDirection(float angle, float ax, float ay, float az, vec3 v) {
-  float sinTheta = sinf(angle);
-  float cosTheta = cosf(angle);
+void lovrMathOrientationToDirection(f32 angle, f32 ax, f32 ay, f32 az, vec3 v) {
+  f32 sinTheta = sinf(angle);
+  f32 cosTheta = cosf(angle);
   v[0] = sinTheta * -ay + (1.f - cosTheta) * -az * ax;
   v[1] = sinTheta * ax + (1.f - cosTheta) * -az * ay;
   v[2] = -cosTheta + (1.f - cosTheta) * -az * az;
 }
 
-float lovrMathGammaToLinear(float x) {
+f32 lovrMathGammaToLinear(f32 x) {
   if (x <= .04045f) {
     return x / 12.92f;
   } else {
@@ -42,7 +46,7 @@ float lovrMathGammaToLinear(float x) {
   }
 }
 
-float lovrMathLinearToGamma(float x) {
+f32 lovrMathLinearToGamma(f32 x) {
   if (x <= .0031308f) {
     return x * 12.92f;
   } else {
@@ -50,18 +54,18 @@ float lovrMathLinearToGamma(float x) {
   }
 }
 
-float lovrMathNoise1(float x) {
+f32 lovrMathNoise1(f32 x) {
   return noise1(x) * .5f + .5f;
 }
 
-float lovrMathNoise2(float x, float y) {
+f32 lovrMathNoise2(f32 x, f32 y) {
   return noise2(x, y) * .5f + .5f;
 }
 
-float lovrMathNoise3(float x, float y, float z) {
+f32 lovrMathNoise3(f32 x, f32 y, f32 z) {
   return noise3(x, y, z) * .5f + .5f;
 }
 
-float lovrMathNoise4(float x, float y, float z, float w) {
+f32 lovrMathNoise4(f32 x, f32 y, f32 z, f32 w) {
   return noise4(x, y, z, w) * .5f + .5f;
 }

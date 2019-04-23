@@ -13,7 +13,7 @@ typedef union {
   } b32;
 } Seed;
 
-typedef struct {
+typedef struct RandomGenerator {
   Ref ref;
   Seed seed;
   Seed state;

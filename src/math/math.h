@@ -1,21 +1,16 @@
-#include "math/randomGenerator.h"
-#include "lib/maf.h"
-#include <stdbool.h>
+#include "util.h"
 
 #pragma once
 
-typedef struct {
-  bool initialized;
-  RandomGenerator* generator;
-} MathState;
+struct RandomGenerator;
 
 bool lovrMathInit(void);
 void lovrMathDestroy(void);
-RandomGenerator* lovrMathGetRandomGenerator(void);
-void lovrMathOrientationToDirection(float angle, float ax, float ay, float az, vec3 v);
-float lovrMathGammaToLinear(float x);
-float lovrMathLinearToGamma(float x);
-float lovrMathNoise1(float x);
-float lovrMathNoise2(float x, float y);
-float lovrMathNoise3(float x, float y, float z);
-float lovrMathNoise4(float x, float y, float z, float w);
+struct RandomGenerator* lovrMathGetRandomGenerator(void);
+void lovrMathOrientationToDirection(f32 angle, f32 ax, f32 ay, f32 az, f32 v[3]);
+f32 lovrMathGammaToLinear(f32 x);
+f32 lovrMathLinearToGamma(f32 x);
+f32 lovrMathNoise1(f32 x);
+f32 lovrMathNoise2(f32 x, f32 y);
+f32 lovrMathNoise3(f32 x, f32 y, f32 z);
+f32 lovrMathNoise4(f32 x, f32 y, f32 z, f32 w);
