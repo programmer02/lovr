@@ -2,7 +2,6 @@
 #include "api/data.h"
 #include "filesystem/filesystem.h"
 #include "data/blob.h"
-#include <stdlib.h>
 #include "platform.h"
 
 // Returns a Blob, leaving stack unchanged.  The Blob must be released when finished.
