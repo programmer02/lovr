@@ -1,8 +1,20 @@
-#include "timer/timer.h"
+#include "timer.h"
 #include "platform.h"
 #include <string.h>
 
-static TimerState state;
+#define TICK_SAMPLES 90
+
+static struct {
+  bool initialized;
+  f64 lastTime;
+  f64 time;
+  f64 dt;
+  f64 tickSum;
+  f64 tickBuffer[TICK_SAMPLES];
+  f64 averageDelta;
+  usize tickIndex;
+  u32 fps;
+} state;
 
 bool lovrTimerInit() {
   if (state.initialized) return false;
@@ -12,18 +24,18 @@ bool lovrTimerInit() {
 
 void lovrTimerDestroy() {
   if (!state.initialized) return;
-  memset(&state, 0, sizeof(TimerState));
+  memset(&state, 0, sizeof(state));
 }
 
-double lovrTimerGetDelta() {
+f64 lovrTimerGetDelta() {
   return state.dt;
 }
 
-double lovrTimerGetTime() {
+f64 lovrTimerGetTime() {
   return lovrPlatformGetTime();
 }
 
-double lovrTimerStep() {
+f64 lovrTimerStep() {
   state.lastTime = state.time;
   state.time = lovrPlatformGetTime();
   state.dt = state.time - state.lastTime;
@@ -31,21 +43,21 @@ double lovrTimerStep() {
   state.tickSum += state.dt;
   state.tickBuffer[state.tickIndex] = state.dt;
   state.averageDelta = state.tickSum / TICK_SAMPLES;
-  state.fps = (int) (1 / (state.tickSum / TICK_SAMPLES) + .5);
+  state.fps = (u32) (1. / (state.tickSum / TICK_SAMPLES) + .5);
   if (++state.tickIndex == TICK_SAMPLES) {
-    state.tickIndex = 0;
+    state.tickIndex = 0u;
   }
   return state.dt;
 }
 
-double lovrTimerGetAverageDelta() {
+f64 lovrTimerGetAverageDelta() {
   return state.averageDelta;
 }
 
-int lovrTimerGetFPS() {
+u32 lovrTimerGetFPS() {
   return state.fps;
 }
 
-void lovrTimerSleep(double seconds) {
+void lovrTimerSleep(f64 seconds) {
   lovrSleep(seconds);
 }

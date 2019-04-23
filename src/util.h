@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <stdarg.h>
 
 #pragma once
@@ -38,7 +38,6 @@ typedef uint64_t u64;
 typedef size_t usize;
 typedef float f32;
 typedef double f64;
-typedef bool b8;
 
 #define PI 3.14159265358979323846f
 #define MAX(a, b) (a > b ? a : b)

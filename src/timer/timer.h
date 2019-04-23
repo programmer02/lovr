@@ -1,26 +1,12 @@
-#include <stdbool.h>
+#include "util.h"
 
 #pragma once
 
-#define TICK_SAMPLES 90
-
-typedef struct {
-  bool initialized;
-  double lastTime;
-  double time;
-  double dt;
-  int tickIndex;
-  double tickSum;
-  double tickBuffer[TICK_SAMPLES];
-  double averageDelta;
-  int fps;
-} TimerState;
-
 bool lovrTimerInit(void);
 void lovrTimerDestroy(void);
-double lovrTimerGetDelta(void);
-double lovrTimerGetTime(void);
-double lovrTimerStep(void);
-double lovrTimerGetAverageDelta(void);
-int lovrTimerGetFPS(void);
-void lovrTimerSleep(double seconds);
+f64 lovrTimerGetDelta(void);
+f64 lovrTimerGetTime(void);
+f64 lovrTimerStep(void);
+f64 lovrTimerGetAverageDelta(void);
+u32 lovrTimerGetFPS(void);
+void lovrTimerSleep(f64 seconds);
