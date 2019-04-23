@@ -1,5 +1,5 @@
+#include "util.h"
 #include "types.h"
-#include "lib/maf.h"
 #include "lib/vec/vec.h"
 
 typedef struct {
@@ -7,15 +7,15 @@ typedef struct {
   vec_float_t points;
 } Curve;
 
-Curve* lovrCurveInit(Curve* curve, int sizeHint);
+Curve* lovrCurveInit(Curve* curve, usize sizeHint);
 #define lovrCurveCreate(...) lovrCurveInit(lovrAlloc(Curve), __VA_ARGS__)
 void lovrCurveDestroy(void* ref);
-void lovrCurveEvaluate(Curve* curve, float t, vec3 point);
-void lovrCurveGetTangent(Curve* curve, float t, vec3 point);
-void lovrCurveRender(Curve* curve, float t1, float t2, vec3 points, int n);
-Curve* lovrCurveSlice(Curve* curve, float t1, float t2);
-int lovrCurveGetPointCount(Curve* curve);
-void lovrCurveGetPoint(Curve* curve, int index, vec3 point);
-void lovrCurveSetPoint(Curve* curve, int index, vec3 point);
-void lovrCurveAddPoint(Curve* curve, vec3 point, int index);
-void lovrCurveRemovePoint(Curve* curve, int index);
+void lovrCurveEvaluate(Curve* curve, f32 t, f32 point[3]);
+void lovrCurveGetTangent(Curve* curve, f32 t, f32 point[3]);
+void lovrCurveRender(Curve* curve, f32 t1, f32 t2, f32 points[3], usize n);
+Curve* lovrCurveSlice(Curve* curve, f32 t1, f32 t2);
+usize lovrCurveGetPointCount(Curve* curve);
+void lovrCurveGetPoint(Curve* curve, usize index, f32 point[3]);
+void lovrCurveSetPoint(Curve* curve, usize index, f32 point[3]);
+void lovrCurveAddPoint(Curve* curve, f32 point[3], usize index);
+void lovrCurveRemovePoint(Curve* curve, usize index);

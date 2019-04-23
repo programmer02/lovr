@@ -1,6 +1,5 @@
-#include "types.h"
 #include "util.h"
-#include <stdint.h>
+#include "types.h"
 
 #define POOL_ALIGN 16
 #define DEFAULT_POOL_SIZE (640 * 1024)
@@ -16,21 +15,21 @@ typedef enum {
 
 typedef struct {
   Ref ref;
-  float* data;
-  size_t size;
-  size_t usage;
-  uint8_t* head;
+  f32* data;
+  usize size;
+  usize usage;
+  u8* head;
 } Pool;
 
-Pool* lovrPoolInit(Pool* pool, size_t size);
+Pool* lovrPoolInit(Pool* pool, usize size);
 #define lovrPoolCreate(...) lovrPoolInit(lovrAlloc(Pool), __VA_ARGS__)
 void lovrPoolDestroy(void* ref);
-float* lovrPoolAllocate(Pool* pool, MathType type);
+f32* lovrPoolAllocate(Pool* pool, MathType type);
 void lovrPoolDrain(Pool* pool);
-size_t lovrPoolGetSize(Pool* pool);
-size_t lovrPoolGetUsage(Pool* pool);
+usize lovrPoolGetSize(Pool* pool);
+usize lovrPoolGetUsage(Pool* pool);
 
 // For you, LuaJIT
-LOVR_EXPORT float* lovrPoolAllocateVec3(Pool* pool);
-LOVR_EXPORT float* lovrPoolAllocateQuat(Pool* pool);
-LOVR_EXPORT float* lovrPoolAllocateMat4(Pool* pool);
+LOVR_EXPORT f32* lovrPoolAllocateVec3(Pool* pool);
+LOVR_EXPORT f32* lovrPoolAllocateQuat(Pool* pool);
+LOVR_EXPORT f32* lovrPoolAllocateMat4(Pool* pool);
