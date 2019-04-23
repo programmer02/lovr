@@ -88,12 +88,12 @@ Model* lovrModelInit(Model* model, ModelData* data) {
     }
 
     model->meshes = calloc(data->primitiveCount, sizeof(Mesh*));
-    for (int i = 0; i < data->primitiveCount; i++) {
+    for (u32 i = 0; i < data->primitiveCount; i++) {
       ModelPrimitive* primitive = &data->primitives[i];
       model->meshes[i] = lovrMeshCreate(primitive->mode, NULL, 0);
 
       bool setDrawRange = false;
-      for (int j = 0; j < MAX_DEFAULT_ATTRIBUTES; j++) {
+      for (u32 j = 0; j < MAX_DEFAULT_ATTRIBUTES; j++) {
         if (primitive->attributes[j]) {
           ModelAttribute* attribute = primitive->attributes[j];
 
@@ -150,21 +150,21 @@ Model* lovrModelInit(Model* model, ModelData* data) {
       model->textures = calloc(data->textureCount, sizeof(Texture*));
     }
 
-    for (int i = 0; i < data->materialCount; i++) {
+    for (u32 i = 0; i < data->materialCount; i++) {
       Material* material = lovrMaterialCreate();
 
-      for (int j = 0; j < MAX_MATERIAL_SCALARS; j++) {
+      for (u32 j = 0; j < MAX_MATERIAL_SCALARS; j++) {
         lovrMaterialSetScalar(material, j, data->materials[i].scalars[j]);
       }
 
-      for (int j = 0; j < MAX_MATERIAL_COLORS; j++) {
+      for (u32 j = 0; j < MAX_MATERIAL_COLORS; j++) {
         lovrMaterialSetColor(material, j, data->materials[i].colors[j]);
       }
 
-      for (int j = 0; j < MAX_MATERIAL_TEXTURES; j++) {
-        int index = data->materials[i].textures[j];
+      for (u32 j = 0; j < MAX_MATERIAL_TEXTURES; j++) {
+        u32 index = data->materials[i].textures[j];
 
-        if (index != -1) {
+        if (index != (u32) -1) {
           if (!model->textures[index]) {
             TextureData* textureData = data->textures[index];
             bool srgb = j == TEXTURE_DIFFUSE || j == TEXTURE_EMISSIVE;
@@ -182,7 +182,7 @@ Model* lovrModelInit(Model* model, ModelData* data) {
   }
 
   model->globalNodeTransforms = malloc(16 * sizeof(float) * model->data->nodeCount);
-  for (int i = 0; i < model->data->nodeCount; i++) {
+  for (u32 i = 0; i < model->data->nodeCount; i++) {
     mat4_identity(model->globalNodeTransforms + 16 * i);
   }
 
@@ -191,10 +191,10 @@ Model* lovrModelInit(Model* model, ModelData* data) {
 
 void lovrModelDestroy(void* ref) {
   Model* model = ref;
-  for (int i = 0; i < model->data->bufferCount; i++) {
+  for (u32 i = 0; i < model->data->bufferCount; i++) {
     lovrRelease(Buffer, model->buffers[i]);
   }
-  for (int i = 0; i < model->data->primitiveCount; i++) {
+  for (u32 i = 0; i < model->data->primitiveCount; i++) {
     lovrRelease(Mesh, model->meshes[i]);
   }
   lovrRelease(ModelData, model->data);

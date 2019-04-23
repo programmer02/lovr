@@ -24,12 +24,12 @@ typedef enum {
 } VerticalAlign;
 
 typedef struct {
-  int x;
-  int y;
-  int width;
-  int height;
-  int rowHeight;
-  int padding;
+  u32 x;
+  u32 y;
+  u32 width;
+  u32 height;
+  u32 rowHeight;
+  u32 padding;
   map_glyph_t glyphs;
 } FontAtlas;
 
@@ -39,8 +39,8 @@ typedef struct Font {
   struct Texture* texture;
   FontAtlas atlas;
   map_int_t kerning;
-  float lineHeight;
-  float pixelDensity;
+  f32 lineHeight;
+  f32 pixelDensity;
   bool flip;
 } Font;
 

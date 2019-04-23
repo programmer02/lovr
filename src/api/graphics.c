@@ -1255,13 +1255,13 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
           for (unsigned k = 0; k < attribute->components; k++) {
             lua_rawgeti(L, -1, ++component);
             switch (attribute->type) {
-              case I8: *data.i8++ = luaL_optinteger(L, -1, 0); break;
-              case U8: *data.u8++ = luaL_optinteger(L, -1, 0); break;
-              case I16: *data.i16++ = luaL_optinteger(L, -1, 0); break;
-              case U16: *data.u16++ = luaL_optinteger(L, -1, 0); break;
-              case I32: *data.i32++ = luaL_optinteger(L, -1, 0); break;
-              case U32: *data.u32++ = luaL_optinteger(L, -1, 0); break;
-              case F32: *data.f32++ = luaL_optnumber(L, -1, 0.); break;
+              case I8: *data.bytes++ = luaL_optinteger(L, -1, 0); break;
+              case U8: *data.ubytes++ = luaL_optinteger(L, -1, 0); break;
+              case I16: *data.shorts++ = luaL_optinteger(L, -1, 0); break;
+              case U16: *data.ushorts++ = luaL_optinteger(L, -1, 0); break;
+              case I32: *data.ints++ = luaL_optinteger(L, -1, 0); break;
+              case U32: *data.uints++ = luaL_optinteger(L, -1, 0); break;
+              case F32: *data.floats++ = luaL_optnumber(L, -1, 0.); break;
             }
             lua_pop(L, 1);
           }

@@ -15,7 +15,7 @@ Animator* lovrAnimatorInit(Animator* animator, ModelData* data) {
   vec_reserve(&animator->tracks, data->animationCount);
   animator->speed = 1.f;
 
-  for (int i = 0; i < data->animationCount; i++) {
+  for (u32 i = 0; i < data->animationCount; i++) {
     vec_push(&animator->tracks, ((Track) {
       .time = 0.f,
       .speed = 1.f,
@@ -67,14 +67,14 @@ void lovrAnimatorUpdate(Animator* animator, float dt) {
   }
 }
 
-bool lovrAnimatorEvaluate(Animator* animator, int nodeIndex, mat4 transform) {
+bool lovrAnimatorEvaluate(Animator* animator, u32 nodeIndex, mat4 transform) {
   float properties[3][4] = { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } };
   bool touched = false;
 
-  for (int i = 0; i < animator->data->animationCount; i++) {
+  for (u32 i = 0; i < animator->data->animationCount; i++) {
     ModelAnimation* animation = &animator->data->animations[i];
 
-    for (int j = 0; j < animation->channelCount; j++) {
+    for (u32 j = 0; j < animation->channelCount; j++) {
       ModelAnimationChannel* channel = &animation->channels[j];
       if (channel->nodeIndex != nodeIndex) {
         continue;
@@ -87,7 +87,7 @@ bool lovrAnimatorEvaluate(Animator* animator, int nodeIndex, mat4 transform) {
 
       float duration = animator->data->animations[i].duration;
       float time = fmodf(track->time, duration);
-      int k = 0;
+      u32 k = 0;
 
       while (k < channel->keyframeCount && channel->times[k] < time) {
         k++;

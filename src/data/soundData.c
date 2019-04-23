@@ -1,12 +1,11 @@
 #include "data/soundData.h"
 #include "data/audioStream.h"
-#include "util.h"
 #include "lib/stb/stb_vorbis.h"
 #include <limits.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-SoundData* lovrSoundDataInit(SoundData* soundData, int samples, int sampleRate, int bitDepth, int channelCount) {
+SoundData* lovrSoundDataInit(SoundData* soundData, usize samples, u32 sampleRate, u32 bitDepth, u32 channelCount) {
   soundData->samples = samples;
   soundData->sampleRate = sampleRate;
   soundData->bitDepth = bitDepth;
@@ -26,11 +25,11 @@ SoundData* lovrSoundDataInitFromAudioStream(SoundData* soundData, AudioStream* a
   soundData->blob.data = calloc(1, soundData->blob.size);
   lovrAssert(soundData->blob.data, "Out of memory");
 
-  int samples;
-  short* buffer = soundData->blob.data;
-  int offset = 0;
+  usize samples;
+  i16* buffer = soundData->blob.data;
+  usize offset = 0;
   lovrAudioStreamRewind(audioStream);
-  while ((samples = lovrAudioStreamDecode(audioStream, buffer + offset, (int) soundData->blob.size - (offset * sizeof(short)))) != 0) {
+  while ((samples = lovrAudioStreamDecode(audioStream, buffer + offset, soundData->blob.size - (offset * sizeof(i16)))) != 0) {
     offset += samples;
   }
 
@@ -39,26 +38,28 @@ SoundData* lovrSoundDataInitFromAudioStream(SoundData* soundData, AudioStream* a
 
 SoundData* lovrSoundDataInitFromBlob(SoundData* soundData, Blob* blob) {
   soundData->bitDepth = 16;
-  soundData->samples = stb_vorbis_decode_memory(blob->data, (int) blob->size, &soundData->channelCount, &soundData->sampleRate, (short**) &soundData->blob.data);
+  int channels = soundData->channelCount;
+  int sampleRate = soundData->sampleRate;
+  soundData->samples = stb_vorbis_decode_memory(blob->data, (int) blob->size, &channels, &sampleRate, (short**) &soundData->blob.data);
   soundData->blob.size = soundData->samples * soundData->channelCount * (soundData->bitDepth / 8);
   return soundData;
 }
 
-float lovrSoundDataGetSample(SoundData* soundData, int index) {
-  lovrAssert(index >= 0 && index < (int) soundData->blob.size / (soundData->bitDepth / 8), "Sample index out of range");
+f32 lovrSoundDataGetSample(SoundData* soundData, usize index) {
+  lovrAssert(index < soundData->blob.size / (soundData->bitDepth / 8), "Sample index out of range");
   switch (soundData->bitDepth) {
-    case 8: return ((int8_t*) soundData->blob.data)[index] / (float) CHAR_MAX;
-    case 16: return ((int16_t*) soundData->blob.data)[index] / (float) SHRT_MAX;
-    default: lovrThrow("Unsupported SoundData bit depth %d\n", soundData->bitDepth); return 0;
+    case 8: return ((i8*) soundData->blob.data)[index] / (f32) CHAR_MAX;
+    case 16: return ((i16*) soundData->blob.data)[index] / (f32) SHRT_MAX;
+    default: lovrThrow("Unsupported SoundData bit depth %u\n", soundData->bitDepth); return 0;
   }
 }
 
-void lovrSoundDataSetSample(SoundData* soundData, int index, float value) {
-  lovrAssert(index >= 0 && index < (int) soundData->blob.size / (soundData->bitDepth / 8), "Sample index out of range");
+void lovrSoundDataSetSample(SoundData* soundData, usize index, f32 value) {
+  lovrAssert(index < soundData->blob.size / (soundData->bitDepth / 8), "Sample index out of range");
   switch (soundData->bitDepth) {
-    case 8: ((int8_t*) soundData->blob.data)[index] = value * CHAR_MAX; break;
-    case 16: ((int16_t*) soundData->blob.data)[index] = value * SHRT_MAX; break;
-    default: lovrThrow("Unsupported SoundData bit depth %d\n", soundData->bitDepth); break;
+    case 8: ((i8*) soundData->blob.data)[index] = value * CHAR_MAX; break;
+    case 16: ((i16*) soundData->blob.data)[index] = value * SHRT_MAX; break;
+    default: lovrThrow("Unsupported SoundData bit depth %u\n", soundData->bitDepth); break;
   }
 }
 

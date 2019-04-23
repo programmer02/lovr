@@ -1,7 +1,6 @@
+#include "util.h"
 #include "types.h"
 #include "lib/stb/stb_truetype.h"
-#include <stdint.h>
-#include <stdbool.h>
 
 #pragma once
 
@@ -14,32 +13,32 @@ typedef struct Rasterizer {
   Ref ref;
   stbtt_fontinfo font;
   struct Blob* blob;
-  float size;
-  float scale;
-  int glyphCount;
-  int height;
-  int advance;
-  int ascent;
-  int descent;
+  f32 size;
+  f32 scale;
+  u32 glyphCount;
+  i32 height;
+  i32 advance;
+  i32 ascent;
+  i32 descent;
 } Rasterizer;
 
 typedef struct {
-  int x;
-  int y;
-  int w;
-  int h;
-  int tw;
-  int th;
-  int dx;
-  int dy;
-  int advance;
+  i32 x;
+  i32 y;
+  u32 w;
+  u32 h;
+  u32 tw;
+  u32 th;
+  i32 dx;
+  i32 dy;
+  i32 advance;
   struct TextureData* data;
 } Glyph;
 
-Rasterizer* lovrRasterizerInit(Rasterizer* rasterizer, struct Blob* blob, float size);
+Rasterizer* lovrRasterizerInit(Rasterizer* rasterizer, struct Blob* blob, f32 size);
 #define lovrRasterizerCreate(...) lovrRasterizerInit(lovrAlloc(Rasterizer), __VA_ARGS__)
 void lovrRasterizerDestroy(void* ref);
-bool lovrRasterizerHasGlyph(Rasterizer* fontData, uint32_t character);
+bool lovrRasterizerHasGlyph(Rasterizer* fontData, u32 character);
 bool lovrRasterizerHasGlyphs(Rasterizer* fontData, const char* str);
-void lovrRasterizerLoadGlyph(Rasterizer* fontData, uint32_t character, Glyph* glyph);
-int lovrRasterizerGetKerning(Rasterizer* fontData, uint32_t left, uint32_t right);
+void lovrRasterizerLoadGlyph(Rasterizer* fontData, u32 character, Glyph* glyph);
+i32 lovrRasterizerGetKerning(Rasterizer* fontData, u32 left, u32 right);

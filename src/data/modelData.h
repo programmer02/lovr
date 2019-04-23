@@ -1,7 +1,5 @@
-#include "types.h"
 #include "util.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "types.h"
 
 #pragma once
 
@@ -40,7 +38,7 @@ typedef enum {
 
 typedef struct {
   FilterMode mode;
-  float anisotropy;
+  f32 anisotropy;
 } TextureFilter;
 
 typedef enum {
@@ -94,61 +92,61 @@ typedef enum { I8, U8, I16, U16, I32, U32, F32 } AttributeType;
 
 typedef union {
   void* raw;
-  int8_t* i8;
-  uint8_t* u8;
-  int16_t* i16;
-  uint16_t* u16;
-  int32_t* i32;
-  uint32_t* u32;
-  float* f32;
+  i8* bytes;
+  u8* ubytes;
+  i16* shorts;
+  u16* ushorts;
+  i32* ints;
+  u32* uints;
+  f32* floats;
 } AttributeData;
 
 typedef struct {
   char* data;
-  size_t size;
-  size_t stride;
+  usize size;
+  usize stride;
 } ModelBuffer;
 
 typedef struct {
-  uint32_t offset;
-  uint32_t buffer;
-  uint32_t count;
+  u32 offset;
+  u32 buffer;
+  u32 count;
   AttributeType type;
-  unsigned int components : 3;
-  bool normalized : 1;
-  bool matrix : 1;
-  bool hasMin : 1;
-  bool hasMax : 1;
-  float min[4];
-  float max[4];
+  u32 components : 3;
+  u32 normalized : 1;
+  u32 matrix : 1;
+  u32 hasMin : 1;
+  u32 hasMax : 1;
+  f32 min[4];
+  f32 max[4];
 } ModelAttribute;
 
 typedef struct {
-  int nodeIndex;
+  u32 nodeIndex;
   AnimationProperty property;
   SmoothMode smoothing;
-  int keyframeCount;
-  float* times;
-  float* data;
+  u32 keyframeCount;
+  f32* times;
+  f32* data;
 } ModelAnimationChannel;
 
 typedef struct {
   const char* name;
   ModelAnimationChannel* channels;
-  int channelCount;
-  float duration;
+  u32 channelCount;
+  f32 duration;
 } ModelAnimation;
 
 typedef struct {
-  int imageIndex;
+  u32 imageIndex;
   TextureFilter filter;
   TextureWrap wrap;
 } ModelTexture;
 
 typedef struct {
-  float scalars[MAX_MATERIAL_SCALARS];
+  f32 scalars[MAX_MATERIAL_SCALARS];
   Color colors[MAX_MATERIAL_COLORS];
-  int textures[MAX_MATERIAL_TEXTURES];
+  u32 textures[MAX_MATERIAL_TEXTURES];
   TextureFilter filters[MAX_MATERIAL_TEXTURES];
   TextureWrap wraps[MAX_MATERIAL_TEXTURES];
 } ModelMaterial;
@@ -157,22 +155,22 @@ typedef struct {
   ModelAttribute* attributes[MAX_DEFAULT_ATTRIBUTES];
   ModelAttribute* indices;
   DrawMode mode;
-  int material;
+  u32 material;
 } ModelPrimitive;
 
 typedef struct {
-  float transform[16];
-  uint32_t* children;
-  uint32_t childCount;
-  uint32_t primitiveIndex;
-  uint32_t primitiveCount;
-  int skin;
+  f32 transform[16];
+  u32* children;
+  u32 childCount;
+  u32 primitiveIndex;
+  u32 primitiveCount;
+  u32 skin;
 } ModelNode;
 
 typedef struct {
-  uint32_t* joints;
-  uint32_t jointCount;
-  float* inverseBindMatrices;
+  u32* joints;
+  u32 jointCount;
+  f32* inverseBindMatrices;
 } ModelSkin;
 
 typedef struct ModelData {
@@ -187,26 +185,26 @@ typedef struct ModelData {
   ModelAnimation* animations;
   ModelSkin* skins;
   ModelNode* nodes;
-  int rootNode;
+  u32 rootNode;
 
-  int blobCount;
-  int bufferCount;
-  int textureCount;
-  int materialCount;
-  int attributeCount;
-  int primitiveCount;
-  int animationCount;
-  int skinCount;
-  int nodeCount;
+  u32 blobCount;
+  u32 bufferCount;
+  u32 textureCount;
+  u32 materialCount;
+  u32 attributeCount;
+  u32 primitiveCount;
+  u32 animationCount;
+  u32 skinCount;
+  u32 nodeCount;
 
   ModelAnimationChannel* channels;
-  uint32_t* children;
-  uint32_t* joints;
+  u32* children;
+  u32* joints;
   char* chars;
-  int channelCount;
-  int childCount;
-  int jointCount;
-  int charCount;
+  u32 channelCount;
+  u32 childCount;
+  u32 jointCount;
+  u32 charCount;
 } ModelData;
 
 ModelData* lovrModelDataInit(ModelData* model, struct Blob* blob);

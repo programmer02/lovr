@@ -158,13 +158,13 @@ static int l_lovrMeshGetVertex(lua_State* L) {
     }
     for (unsigned j = 0; j < attribute->components; j++, components++) {
       switch (attribute->type) {
-        case I8: lua_pushinteger(L, *data.i8++); break;
-        case U8: lua_pushinteger(L, *data.u8++); break;
-        case I16: lua_pushinteger(L, *data.i16++); break;
-        case U16: lua_pushinteger(L, *data.u16++); break;
-        case I32: lua_pushinteger(L, *data.i32++); break;
-        case U32: lua_pushinteger(L, *data.u32++); break;
-        case F32: lua_pushnumber(L, *data.f32++); break;
+        case I8: lua_pushinteger(L, *data.bytes++); break;
+        case U8: lua_pushinteger(L, *data.ubytes++); break;
+        case I16: lua_pushinteger(L, *data.shorts++); break;
+        case U16: lua_pushinteger(L, *data.ushorts++); break;
+        case I32: lua_pushinteger(L, *data.ints++); break;
+        case U32: lua_pushinteger(L, *data.uints++); break;
+        case F32: lua_pushnumber(L, *data.floats++); break;
       }
     }
   }
@@ -198,13 +198,13 @@ static int l_lovrMeshSetVertex(lua_State* L) {
       }
 
       switch (attribute->type) {
-        case I8: *data.i8++ = luaL_optinteger(L, k, 0); break;
-        case U8: *data.u8++ = luaL_optinteger(L, k, 0); break;
-        case I16: *data.i16++ = luaL_optinteger(L, k, 0); break;
-        case U16: *data.u16++ = luaL_optinteger(L, k, 0); break;
-        case I32: *data.i32++ = luaL_optinteger(L, k, 0); break;
-        case U32: *data.u32++ = luaL_optinteger(L, k, 0); break;
-        case F32: *data.f32++ = luaL_optnumber(L, k, 0.); break;
+        case I8: *data.bytes++ = luaL_optinteger(L, k, 0); break;
+        case U8: *data.ubytes++ = luaL_optinteger(L, k, 0); break;
+        case I16: *data.shorts++ = luaL_optinteger(L, k, 0); break;
+        case U16: *data.ubytes++ = luaL_optinteger(L, k, 0); break;
+        case I32: *data.ints++ = luaL_optinteger(L, k, 0); break;
+        case U32: *data.uints++ = luaL_optinteger(L, k, 0); break;
+        case F32: *data.floats++ = luaL_optnumber(L, k, 0.); break;
       }
 
       if (table) {
@@ -229,13 +229,13 @@ static int l_lovrMeshGetVertexAttribute(lua_State* L) {
   AttributeData data = { .raw = lovrBufferMap(buffer, vertexIndex * attribute->stride + attribute->offset) };
   for (unsigned i = 0; i < attribute->components; i++) {
     switch (attribute->type) {
-      case I8: lua_pushinteger(L, *data.i8++); break;
-      case U8: lua_pushinteger(L, *data.u8++); break;
-      case I16: lua_pushinteger(L, *data.i16++); break;
-      case U16: lua_pushinteger(L, *data.u16++); break;
-      case I32: lua_pushinteger(L, *data.i32++); break;
-      case U32: lua_pushinteger(L, *data.u32++); break;
-      case F32: lua_pushnumber(L, *data.f32++); break;
+      case I8: lua_pushinteger(L, *data.bytes++); break;
+      case U8: lua_pushinteger(L, *data.ubytes++); break;
+      case I16: lua_pushinteger(L, *data.shorts++); break;
+      case U16: lua_pushinteger(L, *data.ushorts++); break;
+      case I32: lua_pushinteger(L, *data.ints++); break;
+      case U32: lua_pushinteger(L, *data.uints++); break;
+      case F32: lua_pushnumber(L, *data.floats++); break;
     }
   }
   return attribute->components;
@@ -259,13 +259,13 @@ static int l_lovrMeshSetVertexAttribute(lua_State* L) {
     }
 
     switch (attribute->type) {
-      case I8: *data.i8++ = luaL_optinteger(L, index, 0); break;
-      case U8: *data.u8++ = luaL_optinteger(L, index, 0); break;
-      case I16: *data.i16++ = luaL_optinteger(L, index, 0); break;
-      case U16: *data.u16++ = luaL_optinteger(L, index, 0); break;
-      case I32: *data.i32++ = luaL_optinteger(L, index, 0); break;
-      case U32: *data.u32++ = luaL_optinteger(L, index, 0); break;
-      case F32: *data.f32++ = luaL_optnumber(L, index, 0.); break;
+      case I8: *data.bytes++ = luaL_optinteger(L, index, 0); break;
+      case U8: *data.ubytes++ = luaL_optinteger(L, index, 0); break;
+      case I16: *data.shorts++ = luaL_optinteger(L, index, 0); break;
+      case U16: *data.ushorts++ = luaL_optinteger(L, index, 0); break;
+      case I32: *data.ints++ = luaL_optinteger(L, index, 0); break;
+      case U32: *data.uints++ = luaL_optinteger(L, index, 0); break;
+      case F32: *data.floats++ = luaL_optnumber(L, index, 0.); break;
     }
 
     if (table) {
@@ -307,13 +307,13 @@ static int l_lovrMeshSetVertices(lua_State* L) {
         lua_rawgeti(L, -1, ++component);
 
         switch (attribute->type) {
-          case I8: *data.i8++ = luaL_optinteger(L, -1, 0); break;
-          case U8: *data.u8++ = luaL_optinteger(L, -1, 0); break;
-          case I16: *data.i16++ = luaL_optinteger(L, -1, 0); break;
-          case U16: *data.u16++ = luaL_optinteger(L, -1, 0); break;
-          case I32: *data.i32++ = luaL_optinteger(L, -1, 0); break;
-          case U32: *data.u32++ = luaL_optinteger(L, -1, 0); break;
-          case F32: *data.f32++ = luaL_optnumber(L, -1, 0.); break;
+          case I8: *data.bytes++ = luaL_optinteger(L, -1, 0); break;
+          case U8: *data.ubytes++ = luaL_optinteger(L, -1, 0); break;
+          case I16: *data.shorts++ = luaL_optinteger(L, -1, 0); break;
+          case U16: *data.ushorts++ = luaL_optinteger(L, -1, 0); break;
+          case I32: *data.ints++ = luaL_optinteger(L, -1, 0); break;
+          case U32: *data.uints++ = luaL_optinteger(L, -1, 0); break;
+          case F32: *data.floats++ = luaL_optnumber(L, -1, 0.); break;
         }
 
         lua_pop(L, 1);
