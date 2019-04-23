@@ -1,7 +1,5 @@
 #include "filesystem/file.h"
-#include "util.h"
 #include <physfs.h>
-#include <stdlib.h>
 
 File* lovrFileInit(File* file ,const char* path) {
   file->path = path;
@@ -15,7 +13,7 @@ void lovrFileDestroy(void* ref) {
   }
 }
 
-int lovrFileOpen(File* file, FileMode mode) {
+bool lovrFileOpen(File* file, FileMode mode) {
   lovrAssert(!file->handle, "File is already open");
   file->mode = mode;
 
@@ -25,7 +23,7 @@ int lovrFileOpen(File* file, FileMode mode) {
     case OPEN_APPEND: file->handle = PHYSFS_openAppend(file->path); break;
   }
 
-  return file->handle == NULL;
+  return file->handle != NULL;
 }
 
 void lovrFileClose(File* file) {
@@ -34,27 +32,27 @@ void lovrFileClose(File* file) {
   file->handle = NULL;
 }
 
-size_t lovrFileRead(File* file, void* data, size_t bytes) {
+usize lovrFileRead(File* file, void* data, usize bytes) {
   lovrAssert(file->handle && file->mode == OPEN_READ, "File must be open for reading");
   return PHYSFS_readBytes(file->handle, data, bytes);
 }
 
-size_t lovrFileWrite(File* file, const void* data, size_t bytes) {
+usize lovrFileWrite(File* file, const void* data, usize bytes) {
   lovrAssert(file->handle && (file->mode == OPEN_READ || file->mode == OPEN_WRITE), "File must be open for writing");
   return PHYSFS_writeBytes(file->handle, data, bytes);
 }
 
-size_t lovrFileGetSize(File* file) {
+usize lovrFileGetSize(File* file) {
   lovrAssert(file->handle, "File must be open to get its size");
   return PHYSFS_fileLength(file->handle);
 }
 
-int lovrFileSeek(File* file, size_t position) {
+bool lovrFileSeek(File* file, usize position) {
   lovrAssert(file->handle, "File must be open to seek");
-  return !PHYSFS_seek(file->handle, position);
+  return PHYSFS_seek(file->handle, position);
 }
 
-size_t lovrFileTell(File* file) {
+usize lovrFileTell(File* file) {
   lovrAssert(file->handle, "File must be open to tell");
   return PHYSFS_tell(file->handle);
 }

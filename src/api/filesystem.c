@@ -102,7 +102,7 @@ static int l_lovrFilesystemAppend(lua_State* L) {
 
 static int l_lovrFilesystemCreateDirectory(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  lua_pushboolean(L, !lovrFilesystemCreateDirectory(path));
+  lua_pushboolean(L, lovrFilesystemCreateDirectory(path));
   return 1;
 }
 
@@ -110,9 +110,9 @@ static int l_lovrFilesystemGetAppdataDirectory(lua_State* L) {
   char buffer[LOVR_PATH_MAX];
 
   if (lovrFilesystemGetAppdataDirectory(buffer, sizeof(buffer))) {
-    lua_pushnil(L);
-  } else {
     lua_pushstring(L, buffer);
+  } else {
+    lua_pushnil(L);
   }
 
   return 1;
@@ -129,9 +129,9 @@ static int l_lovrFilesystemGetExecutablePath(lua_State* L) {
   char buffer[LOVR_PATH_MAX];
 
   if (lovrFilesystemGetExecutablePath(buffer, sizeof(buffer))) {
-    lua_pushnil(L);
-  } else {
     lua_pushstring(L, buffer);
+  } else {
+    lua_pushnil(L);
   }
 
   return 1;
@@ -149,7 +149,7 @@ static int l_lovrFilesystemGetIdentity(lua_State* L) {
 
 static int l_lovrFilesystemGetLastModified(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  int lastModified = lovrFilesystemGetLastModified(path);
+  i64 lastModified = lovrFilesystemGetLastModified(path);
 
   if (lastModified < 0) {
     lua_pushnil(L);
@@ -218,9 +218,9 @@ static int l_lovrFilesystemGetWorkingDirectory(lua_State* L) {
   char buffer[LOVR_PATH_MAX];
 
   if (lovrFilesystemGetWorkingDirectory(buffer, sizeof(buffer))) {
-    lua_pushnil(L);
-  } else {
     lua_pushstring(L, buffer);
+  } else {
+    lua_pushnil(L);
   }
 
   return 1;
@@ -269,7 +269,7 @@ static int l_lovrFilesystemMount(lua_State* L) {
   const char* mountpoint = luaL_optstring(L, 2, NULL);
   bool append = lua_isnoneornil(L, 3) ? 0 : lua_toboolean(L, 3);
   const char* root = luaL_optstring(L, 4, NULL);
-  lua_pushboolean(L, !lovrFilesystemMount(path, mountpoint, append, root));
+  lua_pushboolean(L, lovrFilesystemMount(path, mountpoint, append, root));
   return 1;
 }
 
@@ -302,7 +302,7 @@ static int l_lovrFilesystemRead(lua_State* L) {
 
 static int l_lovrFilesystemRemove(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  lua_pushboolean(L, !lovrFilesystemRemove(path));
+  lua_pushboolean(L, lovrFilesystemRemove(path));
   return 1;
 }
 
@@ -324,12 +324,12 @@ static int l_lovrFilesystemSetRequirePath(lua_State* L) {
 
 static int l_lovrFilesystemUnmount(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  lua_pushboolean(L, !lovrFilesystemUnmount(path));
+  lua_pushboolean(L, lovrFilesystemUnmount(path));
   return 1;
 }
 
 static int l_lovrFilesystemWrite(lua_State* L) {
-  size_t size;
+  usize size;
   const char* path = luaL_checkstring(L, 1);
   const char* content = luaL_checklstring(L, 2, &size);
   lua_pushnumber(L, lovrFilesystemWrite(path, content, size, 0));
