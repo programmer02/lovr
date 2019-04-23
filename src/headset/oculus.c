@@ -6,7 +6,6 @@
 #include "lib/maf.h"
 #include "lib/vec/vec.h"
 
-#include <stdbool.h>
 #include <OVR_CAPI.h>
 #include <OVR_CAPI_GL.h>
 
@@ -15,9 +14,9 @@ static struct {
   bool needRefreshButtons;
   ovrSession session;
   ovrGraphicsLuid luid;
-  float clipNear;
-  float clipFar;
-  float offset;
+  f32 clipNear;
+  f32 clipFar;
+  f32 offset;
   ovrSizei size;
   Canvas* canvas;
   ovrTextureSwapChain chain;
@@ -25,7 +24,7 @@ static struct {
   map_t(Texture*) textureLookup;
 } state;
 
-static Texture* lookupTexture(uint32_t handle) {
+static Texture* lookupTexture(u32 handle) {
   char key[4 + 1] = { 0 };
   lovrAssert(handle < 9999, "Texture handle overflow");
   sprintf(key, "%d", handle);
@@ -52,7 +51,7 @@ static ovrTrackingState *refreshTracking() {
 
   // get the state head and controllers are predicted to be in at display time,
   // per the manual (frame timing section).
-  double predicted = ovr_GetPredictedDisplayTime(state.session, 0);
+  f64 predicted = ovr_GetPredictedDisplayTime(state.session, 0);
   ts = ovr_GetTrackingState(state.session, predicted, true);
   state.needRefreshTracking = false;
   return &ts;
@@ -69,7 +68,7 @@ static ovrInputState *refreshButtons() {
   return &is;
 }
 
-static bool init(float offset, int msaa) {
+static bool init(f32 offset, u32 msaa) {
   ovrResult result = ovr_Initialize(NULL);
   if (OVR_FAILURE(result)) {
     return false;
@@ -83,7 +82,7 @@ static bool init(float offset, int msaa) {
 
   state.needRefreshTracking = true;
   state.needRefreshButtons = true;
-  state.clipNear = 0.1f;
+  state.clipNear = .1f;
   state.clipFar = 30.f;
   state.offset = offset;
 
@@ -118,7 +117,7 @@ static void destroy() {
   memset(&state, 0, sizeof(state));
 }
 
-static bool getName(char* name, size_t length) {
+static bool getName(char* name, usize length) {
   ovrHmdDesc desc = ovr_GetHmdDesc(state.session);
   strncpy(name, desc.ProductName, length - 1);
   name[length - 1] = '\0';
@@ -129,37 +128,37 @@ static HeadsetOrigin getOriginType() {
   return ORIGIN_FLOOR;
 }
 
-static void getDisplayDimensions(uint32_t* width, uint32_t* height) {
+static void getDisplayDimensions(u32* width, u32* height) {
   ovrHmdDesc desc = ovr_GetHmdDesc(state.session);
-  ovrSizei size = ovr_GetFovTextureSize(state.session, ovrEye_Left, desc.DefaultEyeFov[0], 1.0f);
+  ovrSizei size = ovr_GetFovTextureSize(state.session, ovrEye_Left, desc.DefaultEyeFov[0], 1.f);
 
   *width = size.w;
   *height = size.h;
 }
 
-static void getClipDistance(float* clipNear, float* clipFar) {
+static void getClipDistance(f32* clipNear, f32* clipFar) {
   *clipNear = state.clipNear;
   *clipFar = state.clipFar;
 }
 
-static void setClipDistance(float clipNear, float clipFar) {
+static void setClipDistance(f32 clipNear, f32 clipFar) {
   state.clipNear = clipNear;
   state.clipFar = clipFar;
 }
 
-static void getBoundsDimensions(float* width, float* depth) {
+static void getBoundsDimensions(f32* width, f32* depth) {
   ovrVector3f dimensions;
   ovr_GetBoundaryDimensions(state.session, ovrBoundary_PlayArea, &dimensions);
   *width = dimensions.x;
   *depth = dimensions.z;
 }
 
-static const float* getBoundsGeometry(int* count) {
+static const f32* getBoundsGeometry(u8* count) {
   *count = 0;
   return NULL;
 }
 
-static bool getPose(const char* path, float* x, float* y, float* z, float* angle, float* ax, float* ay, float* az) {
+static bool getPose(const char* path, f32* x, f32* y, f32* z, f32* angle, f32* ax, f32* ay, f32* az) {
   ovrTrackingState *ts = refreshTracking();
   ovrPosef* pose;
 
@@ -180,14 +179,14 @@ static bool getPose(const char* path, float* x, float* y, float* z, float* angle
   }
 
   if (angle) {
-    float quat[4] = { pose->Orientation.x, pose->Orientation.y, pose->Orientation.z, pose->Orientation.w };
-    quat_getAngleAxis(quat, angle, ax, ay, az);
+    f32 q[4] = { pose->Orientation.x, pose->Orientation.y, pose->Orientation.z, pose->Orientation.w };
+    quat_getAngleAxis(q, angle, ax, ay, az);
   }
 
   return true;
 }
 
-static bool getVelocity(const char* path, float* vx, float* vy, float* vz, float* vax, float* vay, float* vaz) {
+static bool getVelocity(const char* path, f32* vx, f32* vy, f32* vz, f32* vax, f32* vay, f32* vaz) {
   ovrTrackingState *ts = refreshTracking();
   ovrPoseStatef* pose;
 
@@ -216,7 +215,7 @@ static bool getVelocity(const char* path, float* vx, float* vy, float* vz, float
   return true;
 }
 
-static bool getHandInfo(const char* path, ovrHandType* hand, uint32_t* mask, const char** next) {
+static bool getHandInfo(const char* path, ovrHandType* hand, u32* mask, const char** next) {
   if (!strncmp("hand/left", path, strlen("hand/left"))) {
     *hand = ovrHand_Left;
     *mask = ovrButton_LMask;
@@ -241,7 +240,7 @@ static bool isDown(const char* path, bool* down) {
   }
 
   ovrHandType hand;
-  uint32_t mask;
+  u32 mask;
   const char* button;
 
   if (getHandInfo(path, &hand, &mask, &button)) {
@@ -261,7 +260,7 @@ static bool isDown(const char* path, bool* down) {
 
 static bool isTouched(const char* path, bool* touched) {
   ovrHandType hand;
-  uint32_t mask;
+  u32 mask;
   const char* button;
 
   if (getHandInfo(path, &hand, &mask, &button)) {
@@ -276,9 +275,9 @@ static bool isTouched(const char* path, bool* touched) {
   return false;
 }
 
-static int getAxis(const char* path, float* x, float* y, float* z) {
+static u8 getAxis(const char* path, f32* x, f32* y, f32* z) {
   ovrHandType hand;
-  uint32_t mask;
+  u32 mask;
   const char* button;
 
   if (getHandInfo(path, &hand, &mask, &button)) {
@@ -291,7 +290,7 @@ static int getAxis(const char* path, float* x, float* y, float* z) {
   return 0;
 }
 
-static bool vibrate(const char* path, float strength, float duration, float frequency) {
+static bool vibrate(const char* path, f32 strength, f32 duration, f32 frequency) {
   return false; // TODO
 }
 
@@ -302,7 +301,7 @@ static ModelData* newModelData(const char* path) {
 static void renderTo(void (*callback)(void*), void* userdata) {
   ovrHmdDesc desc = ovr_GetHmdDesc(state.session);
   if (!state.canvas) {
-    state.size = ovr_GetFovTextureSize(state.session, ovrEye_Left, desc.DefaultEyeFov[ovrEye_Left], 1.0f);
+    state.size = ovr_GetFovTextureSize(state.session, ovrEye_Left, desc.DefaultEyeFov[ovrEye_Left], 1.f);
 
     ovrTextureSwapChainDesc swdesc = {
       .Type = ovrTexture_2D,
@@ -336,19 +335,19 @@ static void renderTo(void (*callback)(void*), void* userdata) {
     eyeRenderDesc[1].HmdToEyePose
   };
   ovrPosef EyeRenderPose[2];
-  double sensorSampleTime;
+  f64 sensorSampleTime;
   ovr_GetEyePoses(state.session, 0, ovrTrue, HmdToEyeOffset, EyeRenderPose, &sensorSampleTime);
 
   Camera camera = { .canvas = state.canvas };
 
-  for (int eye = 0; eye < 2; eye++) {
-    float orient[] = {
+  for (u32 eye = 0; eye < 2; eye++) {
+    f32 orient[] = {
       EyeRenderPose[eye].Orientation.x,
       EyeRenderPose[eye].Orientation.y,
       EyeRenderPose[eye].Orientation.z,
       -EyeRenderPose[eye].Orientation.w
     };
-    float pos[] = {
+    f32 pos[] = {
       EyeRenderPose[eye].Position.x,
       EyeRenderPose[eye].Position.y,
       EyeRenderPose[eye].Position.z,
@@ -364,8 +363,8 @@ static void renderTo(void (*callback)(void*), void* userdata) {
     mat4_fromMat44(camera.projection[eye], projection.M);
   }
 
-  int curIndex;
-  uint32_t curTexId;
+  i32 curIndex;
+  u32 curTexId;
   ovr_GetTextureSwapChainCurrentIndex(state.session, state.chain, &curIndex);
   ovr_GetTextureSwapChainBufferGL(state.session, state.chain, curIndex, &curTexId);
   Texture* texture = lookupTexture(curTexId);
@@ -380,7 +379,7 @@ static void renderTo(void (*callback)(void*), void* userdata) {
   ovrLayerEyeFov ld;
   ld.Header.Type = ovrLayerType_EyeFov;
   ld.Header.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;
-  for (int eye = 0; eye < 2; eye++) {
+  for (u32 eye = 0; eye < 2; eye++) {
     ld.ColorTexture[eye] = state.chain;
     ovrRecti vp;
     vp.Pos.x = state.size.w * eye;
@@ -401,12 +400,12 @@ static void renderTo(void (*callback)(void*), void* userdata) {
 }
 
 static Texture* getMirrorTexture() {
-  uint32_t handle;
+  u32 handle;
   ovr_GetMirrorTextureBufferGL(state.session, state.mirror, &handle);
   return lookupTexture(handle);
 }
 
-static void update(float dt) {
+static void update(f32 dt) {
   ovrSessionStatus status;
   ovr_GetSessionStatus(state.session, &status);
 

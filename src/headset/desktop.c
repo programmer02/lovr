@@ -2,34 +2,33 @@
 #include "graphics/graphics.h"
 #include "lib/maf.h"
 #include "platform.h"
-#include "util.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 
 static struct {
-  float offset;
+  f32 offset;
 
-  float clipNear;
-  float clipFar;
+  f32 clipNear;
+  f32 clipFar;
 
-  float position[3];
-  float velocity[3];
-  float localVelocity[3];
-  float angularVelocity[3];
+  f32 position[3];
+  f32 velocity[3];
+  f32 localVelocity[3];
+  f32 angularVelocity[3];
 
-  float yaw;
-  float pitch;
-  float transform[16];
+  f32 yaw;
+  f32 pitch;
+  f32 transform[16];
 
-  double prevCursorX;
-  double prevCursorY;
+  f64 prevCursorX;
+  f64 prevCursorY;
 } state;
 
-static bool init(float offset, int msaa) {
+static bool init(f32 offset, u32 msaa) {
   state.offset = offset;
-  state.clipNear = 0.1f;
+  state.clipNear = .1f;
   state.clipFar = 100.f;
   mat4_identity(state.transform);
   return true;
@@ -39,7 +38,7 @@ static void destroy(void) {
   memset(&state, 0, sizeof(state));
 }
 
-static bool getName(char* name, size_t length) {
+static bool getName(char* name, usize length) {
   strncpy(name, "Simulator", length - 1);
   name[length - 1] = '\0';
   return true;
@@ -49,33 +48,33 @@ static HeadsetOrigin getOriginType(void) {
   return ORIGIN_HEAD;
 }
 
-static void getDisplayDimensions(uint32_t* width, uint32_t* height) {
+static void getDisplayDimensions(u32* width, u32* height) {
   int w, h;
   lovrPlatformGetFramebufferSize(&w, &h);
-  *width = (uint32_t) w;
-  *height = (uint32_t) h;
+  *width = (u32) w;
+  *height = (u32) h;
 }
 
-static void getClipDistance(float* clipNear, float* clipFar) {
+static void getClipDistance(f32* clipNear, f32* clipFar) {
   *clipNear = state.clipNear;
   *clipFar = state.clipFar;
 }
 
-static void setClipDistance(float clipNear, float clipFar) {
+static void setClipDistance(f32 clipNear, f32 clipFar) {
   state.clipNear = clipNear;
   state.clipFar = clipFar;
 }
 
-static void getBoundsDimensions(float* width, float* depth) {
+static void getBoundsDimensions(f32* width, f32* depth) {
   *width = *depth = 0.f;
 }
 
-static const float* getBoundsGeometry(int* count) {
+static const f32* getBoundsGeometry(u8* count) {
   *count = 0;
   return NULL;
 }
 
-static bool getPose(const char* path, float* x, float* y, float* z, float* angle, float* ax, float* ay, float* az) {
+static bool getPose(const char* path, f32* x, f32* y, f32* z, f32* angle, f32* ax, f32* ay, f32* az) {
   bool head = !strcmp(path, "head");
   bool hand = !strcmp(path, "hand/left") || !strcmp(path, "hand/right");
 
@@ -90,7 +89,7 @@ static bool getPose(const char* path, float* x, float* y, float* z, float* angle
   }
 
   if (angle) {
-    float q[4];
+    f32 q[4];
     quat_fromMat4(q, state.transform);
     quat_getAngleAxis(q, angle, ax, ay, az);
   }
@@ -98,7 +97,7 @@ static bool getPose(const char* path, float* x, float* y, float* z, float* angle
   return true;
 }
 
-static bool getVelocity(const char* path, float* vx, float* vy, float* vz, float* vax, float* vay, float* vaz) {
+static bool getVelocity(const char* path, f32* vx, f32* vy, f32* vz, f32* vax, f32* vay, f32* vaz) {
   if (strcmp(path, "head")) {
     return false;
   }
@@ -131,11 +130,11 @@ static bool isTouched(const char* path, bool* touched) {
   return false;
 }
 
-static int getAxis(const char* path, float* x, float* y, float* z) {
+static u8 getAxis(const char* path, f32* x, f32* y, f32* z) {
   return 0;
 }
 
-static bool vibrate(const char* path, float strength, float duration, float frequency) {
+static bool vibrate(const char* path, f32 strength, f32 duration, f32 frequency) {
   return false;
 }
 
@@ -144,10 +143,10 @@ static ModelData* newModelData(const char* path) {
 }
 
 static void renderTo(void (*callback)(void*), void* userdata) {
-  uint32_t width, height;
+  u32 width, height;
   getDisplayDimensions(&width, &height);
   Camera camera = { .canvas = NULL, .viewMatrix = { MAT4_IDENTITY }, .stereo = true };
-  mat4_perspective(camera.projection[0], state.clipNear, state.clipFar, 67.f * PI / 180.f, (float) width / 2.f / height);
+  mat4_perspective(camera.projection[0], state.clipNear, state.clipFar, 67.f * PI / 180.f, (f32) width / 2.f / height);
   mat4_multiply(camera.viewMatrix[0], state.transform);
   mat4_invertPose(camera.viewMatrix[0]);
   mat4_set(camera.projection[1], camera.projection[0]);
@@ -157,7 +156,7 @@ static void renderTo(void (*callback)(void*), void* userdata) {
   lovrGraphicsSetCamera(NULL, false);
 }
 
-static void update(float dt) {
+static void update(f32 dt) {
   bool front = lovrPlatformIsKeyDown(KEY_W) || lovrPlatformIsKeyDown(KEY_UP);
   bool back = lovrPlatformIsKeyDown(KEY_S) || lovrPlatformIsKeyDown(KEY_DOWN);
   bool left = lovrPlatformIsKeyDown(KEY_A) || lovrPlatformIsKeyDown(KEY_LEFT);
@@ -165,9 +164,9 @@ static void update(float dt) {
   bool up = lovrPlatformIsKeyDown(KEY_Q);
   bool down = lovrPlatformIsKeyDown(KEY_E);
 
-  float movespeed = 3.f * dt;
-  float turnspeed = 3.f * dt;
-  float damping = MAX(1.f - 20.f * dt, 0);
+  f32 movespeed = 3.f * dt;
+  f32 turnspeed = 3.f * dt;
+  f32 damping = MAX(1.f - 20.f * dt, 0.f);
 
   if (lovrPlatformIsMouseDown(MOUSE_LEFT)) {
     lovrPlatformSetMouseMode(MOUSE_MODE_GRABBED);
@@ -175,7 +174,7 @@ static void update(float dt) {
     int width, height;
     lovrPlatformGetWindowSize(&width, &height);
 
-    double mx, my;
+    f64 mx, my;
     lovrPlatformGetMousePosition(&mx, &my);
 
     if (state.prevCursorX == -1 && state.prevCursorY == -1) {
@@ -183,9 +182,9 @@ static void update(float dt) {
       state.prevCursorY = my;
     }
 
-    float aspect = (float) width / height;
-    float dx = (float) (mx - state.prevCursorX) / ((float) width);
-    float dy = (float) (my - state.prevCursorY) / ((float) height * aspect);
+    f32 aspect = (f32) width / height;
+    f32 dx = (f32) (mx - state.prevCursorX) / ((f32) width);
+    f32 dy = (f32) (my - state.prevCursorY) / ((f32) height * aspect);
     state.angularVelocity[0] = dy / dt;
     state.angularVelocity[1] = dx / dt;
     state.prevCursorX = mx;

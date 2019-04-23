@@ -1,7 +1,5 @@
-#include "lib/vec/vec.h"
+#include "util.h"
 #include "types.h"
-#include <stdbool.h>
-#include <stdint.h>
 
 #pragma once
 
@@ -24,25 +22,25 @@ typedef enum {
 typedef struct HeadsetInterface {
   struct HeadsetInterface* next;
   HeadsetDriver driverType;
-  bool (*init)(float offset, int msaa);
+  bool (*init)(f32 offset, u32 msaa);
   void (*destroy)(void);
-  bool (*getName)(char* name, size_t length);
+  bool (*getName)(char* name, usize length);
   HeadsetOrigin (*getOriginType)(void);
-  void (*getDisplayDimensions)(uint32_t* width, uint32_t* height);
-  void (*getClipDistance)(float* clipNear, float* clipFar);
-  void (*setClipDistance)(float clipNear, float clipFar);
-  void (*getBoundsDimensions)(float* width, float* depth);
-  const float* (*getBoundsGeometry)(int* count);
-  bool (*getPose)(const char* path, float* x, float* y, float* z, float* angle, float* ax, float* ay, float* az);
-  bool (*getVelocity)(const char* path, float* vx, float* vy, float* vz, float* vax, float* vay, float* vaz);
+  void (*getDisplayDimensions)(u32* width, u32* height);
+  void (*getClipDistance)(f32* clipNear, f32* clipFar);
+  void (*setClipDistance)(f32 clipNear, f32 clipFar);
+  void (*getBoundsDimensions)(f32* width, f32* depth);
+  const f32* (*getBoundsGeometry)(u8* count);
+  bool (*getPose)(const char* path, f32* x, f32* y, f32* z, f32* angle, f32* ax, f32* ay, f32* az);
+  bool (*getVelocity)(const char* path, f32* vx, f32* vy, f32* vz, f32* vax, f32* vay, f32* vaz);
   bool (*isDown)(const char* path, bool* down);
   bool (*isTouched)(const char* path, bool* touched);
-  int (*getAxis)(const char* path, float* x, float* y, float* z);
-  bool (*vibrate)(const char* path, float strength, float duration, float frequency);
+  u8 (*getAxis)(const char* path, f32* x, f32* y, f32* z);
+  bool (*vibrate)(const char* path, f32 strength, f32 duration, f32 frequency);
   struct ModelData* (*newModelData)(const char* path);
   void (*renderTo)(void (*callback)(void*), void* userdata);
   struct Texture* (*getMirrorTexture)(void);
-  void (*update)(float dt);
+  void (*update)(f32 dt);
 } HeadsetInterface;
 
 // Available drivers
@@ -59,5 +57,5 @@ extern HeadsetInterface* lovrHeadsetTrackingDrivers;
 #define FOREACH_TRACKING_DRIVER(i)\
   for (HeadsetInterface* i = lovrHeadsetTrackingDrivers; i != NULL; i = i->next)
 
-bool lovrHeadsetInit(HeadsetDriver* drivers, int count, float offset, int msaa);
+bool lovrHeadsetInit(HeadsetDriver* drivers, u8 count, f32 offset, u32 msaa);
 void lovrHeadsetDestroy(void);

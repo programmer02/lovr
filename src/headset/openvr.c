@@ -37,10 +37,10 @@ static struct {
   Canvas* canvas;
   vec_float_t boundsGeometry;
   bool rift;
-  float clipNear;
-  float clipFar;
-  float offset;
-  int msaa;
+  f32 clipNear;
+  f32 clipFar;
+  f32 offset;
+  u32 msaa;
 } state;
 
 static TrackedDeviceIndex_t pathToDevice(const char* path, const char** next) {
@@ -55,17 +55,17 @@ static TrackedDeviceIndex_t pathToDevice(const char* path, const char** next) {
     return state.system->GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole_TrackedControllerRole_RightHand);
   } else if (!strncmp("tracker/", path, strlen("tracker/"))) {
     path += strlen("tracker/");
-    uint32_t index = (path[0] - '0') - 1;
+    u32 index = (path[0] - '0') - 1;
     TrackedDeviceIndex_t indices[8];
-    uint32_t trackerCount = state.system->GetSortedTrackedDeviceIndicesOfClass(ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, indices, 8, 0);
+    u32 trackerCount = state.system->GetSortedTrackedDeviceIndicesOfClass(ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, indices, 8, 0);
     return (index >= 0 && index < trackerCount) ? indices[index] : INVALID_DEVICE;
   } else {
     return INVALID_DEVICE;
   }
 }
 
-static bool getName(char* name, size_t length);
-static bool init(float offset, int msaa) {
+static bool getName(char* name, usize length);
+static bool init(f32 offset, u32 msaa) {
   if (!VR_IsHmdPresent() || !VR_IsRuntimeInstalled()) {
     return false;
   }
@@ -89,7 +89,7 @@ static bool init(float offset, int msaa) {
 
   getName(buffer, sizeof(buffer));
   state.rift = !strncmp(buffer, "Oculus", sizeof(buffer));
-  state.clipNear = 0.1f;
+  state.clipNear = .1f;
   state.clipFar = 30.f;
   state.offset = state.compositor->GetTrackingSpace() == ETrackingUniverseOrigin_TrackingUniverseStanding ? 0. : offset;
   state.msaa = msaa;
@@ -100,7 +100,7 @@ static bool init(float offset, int msaa) {
 
 static void destroy(void) {
   lovrRelease(Canvas, state.canvas);
-  for (int i = 0; i < 16; i++) {
+  for (usize i = 0; i < 16; i++) {
     if (state.deviceModels[i]) {
       state.renderModels->FreeRenderModel(state.deviceModels[i]);
     }
@@ -115,7 +115,7 @@ static void destroy(void) {
   memset(&state, 0, sizeof(state));
 }
 
-static bool getName(char* name, size_t length) {
+static bool getName(char* name, usize length) {
   ETrackedPropertyError error;
   state.system->GetStringTrackedDeviceProperty(HEADSET, ETrackedDeviceProperty_Prop_ManufacturerName_String, name, length, &error);
   return error == ETrackedPropertyError_TrackedProp_Success;
@@ -129,30 +129,30 @@ static HeadsetOrigin getOriginType(void) {
   }
 }
 
-static void getDisplayDimensions(uint32_t* width, uint32_t* height) {
+static void getDisplayDimensions(u32* width, u32* height) {
   state.system->GetRecommendedRenderTargetSize(width, height);
 }
 
-static void getClipDistance(float* clipNear, float* clipFar) {
+static void getClipDistance(f32* clipNear, f32* clipFar) {
   *clipNear = state.clipNear;
   *clipFar = state.clipFar;
 }
 
-static void setClipDistance(float clipNear, float clipFar) {
+static void setClipDistance(f32 clipNear, f32 clipFar) {
   state.clipNear = clipNear;
   state.clipFar = clipFar;
 }
 
-static void getBoundsDimensions(float* width, float* depth) {
+static void getBoundsDimensions(f32* width, f32* depth) {
   state.chaperone->GetPlayAreaSize(width, depth);
 }
 
-static const float* getBoundsGeometry(int* count) {
+static const f32* getBoundsGeometry(u8* count) {
   struct HmdQuad_t quad;
   if (state.chaperone->GetPlayAreaRect(&quad)) {
     vec_clear(&state.boundsGeometry);
 
-    for (int i = 0; i < 4; i++) {
+    for (u32 i = 0; i < 4; i++) {
       vec_push(&state.boundsGeometry, quad.vCorners[i].v[0]);
       vec_push(&state.boundsGeometry, quad.vCorners[i].v[1]);
       vec_push(&state.boundsGeometry, quad.vCorners[i].v[2]);
@@ -165,7 +165,7 @@ static const float* getBoundsGeometry(int* count) {
   return NULL;
 }
 
-static bool getTransform(unsigned int device, mat4 transform) {
+static bool getTransform(u32 device, mat4 transform) {
   TrackedDevicePose_t pose = state.poses[device];
   if (!pose.bPoseIsValid || !pose.bDeviceIsConnected) {
     return false;
@@ -176,8 +176,8 @@ static bool getTransform(unsigned int device, mat4 transform) {
   }
 }
 
-static bool getPose(const char* path, float* x, float* y, float* z, float* angle, float* ax, float* ay, float* az) {
-  float transform[16];
+static bool getPose(const char* path, f32* x, f32* y, f32* z, f32* angle, f32* ax, f32* ay, f32* az) {
+  f32 transform[16];
   TrackedDeviceIndex_t device = pathToDevice(path, NULL);
   if (device == INVALID_DEVICE && !getTransform(device, transform)) {
     return false;
@@ -187,7 +187,7 @@ static bool getPose(const char* path, float* x, float* y, float* z, float* angle
   return true;
 }
 
-static bool getVelocity(const char* path, float* vx, float* vy, float* vz, float* vax, float* vay, float* vaz) {
+static bool getVelocity(const char* path, f32* vx, f32* vy, f32* vz, f32* vax, f32* vay, f32* vaz) {
   TrackedDeviceIndex_t device = pathToDevice(path, NULL);
   TrackedDevicePose_t* pose = &state.poses[device];
   if (device == INVALID_DEVICE || !pose->bPoseIsValid || !pose->bDeviceIsConnected) {
@@ -223,7 +223,7 @@ static bool getButtonState(const char* path, bool touch, bool* value) {
   const char* button;
   TrackedDeviceIndex_t device = pathToDevice(path, &button);
   if (device != INVALID_DEVICE || state.system->GetControllerState(device, &input, sizeof(input))) {
-    uint64_t mask = touch ? input.ulButtonTouched : input.ulButtonPressed;
+    u64 mask = touch ? input.ulButtonTouched : input.ulButtonPressed;
 
     if (state.rift) {
       if (!strcmp(button, "trigger")) { return *value = (mask >> EVRButtonId_k_EButton_Axis1) & 1, true; }
@@ -250,7 +250,7 @@ static bool isTouched(const char* path, bool* touched) {
   return getButtonState(path, true, touched);
 }
 
-static int getAxis(const char* path, float* x, float* y, float* z) {
+static u8 getAxis(const char* path, f32* x, f32* y, f32* z) {
   const char* axis;
   TrackedDeviceIndex_t device = pathToDevice(path, &axis);
 
@@ -264,13 +264,13 @@ static int getAxis(const char* path, float* x, float* y, float* z) {
   return 0;
 }
 
-static bool vibrate(const char* path, float strength, float duration, float frequency) {
-  if (duration <= 0) return false;
+static bool vibrate(const char* path, f32 strength, f32 duration, f32 frequency) {
+  if (duration <= 0.f) return false;
 
   TrackedDeviceIndex_t device = pathToDevice(path, NULL);
   if (device == INVALID_DEVICE) return false;
 
-  unsigned short uSeconds = (unsigned short) (duration * 1e6f + .5f);
+  u16 uSeconds = (u16) (duration * 1e6f + .5f);
   state.system->TriggerHapticPulse(device, 0, uSeconds);
   return true;
 }
@@ -297,7 +297,7 @@ static ModelData* newModelData(const char* path) {
 
   RenderModel_t* vrModel = state.deviceModels[device];
   ModelData* model = lovrAlloc(ModelData);
-  size_t vertexSize = sizeof(RenderModel_Vertex_t);
+  usize vertexSize = sizeof(RenderModel_Vertex_t);
 
   model->bufferCount = 2;
   model->attributeCount = 4;
@@ -383,7 +383,7 @@ static ModelData* newModelData(const char* path) {
 
 static void renderTo(void (*callback)(void*), void* userdata) {
   if (!state.canvas) {
-    uint32_t width, height;
+    u32 width, height;
     state.system->GetRecommendedRenderTargetSize(&width, &height);
     CanvasFlags flags = { .depth = { true, false, FORMAT_D24S8 }, .stereo = true, .mipmaps = true, .msaa = state.msaa };
     state.canvas = lovrCanvasCreate(width * 2, height, flags);
@@ -396,10 +396,10 @@ static void renderTo(void (*callback)(void*), void* userdata) {
 
   Camera camera = { .canvas = state.canvas, .viewMatrix = { MAT4_IDENTITY, MAT4_IDENTITY } };
 
-  float head[16], eye[16];
+  f32 head[16], eye[16];
   getTransform(HEADSET, head);
 
-  for (int i = 0; i < 2; i++) {
+  for (u32 i = 0; i < 2; i++) {
     EVREye vrEye = (i == 0) ? EVREye_Eye_Left : EVREye_Eye_Right;
     mat4_fromMat44(camera.projection[i], state.system->GetProjectionMatrix(vrEye, state.clipNear, state.clipFar).m);
     mat4_multiply(camera.viewMatrix[i], head);
@@ -423,7 +423,7 @@ static void renderTo(void (*callback)(void*), void* userdata) {
   lovrGpuDirtyTexture();
 }
 
-static void update(float dt) {
+static void update(f32 dt) {
   state.compositor->WaitGetPoses(state.poses, 16, NULL, 0);
 
   struct VREvent_t vrEvent;

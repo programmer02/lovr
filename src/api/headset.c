@@ -136,7 +136,7 @@ static int l_lovrHeadsetGetBoundsDimensions(lua_State* L) {
 }
 
 static int l_lovrHeadsetGetBoundsGeometry(lua_State* L) {
-  int count;
+  u8 count;
   const float* points = lovrHeadsetDriver->getBoundsGeometry(&count);
 
   if (!points) {
@@ -151,7 +151,7 @@ static int l_lovrHeadsetGetBoundsGeometry(lua_State* L) {
     lua_createtable(L, count, 0);
   }
 
-  for (int i = 0; i < count; i++) {
+  for (u8 i = 0; i < count; i++) {
     lua_pushnumber(L, points[i]);
     lua_rawseti(L, 1, i + 1);
   }
