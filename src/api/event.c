@@ -1,6 +1,8 @@
 #include "api.h"
 #include "api/event.h"
 #include "event/event.h"
+#include <stdlib.h>
+#include <string.h>
 
 const char* EventTypes[] = {
   [EVENT_QUIT] = "quit",
@@ -93,7 +95,7 @@ static int nextEvent(lua_State* L) {
       return 3;
 
     case EVENT_CUSTOM:
-      for (int i = 0; i < event.data.custom.count; i++) {
+      for (u8 i = 0; i < event.data.custom.count; i++) {
         Variant* variant = &event.data.custom.data[i];
         luax_pushvariant(L, variant);
         lovrVariantDestroy(variant);

@@ -1,6 +1,5 @@
-#include "lib/vec/vec.h"
+#include "util.h"
 #include "types.h"
-#include <stdbool.h>
 
 #pragma once
 
@@ -25,7 +24,7 @@ typedef enum {
 
 typedef union {
   bool boolean;
-  double number;
+  f64 number;
   char* string;
   Ref* ref;
 } VariantValue;
@@ -37,7 +36,7 @@ typedef struct {
 
 typedef struct {
   bool restart;
-  int exitCode;
+  i32 exitCode;
 } QuitEvent;
 
 typedef struct {
@@ -52,7 +51,7 @@ typedef struct {
 typedef struct {
   char name[MAX_EVENT_NAME_LENGTH];
   Variant data[4];
-  int count;
+  u8 count;
 } CustomEvent;
 
 typedef union {
@@ -68,12 +67,6 @@ typedef struct {
 } Event;
 
 typedef void (*EventPump)(void);
-
-typedef struct {
-  bool initialized;
-  vec_t(EventPump) pumps;
-  vec_t(Event) events;
-} EventState;
 
 void lovrVariantDestroy(Variant* variant);
 
