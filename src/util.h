@@ -39,6 +39,8 @@ typedef size_t usize;
 typedef float f32;
 typedef double f64;
 
+typedef char test_sizeof_int[sizeof(int) == sizeof(i32)];
+
 #define PI 3.14159265358979323846f
 #define MAX(a, b) (a > b ? a : b)
 #define MIN(a, b) (a < b ? a : b)

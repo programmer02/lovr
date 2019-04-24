@@ -1,6 +1,6 @@
+#include "util.h"
 #include "data/blob.h"
 #include "types.h"
-#include "util.h"
 #include "lib/vec/vec.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -29,29 +29,29 @@ typedef enum {
 } TextureFormat;
 
 typedef struct {
-  int width;
-  int height;
+  u32 width;
+  u32 height;
+  usize size;
   void* data;
-  int size;
 } Mipmap;
 
 typedef vec_t(Mipmap) vec_mipmap_t;
 
 typedef struct TextureData {
   Blob blob;
-  int width;
-  int height;
+  u32 width;
+  u32 height;
   Blob* source;
   TextureFormat format;
   vec_mipmap_t mipmaps;
 } TextureData;
 
-TextureData* lovrTextureDataInit(TextureData* textureData, int width, int height, uint8_t value, TextureFormat format);
+TextureData* lovrTextureDataInit(TextureData* textureData, u32 width, u32 height, u8 value, TextureFormat format);
 TextureData* lovrTextureDataInitFromBlob(TextureData* textureData, Blob* blob, bool flip);
 #define lovrTextureDataCreate(...) lovrTextureDataInit(lovrAlloc(TextureData), __VA_ARGS__)
 #define lovrTextureDataCreateFromBlob(...) lovrTextureDataInitFromBlob(lovrAlloc(TextureData), __VA_ARGS__)
-Color lovrTextureDataGetPixel(TextureData* textureData, int x, int y);
-void lovrTextureDataSetPixel(TextureData* textureData, int x, int y, Color color);
+Color lovrTextureDataGetPixel(TextureData* textureData, u32 x, u32 y);
+void lovrTextureDataSetPixel(TextureData* textureData, u32 x, u32 y, Color color);
 bool lovrTextureDataEncode(TextureData* textureData, const char* filename);
 void lovrTextureDataDestroy(void* ref);
 
@@ -204,40 +204,40 @@ typedef enum DXGIFormat {
 } DXGIFormat;
 
 typedef struct DDSPixelFormat {
-  uint32_t size;
-  uint32_t flags;
-  uint32_t fourCC;
-  uint32_t rgbBitCount;
-  uint32_t rBitMask;
-  uint32_t gBitMask;
-  uint32_t bBitMask;
-  uint32_t aBitMask;
+  u32 size;
+  u32 flags;
+  u32 fourCC;
+  u32 rgbBitCount;
+  u32 rBitMask;
+  u32 gBitMask;
+  u32 bBitMask;
+  u32 aBitMask;
 } DDSPixelFormat;
 
 typedef struct DDSHeader {
-  uint32_t size;
-  uint32_t flags;
-  uint32_t height;
-  uint32_t width;
-  uint32_t pitchOrLinearSize;
-  uint32_t depth;
-  uint32_t mipMapCount;
-  uint32_t reserved[11];
+  u32 size;
+  u32 flags;
+  u32 height;
+  u32 width;
+  u32 pitchOrLinearSize;
+  u32 depth;
+  u32 mipMapCount;
+  u32 reserved[11];
 
   DDSPixelFormat format;
 
-  uint32_t caps1;
-  uint32_t caps2;
-  uint32_t caps3;
-  uint32_t caps4;
-  uint32_t reserved2;
+  u32 caps1;
+  u32 caps2;
+  u32 caps3;
+  u32 caps4;
+  u32 reserved2;
 } DDSHeader;
 
 typedef struct DDSHeader10 {
   DXGIFormat dxgiFormat;
   D3D10ResourceDimension resourceDimension;
 
-  uint32_t miscFlag;
-  uint32_t arraySize;
-  uint32_t reserved;
+  u32 miscFlag;
+  u32 arraySize;
+  u32 reserved;
 } DDSHeader10;

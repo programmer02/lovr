@@ -11,9 +11,9 @@
 typedef vec_t(ModelMaterial) vec_material_t;
 
 typedef struct {
-  int material;
-  int start;
-  int count;
+  i32 material;
+  i32 start;
+  i32 count;
 } objGroup;
 
 typedef vec_t(objGroup) vec_group_t;
@@ -27,7 +27,7 @@ static void parseMtl(char* path, vec_void_t* textures, vec_material_t* materials
   char* s = data;
 
   while (length > 0) {
-    int lineLength = 0;
+    i32 lineLength = 0;
 
     if (STARTS_WITH(s, "newmtl ")) {
       char name[128];
@@ -84,7 +84,7 @@ static void parseMtl(char* path, vec_void_t* textures, vec_material_t* materials
 
 ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
   char* data = (char*) source->data;
-  size_t length = source->size;
+  usize length = source->size;
 
   if (!memchr(data, '\n', length)) {
     return NULL;
@@ -122,36 +122,36 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
   *root = '\0';
 
   while (length > 0) {
-    int lineLength = 0;
+    i32 lineLength = 0;
 
     if (STARTS_WITH(data, "v ")) {
-      float x, y, z;
-      int count = sscanf(data + 2, "%f %f %f\n%n", &x, &y, &z, &lineLength);
+      f32 x, y, z;
+      i32 count = sscanf(data + 2, "%f %f %f\n%n", &x, &y, &z, &lineLength);
       lovrAssert(count == 3, "Bad OBJ: Expected 3 coordinates for vertex position");
-      vec_pusharr(&positions, ((float[3]) { x, y, z }), 3);
+      vec_pusharr(&positions, ((f32[3]) { x, y, z }), 3);
     } else if (STARTS_WITH(data, "vn ")) {
-      float x, y, z;
-      int count = sscanf(data + 3, "%f %f %f\n%n", &x, &y, &z, &lineLength);
+      f32 x, y, z;
+      i32 count = sscanf(data + 3, "%f %f %f\n%n", &x, &y, &z, &lineLength);
       lovrAssert(count == 3, "Bad OBJ: Expected 3 coordinates for vertex normal");
-      vec_pusharr(&normals, ((float[3]) { x, y, z }), 3);
+      vec_pusharr(&normals, ((f32[3]) { x, y, z }), 3);
     } else if (STARTS_WITH(data, "vt ")) {
-      float u, v;
-      int count = sscanf(data + 3, "%f %f\n%n", &u, &v, &lineLength);
+      f32 u, v;
+      i32 count = sscanf(data + 3, "%f %f\n%n", &u, &v, &lineLength);
       lovrAssert(count == 2, "Bad OBJ: Expected 2 coordinates for texture coordinate");
-      vec_pusharr(&uvs, ((float[2]) { u, v }), 2);
+      vec_pusharr(&uvs, ((f32[2]) { u, v }), 2);
     } else if (STARTS_WITH(data, "f ")) {
       char* s = data + 2;
-      for (int i = 0; i < 3; i++) {
+      for (u32 i = 0; i < 3; i++) {
         char terminator = i == 2 ? '\n' : ' ';
         char* space = strchr(s, terminator);
         if (space) {
           *space = '\0'; // I'll be back
-          int* index = map_get(&vertexMap, s);
+          i32* index = map_get(&vertexMap, s);
           if (index) {
             vec_push(&indexBlob, *index);
           } else {
-            int v, vt, vn;
-            int newIndex = vertexBlob.length / 8;
+            i32 v, vt, vn;
+            i32 newIndex = vertexBlob.length / 8;
             vec_push(&indexBlob, newIndex);
             map_set(&vertexMap, s, newIndex);
 
@@ -191,13 +191,13 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
     } else if (STARTS_WITH(data, "usemtl ")) {
       char name[128];
       bool hasName = sscanf(data + 7, "%s\n%n", name, &lineLength);
-      int* material = map_get(&materialNames, name);
+      i32* material = map_get(&materialNames, name);
       lovrAssert(hasName, "Bad OBJ: Expected a material name");
 
       // If the last group didn't have any faces, just reuse it, otherwise make a new group
       objGroup* group = &vec_last(&groups);
       if (group->count > 0) {
-        int start = group->start + group->count; // Don't put this in the compound literal (realloc)
+        i32 start = group->start + group->count; // Don't put this in the compound literal (realloc)
         vec_push(&groups, ((objGroup) {
           .material = material ? *material : -1,
           .start = start,
@@ -232,19 +232,19 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
   model->materialCount = materials.length;
   lovrModelDataAllocate(model);
 
-  model->blobs[0] = lovrBlobCreate(vertexBlob.data, vertexBlob.length * sizeof(float), "obj vertex data");
-  model->blobs[1] = lovrBlobCreate(indexBlob.data, indexBlob.length * sizeof(int), "obj index data");
+  model->blobs[0] = lovrBlobCreate(vertexBlob.data, vertexBlob.length * sizeof(f32), "obj vertex data");
+  model->blobs[1] = lovrBlobCreate(indexBlob.data, indexBlob.length * sizeof(u32), "obj index data");
 
   model->buffers[0] = (ModelBuffer) {
     .data = model->blobs[0]->data,
     .size = model->blobs[0]->size,
-    .stride = 8 * sizeof(float)
+    .stride = 8 * sizeof(f32)
   };
 
   model->buffers[1] = (ModelBuffer) {
     .data = model->blobs[1]->data,
     .size = model->blobs[1]->size,
-    .stride = sizeof(int)
+    .stride = sizeof(u32)
   };
 
   memcpy(model->textures, textures.data, model->textureCount * sizeof(TextureData*));
@@ -260,7 +260,7 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
 
   model->attributes[1] = (ModelAttribute) {
     .buffer = 0,
-    .offset = 3 * sizeof(float),
+    .offset = 3 * sizeof(f32),
     .count = vertexBlob.length / 8,
     .type = F32,
     .components = 3
@@ -268,24 +268,24 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
 
   model->attributes[2] = (ModelAttribute) {
     .buffer = 0,
-    .offset = 6 * sizeof(float),
+    .offset = 6 * sizeof(f32),
     .count = vertexBlob.length / 8,
     .type = F32,
     .components = 2
   };
 
-  for (int i = 0; i < groups.length; i++) {
+  for (i32 i = 0; i < groups.length; i++) {
     objGroup* group = &groups.data[i];
     model->attributes[3 + i] = (ModelAttribute) {
       .buffer = 1,
-      .offset = group->start * sizeof(int),
+      .offset = group->start * sizeof(i32),
       .count = group->count,
       .type = U32,
       .components = 1
     };
   }
 
-  for (int i = 0; i < groups.length; i++) {
+  for (i32 i = 0; i < groups.length; i++) {
     objGroup* group = &groups.data[i];
     model->primitives[i] = (ModelPrimitive) {
       .mode = DRAW_TRIANGLES,

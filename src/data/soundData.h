@@ -7,9 +7,9 @@ struct AudioStream;
 
 typedef struct SoundData {
   Blob blob;
+  usize samples;
   u32 channelCount;
   u32 sampleRate;
-  usize samples;
   u32 bitDepth;
 } SoundData;
 
