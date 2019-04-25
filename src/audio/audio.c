@@ -20,7 +20,7 @@ static struct {
   f32 velocity[3];
 } state;
 
-ALenum lovrAudioConvertFormat(int bitDepth, int channelCount) {
+ALenum lovrAudioConvertFormat(u32 bitDepth, u32 channelCount) {
   if (bitDepth == 8 && channelCount == 1) {
     return AL_FORMAT_MONO8;
   } else if (bitDepth == 8 && channelCount == 2) {
@@ -66,7 +66,7 @@ void lovrAudioDestroy() {
   alcMakeContextCurrent(NULL);
   alcDestroyContext(state.context);
   alcCloseDevice(state.device);
-  for (int i = 0; i < state.sources.length; i++) {
+  for (i32 i = 0; i < state.sources.length; i++) {
     lovrRelease(Source, state.sources.data[i]);
   }
   vec_deinit(&state.sources);
@@ -74,7 +74,7 @@ void lovrAudioDestroy() {
 }
 
 void lovrAudioUpdate() {
-  int i; Source* source;
+  i32 i; Source* source;
   vec_foreach_rev(&state.sources, source, i) {
     if (source->type == SOURCE_STATIC) {
       continue;
@@ -139,7 +139,7 @@ f32 lovrAudioGetVolume() {
 }
 
 bool lovrAudioHas(Source* source) {
-  int index;
+  i32 index;
   vec_find(&state.sources, source, index);
   return index >= 0;
 }
@@ -149,21 +149,21 @@ bool lovrAudioIsSpatialized() {
 }
 
 void lovrAudioPause() {
-  int i; Source* source;
+  i32 i; Source* source;
   vec_foreach(&state.sources, source, i) {
     lovrSourcePause(source);
   }
 }
 
 void lovrAudioResume() {
-  int i; Source* source;
+  i32 i; Source* source;
   vec_foreach(&state.sources, source, i) {
     lovrSourceResume(source);
   }
 }
 
 void lovrAudioRewind() {
-  int i; Source* source;
+  i32 i; Source* source;
   vec_foreach(&state.sources, source, i) {
     lovrSourceRewind(source);
   }
@@ -203,7 +203,7 @@ void lovrAudioSetVolume(f32 volume) {
 }
 
 void lovrAudioStop() {
-  int i; Source* source;
+  i32 i; Source* source;
   vec_foreach(&state.sources, source, i) {
     lovrSourceStop(source);
   }

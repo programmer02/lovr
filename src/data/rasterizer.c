@@ -1,3 +1,4 @@
+#pragma clang diagnostic ignored "-Wconversion"
 #include "data/rasterizer.h"
 #include "data/blob.h"
 #include "data/textureData.h"
@@ -19,7 +20,7 @@ Rasterizer* lovrRasterizerInit(Rasterizer* rasterizer, Blob* blob, f32 size) {
   rasterizer->blob = blob;
   rasterizer->size = size;
   rasterizer->scale = stbtt_ScaleForMappingEmToPixels(font, size);
-  rasterizer->glyphCount = font->numGlyphs;
+  rasterizer->glyphCount = (u32) font->numGlyphs;
 
   i32 ascent, descent, linegap;
   stbtt_GetFontVMetrics(font, &ascent, &descent, &linegap);
@@ -40,7 +41,7 @@ void lovrRasterizerDestroy(void* ref) {
 }
 
 bool lovrRasterizerHasGlyph(Rasterizer* rasterizer, u32 character) {
-  return stbtt_FindGlyphIndex(&rasterizer->font, character) != 0;
+  return stbtt_FindGlyphIndex(&rasterizer->font, (i32) character) != 0;
 }
 
 bool lovrRasterizerHasGlyphs(Rasterizer* rasterizer, const char* str) {
@@ -57,7 +58,7 @@ bool lovrRasterizerHasGlyphs(Rasterizer* rasterizer, const char* str) {
 }
 
 void lovrRasterizerLoadGlyph(Rasterizer* rasterizer, u32 character, Glyph* glyph) {
-  i32 glyphIndex = stbtt_FindGlyphIndex(&rasterizer->font, character);
+  i32 glyphIndex = stbtt_FindGlyphIndex(&rasterizer->font, (i32) character);
   lovrAssert(glyphIndex, "No font glyph found for character code %d, try using Rasterizer:hasGlyphs", character);
 
   // Trace glyph outline

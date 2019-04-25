@@ -22,5 +22,5 @@ bool lovrChannelPush(Channel* channel, Variant variant, f64 timeout, u64* id);
 bool lovrChannelPop(Channel* channel, Variant* variant, f64 timeout);
 bool lovrChannelPeek(Channel* channel, Variant* variant);
 void lovrChannelClear(Channel* channel);
-u64 lovrChannelGetCount(Channel* channel);
+i32 lovrChannelGetCount(Channel* channel);
 bool lovrChannelHasRead(Channel* channel, u64 id);

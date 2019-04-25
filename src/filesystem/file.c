@@ -34,17 +34,17 @@ void lovrFileClose(File* file) {
 
 usize lovrFileRead(File* file, void* data, usize bytes) {
   lovrAssert(file->handle && file->mode == OPEN_READ, "File must be open for reading");
-  return PHYSFS_readBytes(file->handle, data, bytes);
+  return (usize) PHYSFS_readBytes(file->handle, data, bytes);
 }
 
 usize lovrFileWrite(File* file, const void* data, usize bytes) {
   lovrAssert(file->handle && (file->mode == OPEN_READ || file->mode == OPEN_WRITE), "File must be open for writing");
-  return PHYSFS_writeBytes(file->handle, data, bytes);
+  return (usize) PHYSFS_writeBytes(file->handle, data, bytes);
 }
 
 usize lovrFileGetSize(File* file) {
   lovrAssert(file->handle, "File must be open to get its size");
-  return PHYSFS_fileLength(file->handle);
+  return (usize) PHYSFS_fileLength(file->handle);
 }
 
 bool lovrFileSeek(File* file, usize position) {
@@ -54,5 +54,5 @@ bool lovrFileSeek(File* file, usize position) {
 
 usize lovrFileTell(File* file) {
   lovrAssert(file->handle, "File must be open to tell");
-  return PHYSFS_tell(file->handle);
+  return (usize) PHYSFS_tell(file->handle);
 }

@@ -8,7 +8,7 @@
 
 #define MAX_CONTACTS 4
 #define MAX_TAGS 16
-#define NO_TAG -1
+#define NO_TAG ~0u
 
 typedef enum {
   SHAPE_SPHERE,
@@ -32,7 +32,7 @@ typedef struct {
   dSpaceID space;
   dJointGroupID contactGroup;
   vec_void_t overlaps;
-  map_int_t tags;
+  map_t(u32) tags;
   u16 masks[MAX_TAGS];
   Collider* head;
 } World;
@@ -44,7 +44,7 @@ struct Collider {
   Collider* prev;
   Collider* next;
   void* userdata;
-  int tag;
+  u32 tag;
   vec_void_t shapes;
   vec_void_t joints;
   f32 friction;
@@ -104,7 +104,7 @@ void lovrWorldSetAngularDamping(World* world, f32 damping, f32 threshold);
 bool lovrWorldIsSleepingAllowed(World* world);
 void lovrWorldSetSleepingAllowed(World* world, bool allowed);
 void lovrWorldRaycast(World* world, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, RaycastCallback callback, void* userdata);
-const char* lovrWorldGetTagName(World* world, int tag);
+const char* lovrWorldGetTagName(World* world, u32 tag);
 bool lovrWorldDisableCollisionBetween(World* world, const char* tag1, const char* tag2);
 bool lovrWorldEnableCollisionBetween(World* world, const char* tag1, const char* tag2);
 bool lovrWorldIsCollisionEnabledBetween(World* world, const char* tag1, const char* tag);

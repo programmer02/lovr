@@ -1,11 +1,10 @@
 #include "data/audioStream.h"
 #include "data/blob.h"
 #include "lib/stb/stb_vorbis.h"
-#include "util.h"
 #include <stdlib.h>
 
-AudioStream* lovrAudioStreamInit(AudioStream* stream, Blob* blob, int bufferSize) {
-  stb_vorbis* decoder = stb_vorbis_open_memory(blob->data, (int) blob->size, NULL, NULL);
+AudioStream* lovrAudioStreamInit(AudioStream* stream, Blob* blob, usize bufferSize) {
+  stb_vorbis* decoder = stb_vorbis_open_memory(blob->data, (i32) blob->size, NULL, NULL);
   lovrAssert(decoder, "Could not create audio stream for '%s'", blob->name);
 
   stb_vorbis_info info = stb_vorbis_get_info(decoder);
@@ -15,7 +14,7 @@ AudioStream* lovrAudioStreamInit(AudioStream* stream, Blob* blob, int bufferSize
   stream->sampleRate = info.sample_rate;
   stream->samples = stb_vorbis_stream_length_in_samples(decoder);
   stream->decoder = decoder;
-  stream->bufferSize = stream->channelCount * bufferSize * sizeof(short);
+  stream->bufferSize = stream->channelCount * bufferSize * sizeof(i16);
   stream->buffer = malloc(stream->bufferSize);
   lovrAssert(stream->buffer, "Out of memory");
   stream->blob = blob;
@@ -31,15 +30,15 @@ void lovrAudioStreamDestroy(void* ref) {
   free(stream->buffer);
 }
 
-int lovrAudioStreamDecode(AudioStream* stream, short* destination, int size) {
+usize lovrAudioStreamDecode(AudioStream* stream, i16* destination, usize size) {
   stb_vorbis* decoder = (stb_vorbis*) stream->decoder;
-  short* buffer = destination ? destination : (short*) stream->buffer;
-  int capacity = destination ? size : (stream->bufferSize / sizeof(short));
-  int channelCount = stream->channelCount;
-  int samples = 0;
+  i16* buffer = destination ? destination : (i16*) stream->buffer;
+  usize capacity = destination ? size : (stream->bufferSize / sizeof(i16));
+  u32 channelCount = stream->channelCount;
+  usize samples = 0;
 
   while (samples < capacity) {
-    int count = stb_vorbis_get_samples_short_interleaved(decoder, channelCount, buffer + samples, capacity - samples);
+    usize count = (usize) stb_vorbis_get_samples_short_interleaved(decoder, channelCount, buffer + samples, capacity - samples);
     if (count == 0) break;
     samples += count * channelCount;
   }
@@ -52,12 +51,12 @@ void lovrAudioStreamRewind(AudioStream* stream) {
   stb_vorbis_seek_start(decoder);
 }
 
-void lovrAudioStreamSeek(AudioStream* stream, int sample) {
+void lovrAudioStreamSeek(AudioStream* stream, usize sample) {
   stb_vorbis* decoder = (stb_vorbis*) stream->decoder;
   stb_vorbis_seek(decoder, sample);
 }
 
-int lovrAudioStreamTell(AudioStream* stream) {
+usize lovrAudioStreamTell(AudioStream* stream) {
   stb_vorbis* decoder = (stb_vorbis*) stream->decoder;
-  return stb_vorbis_get_sample_offset(decoder);
+  return (usize) stb_vorbis_get_sample_offset(decoder);
 }

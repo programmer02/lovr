@@ -18,14 +18,21 @@ void lovrChannelDestroy(void* ref) {
 
 bool lovrChannelPush(Channel* channel, Variant variant, f64 timeout, u64* id) {
   mtx_lock(&channel->lock);
+
+  if (channel->messages.length == INT32_MAX) {
+    mtx_unlock(&channel->lock);
+    lovrThrow("Channel cannot hold any more messages");
+  }
+
   if (channel->messages.length == 0) {
     lovrRetain(channel);
   }
+
   vec_insert(&channel->messages, 0, variant);
   *id = ++channel->sent;
   cnd_broadcast(&channel->cond);
 
-  if (isnan(timeout) || timeout < 0) {
+  if (isnan(timeout) || timeout < 0.) {
     mtx_unlock(&channel->lock);
     return false;
   }
@@ -40,8 +47,8 @@ bool lovrChannelPush(Channel* channel, Variant variant, f64 timeout, u64* id) {
       timespec_get(&start, TIME_UTC);
       f64 whole, fraction;
       fraction = modf(timeout, &whole);
-      until.tv_sec = start.tv_sec + whole;
-      until.tv_nsec = start.tv_nsec + fraction * 1e9;
+      until.tv_sec = start.tv_sec + (time_t) whole;
+      until.tv_nsec = start.tv_nsec + (long) (fraction * 1e9 + .5);
       cnd_timedwait(&channel->cond, &channel->lock, &until);
       timespec_get(&stop, TIME_UTC);
       timeout -= (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / (f64) 1e9;
@@ -80,8 +87,8 @@ bool lovrChannelPop(Channel* channel, Variant* variant, f64 timeout) {
       timespec_get(&start, TIME_UTC);
       f64 whole, fraction;
       fraction = modf(timeout, &whole);
-      until.tv_sec = start.tv_sec + whole;
-      until.tv_nsec = start.tv_nsec + fraction * 1e9;
+      until.tv_sec = start.tv_sec + (time_t) whole;
+      until.tv_nsec = start.tv_nsec + (long) (fraction * 1e9 + .5);
       cnd_timedwait(&channel->cond, &channel->lock, &until);
       timespec_get(&stop, TIME_UTC);
       timeout -= (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec) / (f64) 1e9;
@@ -104,7 +111,7 @@ bool lovrChannelPeek(Channel* channel, Variant* variant) {
 
 void lovrChannelClear(Channel* channel) {
   mtx_lock(&channel->lock);
-  for (int i = 0; i < channel->messages.length; i++) {
+  for (i32 i = 0; i < channel->messages.length; i++) {
     lovrVariantDestroy(&channel->messages.data[i]);
   }
   channel->received = channel->sent;
@@ -113,9 +120,9 @@ void lovrChannelClear(Channel* channel) {
   mtx_unlock(&channel->lock);
 }
 
-u64 lovrChannelGetCount(Channel* channel) {
+i32 lovrChannelGetCount(Channel* channel) {
   mtx_lock(&channel->lock);
-  u64 length = channel->messages.length;
+  i32 length = channel->messages.length;
   mtx_unlock(&channel->lock);
   return length;
 }

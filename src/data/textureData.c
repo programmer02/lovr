@@ -158,10 +158,8 @@ TextureData* lovrTextureDataInitFromBlob(TextureData* textureData, Blob* blob, b
     return textureData;
   }
 
+  i32 width, height;
   i32 size = (i32) blob->size;
-  i32 width = (i32) textureData->width;
-  i32 height = (i32) textureData->height;
-
   stbi_set_flip_vertically_on_load(flip);
   if (stbi_is_hdr_from_memory(blob->data, size)) {
     textureData->format = FORMAT_RGBA32F;
@@ -171,14 +169,14 @@ TextureData* lovrTextureDataInitFromBlob(TextureData* textureData, Blob* blob, b
     textureData->blob.data = stbi_load_from_memory(blob->data, size, &width, &height, NULL, 4);
   }
 
-  if (!textureData->blob.data) {
+  if (!textureData->blob.data || width <= 0 || height <= 0) {
     lovrThrow("Could not load texture data from '%s'", blob->name);
     free(textureData);
     return NULL;
   }
 
-  textureData->width = width;
-  textureData->height = height;
+  textureData->width = (u32) width;
+  textureData->height = (u32) height;
 
   return textureData;
 }
@@ -240,8 +238,10 @@ void lovrTextureDataSetPixel(TextureData* textureData, u32 x, u32 y, Color color
 }
 
 static void writeCallback(void* context, void* data, i32 size) {
-  File* file = context;
-  lovrFileWrite(file, data, size);
+  if (size > 0) {
+    File* file = context;
+    lovrFileWrite(file, data, (usize) size);
+  }
 }
 
 bool lovrTextureDataEncode(TextureData* textureData, const char* filename) {
@@ -251,11 +251,11 @@ bool lovrTextureDataEncode(TextureData* textureData, const char* filename) {
     return false;
   }
   lovrAssert(textureData->format == FORMAT_RGB || textureData->format == FORMAT_RGBA, "Only RGB and RGBA TextureData can be encoded");
-  u32 components = textureData->format == FORMAT_RGB ? 3 : 4;
-  u32 width = textureData->width;
-  u32 height = textureData->height;
-  void* data = (u8*) textureData->blob.data + (textureData->height - 1) * textureData->width * components;
-  i32 stride = -textureData->width * components;
+  i32 width = (i32) textureData->width;
+  i32 height = (i32) textureData->height;
+  i32 components = textureData->format == FORMAT_RGB ? 3 : 4;
+  void* data = (u8*) textureData->blob.data + (textureData->height - 1) * textureData->width * (u32) components;
+  i32 stride = -width * components;
   bool success = stbi_write_png_to_func(writeCallback, &file, width, height, components, data, stride);
   lovrFileDestroy(&file);
   return success;
