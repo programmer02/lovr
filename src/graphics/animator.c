@@ -1,6 +1,7 @@
 #include "graphics/animator.h"
 #include "data/modelData.h"
 #include "types.h"
+#include "lib/err.h"
 #include "lib/maf.h"
 #include "lib/map/map.h"
 #include "lib/vec/vec.h"

@@ -1,5 +1,6 @@
 #include "graphics/canvas.h"
 #include "graphics/graphics.h"
+#include "lib/err.h"
 
 const Attachment* lovrCanvasGetAttachments(Canvas* canvas, u32* count) {
   if (count) *count = canvas->attachmentCount;

@@ -2,6 +2,7 @@
 #include "filesystem/file.h"
 #include "platform.h"
 #include "util.h"
+#include "lib/err.h"
 #include <physfs.h>
 #include <stdlib.h>
 #include <string.h>

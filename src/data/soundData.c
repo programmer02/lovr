@@ -1,5 +1,6 @@
 #include "data/soundData.h"
 #include "data/audioStream.h"
+#include "lib/err.h"
 #include "lib/stb/stb_vorbis.h"
 #include <limits.h>
 #include <stdlib.h>

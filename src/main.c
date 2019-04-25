@@ -4,6 +4,7 @@
 #include "luax.h"
 #include "platform.h"
 #include "util.h"
+#include "lib/err.h"
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
@@ -74,7 +75,7 @@ int main(int argc, char** argv) {
       return 1;
     }
 
-    lovrSetErrorCallback((lovrErrorHandler) luax_vthrow, T);
+    err_setHandler((err_fn) luax_vthrow, T);
 
 #ifdef EMSCRIPTEN
     lovrEmscriptenContext context = { L, T, argc, argv };

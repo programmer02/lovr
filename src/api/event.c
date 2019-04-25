@@ -2,6 +2,7 @@
 #include "api/event.h"
 #include "event/event.h"
 #include "types.h"
+#include "lib/err.h"
 #include <stdlib.h>
 #include <string.h>
 

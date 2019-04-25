@@ -1,5 +1,6 @@
 #include "types.h"
 #include "util.h"
+#include "lib/err.h"
 #include <stdlib.h>
 
 void lovrAnimatorDestroy(void*);

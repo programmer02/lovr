@@ -1,4 +1,5 @@
 #include "api.h"
+#include "lib/err.h"
 #include "graphics/animator.h"
 
 static u32 luax_checkanimation(lua_State* L, int index, Animator* animator) {

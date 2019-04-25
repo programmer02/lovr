@@ -1,4 +1,5 @@
 #include "math/pool.h"
+#include "lib/err.h"
 #include <stdlib.h>
 
 static const usize sizeOfMathType[] = {

@@ -1,4 +1,5 @@
 #include "util.h"
+#include "lib/err.h"
 
 // Include this in ONE translation unit
 

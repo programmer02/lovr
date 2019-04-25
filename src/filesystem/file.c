@@ -1,4 +1,5 @@
 #include "filesystem/file.h"
+#include "lib/err.h"
 #include <physfs.h>
 
 File* lovrFileInit(File* file ,const char* path) {

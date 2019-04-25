@@ -1,6 +1,7 @@
 #include "api.h"
 #include "api/math.h"
 #include "math/curve.h"
+#include "lib/err.h"
 
 static int l_lovrCurveEvaluate(lua_State* L) {
   Curve* curve = luax_checktype(L, 1, Curve);

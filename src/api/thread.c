@@ -2,6 +2,7 @@
 #include "event/event.h"
 #include "thread/thread.h"
 #include "thread/channel.h"
+#include "lib/err.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -17,7 +18,7 @@ static int threadRunner(void* data) {
   // Lua state
   lua_State* L = luaL_newstate();
   luaL_openlibs(L);
-  lovrSetErrorCallback((lovrErrorHandler) luax_vthrow, L);
+  err_setHandler((err_fn) luax_vthrow, L);
 
   lua_getglobal(L, "package");
   lua_getfield(L, -1, "preload");

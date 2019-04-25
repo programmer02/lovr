@@ -3,6 +3,7 @@
 #include "data/audioStream.h"
 #include "data/soundData.h"
 #include "types.h"
+#include "lib/err.h"
 #include "lib/maf.h"
 #include <stdlib.h>
 #include <AL/al.h>

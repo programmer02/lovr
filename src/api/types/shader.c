@@ -3,6 +3,7 @@
 #include "api/math.h"
 #include "graphics/buffer.h"
 #include "graphics/shader.h"
+#include "lib/err.h"
 
 struct TempData {
   void* data;

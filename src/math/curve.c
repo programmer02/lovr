@@ -1,4 +1,5 @@
 #include "math/curve.h"
+#include "lib/err.h"
 #include "lib/maf.h"
 #include <math.h>
 

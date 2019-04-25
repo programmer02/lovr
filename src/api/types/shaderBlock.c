@@ -2,6 +2,7 @@
 #include "api/graphics.h"
 #include "graphics/buffer.h"
 #include "graphics/shader.h"
+#include "lib/err.h"
 
 static int l_lovrShaderBlockGetType(lua_State* L) {
   ShaderBlock* block = luax_checktype(L, 1, ShaderBlock);

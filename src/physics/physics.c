@@ -1,4 +1,5 @@
 #include "physics.h"
+#include "lib/err.h"
 #include "lib/maf.h"
 
 static void defaultNearCallback(void* data, dGeomID a, dGeomID b) {

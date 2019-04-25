@@ -1,5 +1,6 @@
 #include "data/audioStream.h"
 #include "data/blob.h"
+#include "lib/err.h"
 #include "lib/stb/stb_vorbis.h"
 #include <stdlib.h>
 

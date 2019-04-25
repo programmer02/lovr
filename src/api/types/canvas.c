@@ -2,6 +2,7 @@
 #include "api/graphics.h"
 #include "graphics/canvas.h"
 #include "graphics/graphics.h"
+#include "lib/err.h"
 
 Texture* luax_checktexture(lua_State* L, int index) {
   Canvas* canvas = luax_totype(L, index, Canvas);

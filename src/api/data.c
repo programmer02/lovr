@@ -5,6 +5,7 @@
 #include "data/rasterizer.h"
 #include "data/soundData.h"
 #include "data/textureData.h"
+#include "lib/err.h"
 
 static int l_lovrDataNewBlob(lua_State* L) {
   usize size;

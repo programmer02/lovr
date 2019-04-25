@@ -5,6 +5,7 @@
 #include "graphics/graphics.h"
 #include "graphics/material.h"
 #include "graphics/mesh.h"
+#include "lib/err.h"
 #include <limits.h>
 
 static int l_lovrMeshAttachAttributes(lua_State* L) {

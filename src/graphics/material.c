@@ -3,6 +3,7 @@
 #include "graphics/shader.h"
 #include "graphics/texture.h"
 #include "resources/shaders.h"
+#include "lib/err.h"
 #include <stdlib.h>
 #include <math.h>
 

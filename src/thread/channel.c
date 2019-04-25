@@ -1,6 +1,7 @@
 #include "thread/channel.h"
 #include "event/event.h"
 #include "types.h"
+#include "lib/err.h"
 #include "lib/tinycthread/tinycthread.h"
 #include "lib/vec/vec.h"
 #include <math.h>

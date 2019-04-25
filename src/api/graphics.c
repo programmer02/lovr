@@ -14,6 +14,7 @@
 #include "data/textureData.h"
 #include "filesystem/filesystem.h"
 #include "util.h"
+#include "lib/err.h"
 #include <math.h>
 #include <stdbool.h>
 

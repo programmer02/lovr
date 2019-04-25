@@ -1,6 +1,7 @@
 #include "thread/thread.h"
 #include "thread/channel.h"
 #include "lib/map/map.h"
+#include "lib/err.h"
 #include <stdlib.h>
 
 static struct {
