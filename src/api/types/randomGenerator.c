@@ -3,8 +3,8 @@
 #include "math/randomGenerator.h"
 #include <math.h>
 
-static double luax_checkrandomseedpart(lua_State* L, int index) {
-  double x = luaL_checknumber(L, index);
+static f64 luax_checkrandomseedpart(lua_State* L, int index) {
+  f64 x = luaL_checknumber(L, index);
 
   if (!isfinite(x)) {
     luaL_argerror(L, index, "invalid random seed");
@@ -43,7 +43,7 @@ int l_lovrRandomGeneratorSetSeed(lua_State* L) {
 
 static int l_lovrRandomGeneratorGetState(lua_State* L) {
   RandomGenerator* generator = luax_checktype(L, 1, RandomGenerator);
-  size_t length = 32;
+  usize length = 32;
   char state[32];
   lovrRandomGeneratorGetState(generator, state, length);
   lua_pushstring(L, state);
@@ -61,14 +61,14 @@ static int l_lovrRandomGeneratorSetState(lua_State* L) {
 
 int l_lovrRandomGeneratorRandom(lua_State* L) {
   RandomGenerator* generator = luax_checktype(L, 1, RandomGenerator);
-  double r = lovrRandomGeneratorRandom(generator);
+  f64 r = lovrRandomGeneratorRandom(generator);
 
   if (lua_gettop(L) >= 3) {
-    double lower = luaL_checknumber(L, 2);
-    double upper = luaL_checknumber(L, 3);
+    f64 lower = luaL_checknumber(L, 2);
+    f64 upper = luaL_checknumber(L, 3);
     lua_pushnumber(L, floor(r * (upper - lower + 1)) + lower);
   } else if (lua_gettop(L) >= 2) {
-    double upper = luaL_checknumber(L, 2);
+    f64 upper = luaL_checknumber(L, 2);
     lua_pushnumber(L, floor(r * upper) + 1);
   } else {
     lua_pushnumber(L, r);
@@ -79,8 +79,8 @@ int l_lovrRandomGeneratorRandom(lua_State* L) {
 
 int l_lovrRandomGeneratorRandomNormal(lua_State* L) {
   RandomGenerator* generator = luax_checktype(L, 1, RandomGenerator);
-  float sigma = luax_optfloat(L, 2, 1.f);
-  float mu = luax_optfloat(L, 3, 0.f);
+  f32 sigma = luax_optfloat(L, 2, 1.f);
+  f32 mu = luax_optfloat(L, 3, 0.f);
   lua_pushnumber(L, mu + lovrRandomGeneratorRandomNormal(generator) * sigma);
   return 1;
 }

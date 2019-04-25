@@ -77,21 +77,21 @@ static int l_lovrHeadsetGetOriginType(lua_State* L) {
 }
 
 static int l_lovrHeadsetGetDisplayWidth(lua_State* L) {
-  uint32_t width, height;
+  u32 width, height;
   lovrHeadsetDriver->getDisplayDimensions(&width, &height);
   lua_pushinteger(L, width);
   return 1;
 }
 
 static int l_lovrHeadsetGetDisplayHeight(lua_State* L) {
-  uint32_t width, height;
+  u32 width, height;
   lovrHeadsetDriver->getDisplayDimensions(&width, &height);
   lua_pushinteger(L, height);
   return 1;
 }
 
 static int l_lovrHeadsetGetDisplayDimensions(lua_State* L) {
-  uint32_t width, height;
+  u32 width, height;
   lovrHeadsetDriver->getDisplayDimensions(&width, &height);
   lua_pushinteger(L, width);
   lua_pushinteger(L, height);
@@ -99,7 +99,7 @@ static int l_lovrHeadsetGetDisplayDimensions(lua_State* L) {
 }
 
 static int l_lovrHeadsetGetClipDistance(lua_State* L) {
-  float clipNear, clipFar;
+  f32 clipNear, clipFar;
   lovrHeadsetDriver->getClipDistance(&clipNear, &clipFar);
   lua_pushnumber(L, clipNear);
   lua_pushnumber(L, clipFar);
@@ -107,8 +107,8 @@ static int l_lovrHeadsetGetClipDistance(lua_State* L) {
 }
 
 static int l_lovrHeadsetSetClipDistance(lua_State* L) {
-  float clipNear = luax_checkfloat(L, 1);
-  float clipFar = luax_checkfloat(L, 2);
+  f32 clipNear = luax_checkfloat(L, 1);
+  f32 clipFar = luax_checkfloat(L, 2);
   lovrHeadsetDriver->setClipDistance(clipNear, clipFar);
   return 0;
 }
@@ -121,14 +121,14 @@ static int l_lovrHeadsetGetBoundsWidth(lua_State* L) {
 }
 
 static int l_lovrHeadsetGetBoundsDepth(lua_State* L) {
-  float width, depth;
+  f32 width, depth;
   lovrHeadsetDriver->getBoundsDimensions(&width, &depth);
   lua_pushnumber(L, depth);
   return 1;
 }
 
 static int l_lovrHeadsetGetBoundsDimensions(lua_State* L) {
-  float width, depth;
+  f32 width, depth;
   lovrHeadsetDriver->getBoundsDimensions(&width, &depth);
   lua_pushnumber(L, width);
   lua_pushnumber(L, depth);
@@ -136,8 +136,8 @@ static int l_lovrHeadsetGetBoundsDimensions(lua_State* L) {
 }
 
 static int l_lovrHeadsetGetBoundsGeometry(lua_State* L) {
-  u8 count;
-  const float* points = lovrHeadsetDriver->getBoundsGeometry(&count);
+  u32 count;
+  const f32* points = lovrHeadsetDriver->getBoundsGeometry(&count);
 
   if (!points) {
     lua_pushnil(L);
@@ -151,7 +151,7 @@ static int l_lovrHeadsetGetBoundsGeometry(lua_State* L) {
     lua_createtable(L, count, 0);
   }
 
-  for (u8 i = 0; i < count; i++) {
+  for (u32 i = 0; i < count; i++) {
     lua_pushnumber(L, points[i]);
     lua_rawseti(L, 1, i + 1);
   }
@@ -161,7 +161,7 @@ static int l_lovrHeadsetGetBoundsGeometry(lua_State* L) {
 
 int l_lovrHeadsetGetPose(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float x, y, z, angle, ax, ay, az;
+  f32 x, y, z, angle, ax, ay, az;
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->getPose(path, &x, &y, &z, &angle, &ax, &ay, &az)) {
       lua_pushnumber(L, x);
@@ -179,7 +179,7 @@ int l_lovrHeadsetGetPose(lua_State* L) {
 
 int l_lovrHeadsetGetPosition(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float x, y, z;
+  f32 x, y, z;
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->getPose(path, &x, &y, &z, NULL, NULL, NULL, NULL)) {
       lua_pushnumber(L, x);
@@ -193,7 +193,7 @@ int l_lovrHeadsetGetPosition(lua_State* L) {
 
 int l_lovrHeadsetGetOrientation(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float angle, ax, ay, az;
+  f32 angle, ax, ay, az;
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->getPose(path, NULL, NULL, NULL, &angle, &ax, &ay, &az)) {
       lua_pushnumber(L, angle);
@@ -208,12 +208,12 @@ int l_lovrHeadsetGetOrientation(lua_State* L) {
 
 int l_lovrHeadsetGetDirection(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float angle, ax, ay, az;
+  f32 angle, ax, ay, az;
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->getPose(path, NULL, NULL, NULL, &angle, &ax, &ay, &az)) {
-      float q[4];
+      f32 q[4];
       quat_fromAngleAxis(q, angle, ax, ay, az);
-      float v[3] = { 0.f, 0.f, -1.f };
+      f32 v[3] = { 0.f, 0.f, -1.f };
       quat_rotate(q, v);
       lua_pushnumber(L, v[0]);
       lua_pushnumber(L, v[1]);
@@ -226,7 +226,7 @@ int l_lovrHeadsetGetDirection(lua_State* L) {
 
 int l_lovrHeadsetGetVelocity(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float vx, vy, vz;
+  f32 vx, vy, vz;
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->getVelocity(path, &vx, &vy, &vz, NULL, NULL, NULL)) {
       lua_pushnumber(L, vx);
@@ -240,7 +240,7 @@ int l_lovrHeadsetGetVelocity(lua_State* L) {
 
 int l_lovrHeadsetGetAngularVelocity(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float vax, vay, vaz;
+  f32 vax, vay, vaz;
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->getVelocity(path, NULL, NULL, NULL, &vax, &vay, &vaz)) {
       lua_pushnumber(L, vax);
@@ -278,8 +278,8 @@ int l_lovrHeadsetIsTouched(lua_State* L) {
 
 int l_lovrHeadsetGetAxis(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float x, y, z;
-  int count;
+  f32 x, y, z;
+  u32 count;
   FOREACH_TRACKING_DRIVER(driver) {
     if ((count = driver->getAxis(path, &x, &y, &z)) > 0) {
       lua_pushnumber(L, x);
@@ -294,9 +294,9 @@ int l_lovrHeadsetGetAxis(lua_State* L) {
 
 int l_lovrHeadsetVibrate(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  float strength = luax_optfloat(L, 2, 1.f);
-  float duration = luax_optfloat(L, 3, .5f);
-  float frequency = luax_optfloat(L, 4, 0.f);
+  f32 strength = luax_optfloat(L, 2, 1.f);
+  f32 duration = luax_optfloat(L, 3, .5f);
+  f32 frequency = luax_optfloat(L, 4, 0.f);
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->vibrate(path, strength, duration, frequency)) {
       lua_pushboolean(L, true);
@@ -357,11 +357,11 @@ static int l_lovrHeadsetUpdate(lua_State* L) {
 }
 
 static int l_lovrHeadsetGetMirrorTexture(lua_State* L) {
-  Texture *texture = NULL;
-  if (lovrHeadsetDriver->getMirrorTexture)
-    texture = lovrHeadsetDriver->getMirrorTexture();
-  luax_pushobject(L, texture);
-
+  if (lovrHeadsetDriver->getMirrorTexture) {
+    luax_pushobject(L, lovrHeadsetDriver->getMirrorTexture());
+  } else {
+    lua_pushnil(L);
+  }
   return 1;
 }
 
@@ -404,15 +404,15 @@ int luaopen_lovr_headset(lua_State* L) {
 
   vec_t(HeadsetDriver) drivers;
   vec_init(&drivers);
-  float offset = 1.7f;
-  int msaa = 4;
+  f32 offset = 1.7f;
+  u32 msaa = 4;
 
   if (lua_istable(L, -1)) {
 
     // Drivers
     lua_getfield(L, -1, "drivers");
-    int n = luax_len(L, -1);
-    for (int i = 0; i < n; i++) {
+    usize n = lua_objlen(L, -1);
+    for (usize i = 0; i < n; i++) {
       lua_rawgeti(L, -1, i + 1);
       vec_push(&drivers, luaL_checkoption(L, -1, NULL, HeadsetDrivers));
       lua_pop(L, 1);
@@ -426,7 +426,7 @@ int luaopen_lovr_headset(lua_State* L) {
 
     // MSAA
     lua_getfield(L, -1, "msaa");
-    msaa = luaL_optinteger(L, -1, 4);
+    msaa = luax_optu32(L, -1, 4);
     lua_pop(L, 1);
   }
 

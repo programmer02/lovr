@@ -3,7 +3,7 @@
 #include "thread/channel.h"
 #include <math.h>
 
-static void luax_checktimeout(lua_State* L, int index, double* timeout) {
+static void luax_checktimeout(lua_State* L, int index, f64* timeout) {
   switch (lua_type(L, index)) {
     case LUA_TNONE:
     case LUA_TNIL:
@@ -13,18 +13,18 @@ static void luax_checktimeout(lua_State* L, int index, double* timeout) {
       *timeout = lua_toboolean(L, index) ? INFINITY : NAN;
       break;
     default:
-      *timeout = luax_checkfloat(L, index);
+      *timeout = luaL_checknumber(L, index);
       break;
   }
 }
 
 static int l_lovrChannelPush(lua_State* L) {
   Variant variant;
-  double timeout;
+  f64 timeout;
   Channel* channel = luax_checktype(L, 1, Channel);
   luax_checkvariant(L, 2, &variant);
   luax_checktimeout(L, 3, &timeout);
-  uint64_t id;
+  u64 id;
   bool read = lovrChannelPush(channel, variant, timeout, &id);
   lua_pushnumber(L, id);
   lua_pushboolean(L, read);
@@ -33,7 +33,7 @@ static int l_lovrChannelPush(lua_State* L) {
 
 static int l_lovrChannelPop(lua_State* L) {
   Variant variant;
-  double timeout;
+  f64 timeout;
   Channel* channel = luax_checktype(L, 1, Channel);
   luax_checktimeout(L, 2, &timeout);
   if (lovrChannelPop(channel, &variant, timeout)) {
@@ -69,7 +69,7 @@ static int l_lovrChannelGetCount(lua_State* L) {
 
 static int l_lovrChannelHasRead(lua_State* L) {
   Channel* channel = luax_checktype(L, 1, Channel);
-  uint64_t id = luaL_checkinteger(L, 2);
+  u64 id = luaL_checkinteger(L, 2);
   lua_pushboolean(L, lovrChannelHasRead(channel, id));
   return 1;
 }

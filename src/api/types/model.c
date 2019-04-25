@@ -6,9 +6,9 @@
 
 static int l_lovrModelDraw(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
-  float transform[16];
+  f32 transform[16];
   int index = luax_readmat4(L, 2, transform, 1);
-  int instances = luaL_optinteger(L, index, 1);
+  u32 instances = luax_optu32(L, index, 1);
   lovrModelDraw(model, transform, instances);
   return 0;
 }
@@ -50,9 +50,9 @@ static int l_lovrModelSetMaterial(lua_State* L) {
 
 static int l_lovrModelGetAABB(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
-  float aabb[6];
+  f32 aabb[6];
   lovrModelGetAABB(model, aabb);
-  for (int i = 0; i < 6; i++) {
+  for (u32 i = 0; i < 6; i++) {
     lua_pushnumber(L, aabb[i]);
   }
   return 6;

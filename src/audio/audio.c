@@ -111,10 +111,10 @@ void lovrAudioGetDopplerEffect(f32* factor, f32* speedOfSound) {
   alGetFloatv(AL_SPEED_OF_SOUND, speedOfSound);
 }
 
-void lovrAudioGetMicrophoneNames(const char* names[MAX_MICROPHONES], u8* count) {
+void lovrAudioGetMicrophoneNames(const char* names[MAX_MICROPHONES], u32* count) {
   const char* name = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
   *count = 0;
-  while (*name) {
+  while (*name && *count < MAX_MICROPHONES) {
     names[(*count)++] = name;
     name += strlen(name);
   }

@@ -31,7 +31,7 @@ void luax_checkvariant(lua_State* L, int index, Variant* variant) {
 
     case LUA_TSTRING:
       variant->type = TYPE_STRING;
-      size_t length;
+      usize length;
       const char* string = lua_tolstring(L, index, &length);
       variant->value.string = malloc(length + 1);
       lovrAssert(variant->value.string, "Out of memory");
@@ -95,7 +95,7 @@ static int nextEvent(lua_State* L) {
       return 3;
 
     case EVENT_CUSTOM:
-      for (u8 i = 0; i < event.data.custom.count; i++) {
+      for (u32 i = 0; i < event.data.custom.count; i++) {
         Variant* variant = &event.data.custom.data[i];
         luax_pushvariant(L, variant);
         lovrVariantDestroy(variant);
@@ -127,7 +127,7 @@ static int l_lovrEventPush(lua_State* L) {
   const char* name = luaL_checkstring(L, 1);
   strncpy(eventData.name, name, MAX_EVENT_NAME_LENGTH - 1);
   eventData.count = MIN(lua_gettop(L) - 1, 4);
-  for (int i = 0; i < eventData.count; i++) {
+  for (u32 i = 0; i < eventData.count; i++) {
     luax_checkvariant(L, 2 + i, &eventData.data[i]);
   }
 

@@ -147,7 +147,7 @@ static void getBoundsDimensions(f32* width, f32* depth) {
   state.chaperone->GetPlayAreaSize(width, depth);
 }
 
-static const f32* getBoundsGeometry(u8* count) {
+static const f32* getBoundsGeometry(u32* count) {
   struct HmdQuad_t quad;
   if (state.chaperone->GetPlayAreaRect(&quad)) {
     vec_clear(&state.boundsGeometry);
@@ -250,7 +250,7 @@ static bool isTouched(const char* path, bool* touched) {
   return getButtonState(path, true, touched);
 }
 
-static u8 getAxis(const char* path, f32* x, f32* y, f32* z) {
+static u32 getAxis(const char* path, f32* x, f32* y, f32* z) {
   const char* axis;
   TrackedDeviceIndex_t device = pathToDevice(path, &axis);
 

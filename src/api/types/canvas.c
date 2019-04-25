@@ -20,7 +20,7 @@ static int luax_checkattachment(lua_State* L, int index, Attachment* attachment)
     lua_pop(L, 1);
 
     lua_rawgeti(L, index, 2);
-    attachment->slice = luaL_optinteger(L, -1, 1) - 1;
+    attachment->slice = luax_optu32(L, -1, 1) - 1; // TODO handle 0 better
     lua_pop(L, 1);
 
     lua_rawgeti(L, index, 3);
@@ -30,21 +30,21 @@ static int luax_checkattachment(lua_State* L, int index, Attachment* attachment)
     index++;
   } else {
     attachment->texture = luax_checktype(L, index++, Texture);
-    attachment->slice = lua_type(L, index) == LUA_TNUMBER ? lua_tointeger(L, index++) - 1 : 0;
+    attachment->slice = lua_type(L, index) == LUA_TNUMBER ? luax_checku32(L, index++) : 0; // TODO handle 0 better
     attachment->level = lua_type(L, index) == LUA_TNUMBER ? luax_optmipmap(L, index++, attachment->texture) : 0;
   }
   return index;
 }
 
-void luax_readattachments(lua_State* L, int index, Attachment* attachments, int* count) {
+void luax_readattachments(lua_State* L, int index, Attachment* attachments, u32* count) {
   bool table = lua_istable(L, index);
   int top = table ? -1 : lua_gettop(L);
-  int n;
+  usize n;
 
   if (table) {
-    n = luax_len(L, index);
+    n = lua_objlen(L, index);
     n = MIN(n, 3 * MAX_CANVAS_ATTACHMENTS);
-    for (int i = 0; i < n; i++) {
+    for (usize i = 0; i < n; i++) {
       lua_rawgeti(L, index, i + 1);
     }
     index = -n;
@@ -61,10 +61,10 @@ void luax_readattachments(lua_State* L, int index, Attachment* attachments, int*
 
 static int l_lovrCanvasNewTextureData(lua_State* L) {
   Canvas* canvas = luax_checktype(L, 1, Canvas);
-  u32 index = luaL_optinteger(L, 2, 1) - 1;
+  u32 index = luax_optu32(L, 2, 1);
   u32 count;
   lovrCanvasGetAttachments(canvas, &count);
-  lovrAssert(index < count, "Can not create a TextureData from Texture #%d of Canvas (it only has %d textures)", index, count);
+  lovrAssert(index - 1 < count, "Can not create a TextureData from Texture #%d of Canvas (it only has %d texture%s)", index, count, count > 1 ? "s" : "");
   TextureData* textureData = lovrCanvasNewTextureData(canvas, index);
   luax_pushobject(L, textureData);
   lovrRelease(TextureData, textureData);
@@ -95,7 +95,7 @@ static int l_lovrCanvasGetTexture(lua_State* L) {
 static int l_lovrCanvasSetTexture(lua_State* L) {
   Canvas* canvas = luax_checktype(L, 1, Canvas);
   Attachment attachments[MAX_CANVAS_ATTACHMENTS];
-  int count;
+  u32 count;
   luax_readattachments(L, 2, attachments, &count);
   lovrCanvasSetAttachments(canvas, attachments, count);
   return 0;
@@ -129,7 +129,7 @@ static int l_lovrCanvasGetDepthTexture(lua_State* L) {
 
 static int l_lovrCanvasGetMSAA(lua_State* L) {
   Canvas* canvas = luax_checktype(L, 1, Canvas);
-  int msaa = lovrCanvasGetMSAA(canvas);
+  u32 msaa = lovrCanvasGetMSAA(canvas);
   lua_pushinteger(L, msaa);
   return 1;
 }

@@ -51,7 +51,7 @@ typedef struct {
 typedef struct {
   char name[MAX_EVENT_NAME_LENGTH];
   Variant data[4];
-  u8 count;
+  u32 count;
 } CustomEvent;
 
 typedef union {

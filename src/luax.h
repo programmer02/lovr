@@ -1,6 +1,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+#include "util.h"
 #include "types.h"
 
 #pragma once
@@ -16,8 +17,9 @@ struct Color;
 #define luax_extendtype(L, S, T) _luax_extendtype(L, #T, lovr ## S, lovr ## T)
 #define luax_totype(L, i, T) ((T*) _luax_totype(L, i, T_ ## T))
 #define luax_checktype(L, i, T) ((T*) _luax_checktype(L, i, T_ ## T, #T))
-#define luax_checkfloat(L, i) (float) luaL_checknumber(L, i)
-#define luax_optfloat(L, i, x) (float) luaL_optnumber(L, i, x)
+#define luax_checkfloat(L, i) (f32) luaL_checknumber(L, i)
+#define luax_optfloat(L, i, x) (f32) luaL_optnumber(L, i, x)
+#define luax_optu32(L, i, x) lua_isnoneornil(L, i) ? x : luax_checku32(L, i)
 #define luax_geterror(L) lua_getfield(L, LUA_REGISTRYINDEX, "_lovrerror")
 #define luax_seterror(L) lua_setfield(L, LUA_REGISTRYINDEX, "_lovrerror")
 #define luax_clearerror(L) lua_pushnil(L), luax_seterror(L)
@@ -32,6 +34,7 @@ void _luax_extendtype(lua_State* L, const char* name, const luaL_Reg* baseFuncti
 void* _luax_totype(lua_State* L, int index, Type type);
 void* _luax_checktype(lua_State* L, int index, Type type, const char* debug);
 void luax_pushobject(lua_State* L, void* object);
+u32 luax_checku32(lua_State* L, int index);
 void luax_vthrow(lua_State* L, const char* format, va_list args);
 void luax_traceback(lua_State* L, lua_State* T, const char* message, int level);
 int luax_getstack(lua_State* L);

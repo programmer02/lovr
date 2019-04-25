@@ -13,7 +13,7 @@ Blob* luax_readblob(lua_State* L, int index, const char* debug) {
   } else {
     const char* path = luaL_checkstring(L, index);
 
-    size_t size;
+    usize size;
     void* data = lovrFilesystemRead(path, -1, &size);
     if (!data) {
       luaL_error(L, "Could not read %s from '%s'", debug, path);
@@ -25,7 +25,7 @@ Blob* luax_readblob(lua_State* L, int index, const char* debug) {
 
 static int pushDirectoryItem(void* userdata, const char* path, const char* filename) {
   lua_State* L = userdata;
-  int n = luax_len(L, -1);
+  usize n = lua_objlen(L, -1);
   lua_pushstring(L, filename);
   lua_rawseti(L, -2, n + 1);
   return 1;
@@ -37,7 +37,7 @@ static int moduleLoader(lua_State* L) {
   const char* module = luaL_gsub(L, lua_tostring(L, -1), ".", "/");
   lua_pop(L, 2);
 
-  char* path; int i;
+  char* path; i32 i;
   vec_foreach(lovrFilesystemGetRequirePath(), path, i) {
     const char* filename = luaL_gsub(L, path, "?", module);
     if (lovrFilesystemIsFile(filename)) {
@@ -66,7 +66,7 @@ static int libraryLoader(lua_State* L) {
   moduleFunction = hyphen ? hyphen + 1 : moduleFunction;
   lua_pop(L, 3);
 
-  char* path; int i;
+  char* path; i32 i;
   vec_foreach(lovrFilesystemGetCRequirePath(), path, i) {
     for (const char** extension = libraryExtensions; *extension != NULL; extension++) {
       char buffer[64];
@@ -93,7 +93,7 @@ static int libraryLoader(lua_State* L) {
 }
 
 static int l_lovrFilesystemAppend(lua_State* L) {
-  size_t size;
+  usize size;
   const char* path = luaL_checkstring(L, 1);
   const char* content = luaL_checklstring(L, 2, &size);
   lua_pushnumber(L, lovrFilesystemWrite(path, content, size, 1));
@@ -149,9 +149,9 @@ static int l_lovrFilesystemGetIdentity(lua_State* L) {
 
 static int l_lovrFilesystemGetLastModified(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  i64 lastModified = lovrFilesystemGetLastModified(path);
+  u64 lastModified = lovrFilesystemGetLastModified(path);
 
-  if (lastModified < 0) {
+  if (lastModified == ~0ull) {
     lua_pushnil(L);
   } else {
     lua_pushinteger(L, lastModified);
@@ -167,7 +167,7 @@ static int l_lovrFilesystemGetRealDirectory(lua_State* L) {
 }
 
 static void pushRequirePath(lua_State* L, vec_str_t* path) {
-  char* pattern; int i;
+  char* pattern; i32 i;
   vec_foreach(path, pattern, i) {
     lua_pushstring(L, pattern);
     lua_pushliteral(L, ";");
@@ -189,8 +189,8 @@ static int l_lovrFilesystemGetSaveDirectory(lua_State* L) {
 
 static int l_lovrFilesystemGetSize(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  size_t size = lovrFilesystemGetSize(path);
-  if ((int) size == -1) {
+  usize size = lovrFilesystemGetSize(path);
+  if (size == (usize) -1) {
     return luaL_error(L, "File does not exist");
   }
   lua_pushinteger(L, size);
@@ -245,7 +245,7 @@ static int l_lovrFilesystemIsFused(lua_State* L) {
 
 static int l_lovrFilesystemLoad(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  size_t size;
+  usize size;
   char* content = lovrFilesystemRead(path, -1, &size);
 
   if (!content) {
@@ -274,9 +274,9 @@ static int l_lovrFilesystemMount(lua_State* L) {
 }
 
 static int l_lovrFilesystemNewBlob(lua_State* L) {
-  size_t size;
+  usize size;
   const char* path = luaL_checkstring(L, 1);
-  uint8_t* data = lovrFilesystemRead(path, -1, &size);
+  u8* data = lovrFilesystemRead(path, -1, &size);
   lovrAssert(data, "Could not load file '%s'", path);
   Blob* blob = lovrBlobCreate(data, size, path);
   luax_pushobject(L, blob);
@@ -286,9 +286,8 @@ static int l_lovrFilesystemNewBlob(lua_State* L) {
 
 static int l_lovrFilesystemRead(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  lua_Integer luaSize = luaL_optinteger(L, 2, -1);
-  size_t size = MAX(luaSize, -1);
-  size_t bytesRead;
+  usize size = lua_isnoneornil(L, 2) ? (usize) -1 : luax_checku32(L, 2);
+  usize bytesRead;
   void* content = lovrFilesystemRead(path, size, &bytesRead);
   if (!content) {
     lua_pushnil(L);

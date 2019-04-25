@@ -987,7 +987,7 @@ static int l_lovrGraphicsNewShaderBlock(lua_State* L) {
 
 static int l_lovrGraphicsNewCanvas(lua_State* L) {
   Attachment attachments[MAX_CANVAS_ATTACHMENTS];
-  int attachmentCount = 0;
+  u32 attachmentCount = 0;
   int width = 0;
   int height = 0;
   int index;

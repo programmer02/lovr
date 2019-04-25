@@ -66,7 +66,7 @@ static void getBoundsDimensions(f32* width, f32* depth) {
   *width = *depth = 0.f;
 }
 
-static const f32* getBoundsGeometry(u8* count) {
+static const f32* getBoundsGeometry(u32* count) {
   *count = 0;
   return NULL;
 }
@@ -127,7 +127,7 @@ static bool isTouched(const char* path, bool* touched) {
   return false;
 }
 
-static u8 getAxis(const char* path, f32* x, f32* y, f32* z) {
+static u32 getAxis(const char* path, f32* x, f32* y, f32* z) {
   return 0;
 }
 

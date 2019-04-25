@@ -1,10 +1,8 @@
 #include "luax.h"
 #include "platform.h"
-#include "util.h"
 #include "lib/sds/sds.h"
 #include <stdlib.h>
-#include <stdarg.h>
-#include <stdbool.h>
+#include <math.h>
 
 static int luax_meta__tostring(lua_State* L) {
   lua_getfield(L, -1, "name");
@@ -212,6 +210,20 @@ void luax_pushobject(lua_State* L, void* object) {
   lua_pushvalue(L, -2);
   lua_settable(L, -4);
   lua_remove(L, -2);
+}
+
+u32 luax_checku32(lua_State* L, int index) {
+  lua_Number n = lua_tonumber(L, index);
+  if (n != 0. || lua_isnumber(L, index)) {
+    if (!(n >= 0. && n < UINT32_MAX)) {
+      const char* message = lua_pushfstring(L, "number between %d and %f expected, got %f", 0, nextafter(UINT32_MAX - 1, 0.), n);
+      luaL_argerror(L, index, message);
+      return 0;
+    }
+    return (u32) n;
+  }
+  luaL_typerror(L, index, lua_typename(L, LUA_TNUMBER));
+  return 0;
 }
 
 void luax_vthrow(lua_State* L, const char* format, va_list args) {

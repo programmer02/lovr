@@ -140,9 +140,9 @@ const char* lovrFilesystemGetIdentity() {
   return state.identity;
 }
 
-i64 lovrFilesystemGetLastModified(const char* path) {
+u64 lovrFilesystemGetLastModified(const char* path) {
   PHYSFS_Stat stat;
-  return PHYSFS_stat(path, &stat) ? stat.modtime : -1;
+  return PHYSFS_stat(path, &stat) ? stat.modtime : ~0ull;
 }
 
 const char* lovrFilesystemGetRealDirectory(const char* path) {
@@ -226,7 +226,7 @@ void* lovrFilesystemRead(const char* path, usize bytes, usize* bytesRead) {
   File file;
   lovrFileInit(memset(&file, 0, sizeof(File)), path);
 
-  if (lovrFileOpen(&file, OPEN_READ)) {
+  if (!lovrFileOpen(&file, OPEN_READ)) {
     return NULL;
   }
 

@@ -1,7 +1,5 @@
 #include "util.h"
 #include "types.h"
-#include <AL/al.h>
-#include <AL/alc.h>
 
 #pragma once
 
@@ -25,8 +23,8 @@ typedef struct Source {
   SourceType type;
   struct SoundData* soundData;
   struct AudioStream* stream;
-  ALuint id;
-  ALuint buffers[SOURCE_BUFFERS];
+  u32 id;
+  u32 buffers[SOURCE_BUFFERS];
   bool isLooping;
 } Source;
 
@@ -69,5 +67,5 @@ void lovrSourceSetVelocity(Source* source, f32 velocity[3]);
 void lovrSourceSetVolume(Source* source, f32 volume);
 void lovrSourceSetVolumeLimits(Source* source, f32 min, f32 max);
 void lovrSourceStop(Source* source);
-void lovrSourceStream(Source* source, ALuint* buffers, usize count);
+void lovrSourceStream(Source* source, u32* buffers, usize count);
 usize lovrSourceTell(Source* source);

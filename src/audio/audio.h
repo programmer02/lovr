@@ -13,7 +13,7 @@ void lovrAudioDestroy(void);
 void lovrAudioUpdate(void);
 void lovrAudioAdd(struct Source* source);
 void lovrAudioGetDopplerEffect(f32* factor, f32* speedOfSound);
-void lovrAudioGetMicrophoneNames(const char* names[MAX_MICROPHONES], u8* count);
+void lovrAudioGetMicrophoneNames(const char* names[MAX_MICROPHONES], u32* count);
 void lovrAudioGetOrientation(f32 orientation[4]);
 void lovrAudioGetPosition(f32 position[3]);
 void lovrAudioGetVelocity(f32 velocity[3]);

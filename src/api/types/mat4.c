@@ -3,7 +3,7 @@
 #include "math/math.h"
 #include "lib/maf.h"
 
-int luax_readmat4(lua_State* L, int index, mat4 m, int scaleComponents) {
+int luax_readmat4(lua_State* L, int index, mat4 m, usize scaleComponents) {
   switch (lua_type(L, index)) {
     case LUA_TNIL:
     case LUA_TNONE:
@@ -14,7 +14,7 @@ int luax_readmat4(lua_State* L, int index, mat4 m, int scaleComponents) {
     case LUA_TUSERDATA:
     default: {
       MathType type;
-      float* p = luax_tomathtype(L, index, &type);
+      f32* p = luax_tomathtype(L, index, &type);
       if (type == MATH_MAT4) {
         mat4_init(m, p);
         return index + 1;
@@ -22,8 +22,8 @@ int luax_readmat4(lua_State* L, int index, mat4 m, int scaleComponents) {
     } // Fall through
 
     case LUA_TNUMBER: {
-      float S[3];
-      float R[4];
+      f32 S[3];
+      f32 R[4];
       mat4_identity(m);
       index = luax_readvec3(L, index, m + 12, "mat4, vec3, or number");
       index = luax_readscale(L, index, S, scaleComponents, NULL);
@@ -38,12 +38,12 @@ int luax_readmat4(lua_State* L, int index, mat4 m, int scaleComponents) {
 static int l_lovrMat4Unpack(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
   if (lua_toboolean(L, 2)) {
-    for (int i = 0; i < 16; i++) {
+    for (usize i = 0; i < 16; i++) {
       lua_pushnumber(L, m[i]);
     }
     return 16;
   } else {
-    float x, y, z, sx, sy, sz, angle, ax, ay, az;
+    f32 x, y, z, sx, sy, sz, angle, ax, ay, az;
     mat4_getTransform(m, &x, &y, &z, &sx, &sy, &sz, &angle, &ax, &ay, &az);
     lua_pushnumber(L, x);
     lua_pushnumber(L, y);
@@ -62,7 +62,7 @@ static int l_lovrMat4Unpack(lua_State* L) {
 int l_lovrMat4Set(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
   if (lua_gettop(L) >= 17) {
-    for (int i = 2; i <= 17; i++) {
+    for (usize i = 2; i <= 17; i++) {
       *m++ = luaL_checknumber(L, i);
     }
   } else {
@@ -98,7 +98,7 @@ static int l_lovrMat4Translate(lua_State* L) {
   if (lua_type(L, 2) == LUA_TNUMBER) {
     mat4_translate(m, luax_checkfloat(L, 2), luax_checkfloat(L, 3), luax_checkfloat(L, 4));
   } else {
-    float* v = luax_checkmathtype(L, 2, MATH_VEC3, "vec3 or number");
+    f32* v = luax_checkmathtype(L, 2, MATH_VEC3, "vec3 or number");
     mat4_translate(m, v[0], v[1], v[2]);
   }
   lua_settop(L, 1);
@@ -110,7 +110,7 @@ static int l_lovrMat4Rotate(lua_State* L) {
   if (lua_type(L, 2) == LUA_TNUMBER) {
     mat4_rotate(m, luax_checkfloat(L, 2), luax_checkfloat(L, 3), luax_checkfloat(L, 4), luax_checkfloat(L, 5));
   } else {
-    float* q = luax_checkmathtype(L, 2, MATH_QUAT, "quat or number");
+    f32* q = luax_checkmathtype(L, 2, MATH_QUAT, "quat or number");
     mat4_rotateQuat(m, q);
   }
   lua_settop(L, 1);
@@ -120,10 +120,10 @@ static int l_lovrMat4Rotate(lua_State* L) {
 static int l_lovrMat4Scale(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
   if (lua_type(L, 2) == LUA_TNUMBER) {
-    float x = luax_checkfloat(L, 2);
+    f32 x = luax_checkfloat(L, 2);
     mat4_scale(m, x, luax_optfloat(L, 3, x), luax_optfloat(L, 4, x));
   } else {
-    float* s = luax_checkmathtype(L, 2, MATH_VEC3, "vec3 or number");
+    f32* s = luax_checkmathtype(L, 2, MATH_VEC3, "vec3 or number");
     mat4_scale(m, s[0], s[1], s[2]);
   }
   lua_settop(L, 1);
@@ -133,7 +133,7 @@ static int l_lovrMat4Scale(lua_State* L) {
 static int l_lovrMat4Mul(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
   MathType type;
-  float* n = luax_tomathtype(L, 2, &type);
+  f32* n = luax_tomathtype(L, 2, &type);
   if (n && type == MATH_MAT4) {
     mat4_multiply(m, n);
     lua_settop(L, 1);
@@ -143,9 +143,9 @@ static int l_lovrMat4Mul(lua_State* L) {
     lua_settop(L, 2);
     return 1;
   } else if (lua_type(L, 2) == LUA_TNUMBER) {
-    float x = luaL_checknumber(L, 2);
-    float y = luaL_optnumber(L, 3, 0.f);
-    float z = luaL_optnumber(L, 4, 0.f);
+    f32 x = luaL_checknumber(L, 2);
+    f32 y = luaL_optnumber(L, 3, 0.f);
+    f32 z = luaL_optnumber(L, 4, 0.f);
     mat4_transform(m, &x, &y, &z);
     lua_pushnumber(L, x);
     lua_pushnumber(L, y);
@@ -158,10 +158,10 @@ static int l_lovrMat4Mul(lua_State* L) {
 
 static int l_lovrMat4Perspective(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
-  float clipNear = luax_checkfloat(L, 2);
-  float clipFar = luax_checkfloat(L, 3);
-  float fov = luax_checkfloat(L, 4);
-  float aspect = luax_checkfloat(L, 5);
+  f32 clipNear = luax_checkfloat(L, 2);
+  f32 clipFar = luax_checkfloat(L, 3);
+  f32 fov = luax_checkfloat(L, 4);
+  f32 aspect = luax_checkfloat(L, 5);
   mat4_perspective(m, clipNear, clipFar, fov, aspect);
   lua_settop(L, 1);
   return 1;
@@ -169,12 +169,12 @@ static int l_lovrMat4Perspective(lua_State* L) {
 
 static int l_lovrMat4Orthographic(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
-  float left = luax_checkfloat(L, 2);
-  float right = luax_checkfloat(L, 3);
-  float top = luax_checkfloat(L, 4);
-  float bottom = luax_checkfloat(L, 5);
-  float clipNear = luax_checkfloat(L, 6);
-  float clipFar = luax_checkfloat(L, 7);
+  f32 left = luax_checkfloat(L, 2);
+  f32 right = luax_checkfloat(L, 3);
+  f32 top = luax_checkfloat(L, 4);
+  f32 bottom = luax_checkfloat(L, 5);
+  f32 clipNear = luax_checkfloat(L, 6);
+  f32 clipFar = luax_checkfloat(L, 7);
   mat4_orthographic(m, left, right, top, bottom, clipNear, clipFar);
   lua_settop(L, 1);
   return 1;
@@ -183,7 +183,7 @@ static int l_lovrMat4Orthographic(lua_State* L) {
 static int l_lovrMat4__mul(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
   MathType type;
-  float* n = luax_tomathtype(L, 2, &type);
+  f32* n = luax_tomathtype(L, 2, &type);
   if (!n || type == MATH_QUAT) return luaL_typerror(L, 2, "mat4 or vec3");
   if (type == MATH_MAT4) {
     mat4 out = luax_newmathtype(L, MATH_MAT4);

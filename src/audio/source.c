@@ -4,6 +4,8 @@
 #include "data/soundData.h"
 #include "lib/maf.h"
 #include <stdlib.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 static ALenum lovrSourceGetState(Source* source) {
   ALenum state;

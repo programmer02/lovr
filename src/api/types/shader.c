@@ -15,30 +15,30 @@ static struct TempData tempData;
 int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* dest, const char* debug) {
   Blob* blob = luax_totype(L, index, Blob);
   UniformType uniformType = uniform->type;
-  i32 components = uniform->components;
-  i32 count = uniform->count;
+  u32 components = uniform->components;
+  u32 count = uniform->count;
 
   if (uniformType == UNIFORM_MATRIX) {
     components *= components;
   }
 
   if (blob) {
-    size_t elements = count * components;
+    usize elements = count * components;
     const char* s = elements == 1 ? "" : "s";
-    size_t capacity;
+    usize capacity;
 
     switch (uniformType) {
       case UNIFORM_FLOAT:
       case UNIFORM_MATRIX:
-        capacity = blob->size / sizeof(float);
+        capacity = blob->size / sizeof(f32);
         lovrAssert(capacity >= elements, "Blob can only hold %d float%s, at least %d needed for uniform '%s'", capacity, s, elements, debug);
-        memcpy(dest, blob->data, elements * sizeof(float));
+        memcpy(dest, blob->data, elements * sizeof(f32));
         break;
 
       case UNIFORM_INT:
-        capacity = blob->size / sizeof(int);
+        capacity = blob->size / sizeof(i32);
         lovrAssert(capacity >= elements, "Blob can only hold %d int%s, at least %d needed for uniform '%s'", capacity, s, elements, debug);
-        memcpy(dest, blob->data, elements * sizeof(int));
+        memcpy(dest, blob->data, elements * sizeof(i32));
         break;
 
       case UNIFORM_SAMPLER: lovrThrow("Sampler uniform '%s' can not be updated with a Blob", debug);
@@ -50,9 +50,9 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
 
   if (components == 1) {
     bool isTable = lua_istable(L, index);
-    i32 length = (usize) (isTable ? luax_len(L, index) : count);
+    usize length = isTable ? lua_objlen(L, index) : count;
     length = MIN(length, count);
-    for (i32 i = 0; i < count; i++) {
+    for (usize i = 0; i < count; i++) {
       int j = index + i;
       if (isTable) {
         lua_rawgeti(L, index, i + 1);
@@ -60,8 +60,8 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
       }
 
       switch (uniformType) {
-        case UNIFORM_FLOAT: *((float*) dest + i) = luax_optfloat(L, j, 0.f); break;
-        case UNIFORM_INT: *((int*) dest + i) = luaL_optinteger(L, j, 0); break;
+        case UNIFORM_FLOAT: *((f32*) dest + i) = luax_optfloat(L, j, 0.f); break;
+        case UNIFORM_INT: *((i32*) dest + i) = luaL_optinteger(L, j, 0); break;
         case UNIFORM_SAMPLER:
           *((Texture**) dest + i) = luax_checktype(L, j, Texture);
           TextureType type = lovrTextureGetType(*((Texture**) dest + i));
@@ -71,7 +71,7 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
         case UNIFORM_IMAGE: {
           Image* image = (Image*) dest + i;
           image->texture = luax_checktype(L, j, Texture);
-          image->slice = -1;
+          image->slice = ~0u;
           image->mipmap = 0;
           image->access = ACCESS_READ_WRITE;
           TextureType type = lovrTextureGetType(image->texture);
@@ -96,16 +96,16 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
     }
 
     if (wrappedTable) {
-      int length = luax_len(L, index);
+      usize length = lua_objlen(L, index);
       length = MIN(length, count);
-      for (int i = 0; i < length; i++) {
+      for (usize i = 0; i < length; i++) {
         lua_rawgeti(L, index, i + 1);
 
         if (uniformType == UNIFORM_MATRIX && components == 16) {
           MathType type;
           mat4 m = luax_tomathtype(L, -1, &type);
           if (m && type == MATH_MAT4) {
-            mat4_init((float*) dest + i * components, m);
+            mat4_init((f32*) dest + i * components, m);
             lua_pop(L, 1);
             continue;
           }
@@ -113,23 +113,23 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
           MathType type;
           vec3 v = luax_tomathtype(L, -1, &type);
           if (v && type == MATH_VEC3) {
-            vec3_init((float*) dest + i * components, v);
+            vec3_init((f32*) dest + i * components, v);
             lua_pop(L, 1);
             continue;
           }
         }
 
         luaL_checktype(L, -1, LUA_TTABLE);
-        for (int j = 0; j < components; j++) {
+        for (usize j = 0; j < components; j++) {
           lua_rawgeti(L, -1, j + 1);
           switch (uniformType) {
             case UNIFORM_FLOAT:
             case UNIFORM_MATRIX:
-              *((float*) dest + i * components + j) = luax_optfloat(L, -1, 0.f);
+              *((f32*) dest + i * components + j) = luax_optfloat(L, -1, 0.f);
               break;
 
             case UNIFORM_INT:
-              *((int*) dest + i * components + j) = luaL_optinteger(L, -1, 0);
+              *((i32*) dest + i * components + j) = luaL_optinteger(L, -1, 0);
               break;
 
             case UNIFORM_SAMPLER:
@@ -141,34 +141,34 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
         lua_pop(L, 1);
       }
     } else {
-      for (int i = 0; i < count; i++) {
+      for (usize i = 0; i < count; i++) {
         if (uniformType == UNIFORM_MATRIX && components == 16) {
           MathType type;
           mat4 m = luax_tomathtype(L, index + i, &type);
           if (m && type == MATH_MAT4) {
-            mat4_init((float*) dest + i * components, m);
+            mat4_init((f32*) dest + i * components, m);
             continue;
           }
         } else if (uniformType == UNIFORM_FLOAT && components == 3) {
           MathType type;
           vec3 v = luax_tomathtype(L, index + i, &type);
           if (v && type == MATH_VEC3) {
-            vec3_init((float*) dest + i * components, v);
+            vec3_init((f32*) dest + i * components, v);
             continue;
           }
         }
 
         luaL_checktype(L, index + i, LUA_TTABLE);
-        for (int j = 0; j < components; j++) {
+        for (usize j = 0; j < components; j++) {
           lua_rawgeti(L, index + i, j + 1);
           switch (uniformType) {
             case UNIFORM_FLOAT:
             case UNIFORM_MATRIX:
-              *((float*) dest + i * components + j) = luax_optfloat(L, -1, 0.f);
+              *((f32*) dest + i * components + j) = luax_optfloat(L, -1, 0.f);
               break;
 
             case UNIFORM_INT:
-              *((int*) dest + i * components + j) = luaL_optinteger(L, -1, 0);
+              *((i32*) dest + i * components + j) = luaL_optinteger(L, -1, 0);
               break;
 
             case UNIFORM_SAMPLER:
@@ -184,7 +184,7 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
 }
 
 void luax_checkuniformtype(lua_State* L, int index, UniformType* baseType, u32* components) {
-  size_t length;
+  usize length;
   lovrAssert(lua_type(L, index) == LUA_TSTRING, "Uniform types must be strings, got %s", lua_typename(L, index));
   const char* type = lua_tolstring(L, index, &length);
 
@@ -262,14 +262,14 @@ static int l_lovrShaderSendImage(lua_State* L) {
   Shader* shader = luax_checktype(L, index++, Shader);
   const char* name = luaL_checkstring(L, index++);
 
-  int start = 0;
+  usize start = 0;
   if (lua_type(L, index) == LUA_TNUMBER) {
-    start = lua_tointeger(L, index++);
+    start = luax_checku32(L, index++);
   }
 
   Texture* texture = luax_checktype(L, index++, Texture);
-  int slice = luaL_optinteger(L, index++, 0) - 1; // Default is -1
-  int mipmap = luax_optmipmap(L, index++, texture);
+  u32 slice = luax_optu32(L, index++, 0) - 1;
+  u32 mipmap = luax_optmipmap(L, index++, texture);
   UniformAccess access = luaL_checkoption(L, index++, "readwrite", UniformAccesses);
   Image image = { .texture = texture, .slice = slice, .mipmap = mipmap, .access = access };
   lovrShaderSetImages(shader, name, &image, start, 1);

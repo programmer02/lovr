@@ -7,13 +7,11 @@
 #include "data/textureData.h"
 
 static int l_lovrDataNewBlob(lua_State* L) {
-  size_t size;
-  uint8_t* data = NULL;
+  usize size;
+  u8* data = NULL;
   int type = lua_type(L, 1);
   if (type == LUA_TNUMBER) {
-    int isize = lua_tonumber(L, 1);
-    lovrAssert(isize > 0, "Blob size must be positive");
-    size = (size_t) isize;
+    size = (usize) luax_checku32(L, 1);
     data = calloc(1, size);
     lovrAssert(data, "Out of memory");
   } else if (type == LUA_TSTRING) {
@@ -27,6 +25,7 @@ static int l_lovrDataNewBlob(lua_State* L) {
     size = blob->size;
     data = malloc(size);
     lovrAssert(data, "Out of memory");
+    memcpy(data, blob->data, size);
   }
   const char* name = luaL_optstring(L, 2, "");
   Blob* blob = lovrBlobCreate(data, size, name);
@@ -37,7 +36,7 @@ static int l_lovrDataNewBlob(lua_State* L) {
 
 static int l_lovrDataNewAudioStream(lua_State* L) {
   Blob* blob = luax_readblob(L, 1, "AudioStream");
-  int bufferSize = luaL_optinteger(L, 2, 4096);
+  u32 bufferSize = luax_optu32(L, 2, 4096);
   AudioStream* stream = lovrAudioStreamCreate(blob, bufferSize);
   luax_pushobject(L, stream);
   lovrRelease(Blob, blob);
@@ -56,7 +55,7 @@ static int l_lovrDataNewModelData(lua_State* L) {
 
 static int l_lovrDataNewRasterizer(lua_State* L) {
   Blob* blob = NULL;
-  float size;
+  f32 size;
 
   if (lua_type(L, 1) == LUA_TNUMBER || lua_isnoneornil(L, 1)) {
     size = luax_optfloat(L, 1, 32.f);
@@ -74,10 +73,10 @@ static int l_lovrDataNewRasterizer(lua_State* L) {
 
 static int l_lovrDataNewSoundData(lua_State* L) {
   if (lua_type(L, 1) == LUA_TNUMBER) {
-    int samples = luaL_checkinteger(L, 1);
-    int sampleRate = luaL_optinteger(L, 2, 44100);
-    int bitDepth = luaL_optinteger(L, 3, 16);
-    int channelCount = luaL_optinteger(L, 4, 2);
+    usize samples = luax_checku32(L, 1);
+    u32 sampleRate = luax_optu32(L, 2, 44100);
+    u32 bitDepth = luax_optu32(L, 3, 16);
+    u32 channelCount = luax_optu32(L, 4, 2);
     SoundData* soundData = lovrSoundDataCreate(samples, sampleRate, bitDepth, channelCount);
     luax_pushobject(L, soundData);
     lovrRelease(SoundData, soundData);
@@ -103,8 +102,8 @@ static int l_lovrDataNewSoundData(lua_State* L) {
 static int l_lovrDataNewTextureData(lua_State* L) {
   TextureData* textureData = NULL;
   if (lua_type(L, 1) == LUA_TNUMBER) {
-    u32 width = luaL_checkinteger(L, 1);
-    u32 height = luaL_checkinteger(L, 2);
+    u32 width = luax_checku32(L, 1);
+    u32 height = luax_checku32(L, 2);
     TextureFormat format = luaL_checkoption(L, 3, "rgba", TextureFormats);
     textureData = lovrTextureDataCreate(width, height, 0x0, format);
   } else {

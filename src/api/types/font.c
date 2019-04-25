@@ -3,12 +3,12 @@
 
 static int l_lovrFontGetWidth(lua_State* L) {
   Font* font = luax_checktype(L, 1, Font);
-  size_t length;
+  usize length;
   const char* string = luaL_checklstring(L, 2, &length);
-  float wrap = luax_optfloat(L, 3, 0.f);
-  float width;
-  uint32_t lineCount;
-  uint32_t glyphCount;
+  f32 wrap = luax_optfloat(L, 3, 0.f);
+  f32 width;
+  u32 lineCount;
+  u32 glyphCount;
   lovrFontMeasure(font, string, length, wrap, &width, &lineCount, &glyphCount);
   lua_pushnumber(L, width);
   return 1;
@@ -46,7 +46,7 @@ static int l_lovrFontGetLineHeight(lua_State* L) {
 
 static int l_lovrFontSetLineHeight(lua_State* L) {
   Font* font = luax_checktype(L, 1, Font);
-  float lineHeight = luax_checkfloat(L, 2);
+  f32 lineHeight = luax_checkfloat(L, 2);
   lovrFontSetLineHeight(font, lineHeight);
   return 0;
 }
@@ -74,7 +74,7 @@ static int l_lovrFontSetPixelDensity(lua_State* L) {
   if (lua_isnoneornil(L, 2)) {
     lovrFontSetPixelDensity(font, lovrFontGetRasterizer(font)->height);
   } else {
-    float pixelDensity = luax_optfloat(L, 2, -1.f);
+    f32 pixelDensity = luax_optfloat(L, 2, -1.f);
     lovrFontSetPixelDensity(font, pixelDensity);
   }
   return 0;

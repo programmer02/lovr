@@ -27,7 +27,7 @@ static int l_lovrTimerStep(lua_State* L) {
 }
 
 static int l_lovrTimerSleep(lua_State* L) {
-  double duration = luaL_checknumber(L, 1);
+  f64 duration = luaL_checknumber(L, 1);
   lovrTimerSleep(duration);
   return 0;
 }

@@ -30,12 +30,12 @@ typedef struct HeadsetInterface {
   void (*getClipDistance)(f32* clipNear, f32* clipFar);
   void (*setClipDistance)(f32 clipNear, f32 clipFar);
   void (*getBoundsDimensions)(f32* width, f32* depth);
-  const f32* (*getBoundsGeometry)(u8* count);
+  const f32* (*getBoundsGeometry)(u32* count);
   bool (*getPose)(const char* path, f32* x, f32* y, f32* z, f32* angle, f32* ax, f32* ay, f32* az);
   bool (*getVelocity)(const char* path, f32* vx, f32* vy, f32* vz, f32* vax, f32* vay, f32* vaz);
   bool (*isDown)(const char* path, bool* down);
   bool (*isTouched)(const char* path, bool* touched);
-  u8 (*getAxis)(const char* path, f32* x, f32* y, f32* z);
+  u32 (*getAxis)(const char* path, f32* x, f32* y, f32* z);
   bool (*vibrate)(const char* path, f32 strength, f32 duration, f32 frequency);
   struct ModelData* (*newModelData)(const char* path);
   void (*renderTo)(void (*callback)(void*), void* userdata);

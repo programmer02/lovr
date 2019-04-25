@@ -16,7 +16,7 @@ bool lovrFilesystemGetAppdataDirectory(char* dest, usize size);
 void lovrFilesystemGetDirectoryItems(const char* path, getDirectoryItemsCallback callback, void* userdata);
 bool lovrFilesystemGetExecutablePath(char* path, usize size);
 const char* lovrFilesystemGetIdentity(void);
-i64 lovrFilesystemGetLastModified(const char* path);
+u64 lovrFilesystemGetLastModified(const char* path);
 const char* lovrFilesystemGetRealDirectory(const char* path);
 vec_str_t* lovrFilesystemGetRequirePath(void);
 vec_str_t* lovrFilesystemGetCRequirePath(void);

@@ -26,7 +26,7 @@ static int l_lovrAudioUpdate(lua_State* L) {
 }
 
 static int l_lovrAudioGetDopplerEffect(lua_State* L) {
-  float factor, speedOfSound;
+  f32 factor, speedOfSound;
   lovrAudioGetDopplerEffect(&factor, &speedOfSound);
   lua_pushnumber(L, factor);
   lua_pushnumber(L, speedOfSound);
@@ -35,7 +35,7 @@ static int l_lovrAudioGetDopplerEffect(lua_State* L) {
 
 static int l_lovrAudioGetMicrophoneNames(lua_State* L) {
   const char* names[MAX_MICROPHONES];
-  uint8_t count;
+  u32 count;
   lovrAudioGetMicrophoneNames(names, &count);
 
   if (lua_istable(L, 1)) {
@@ -45,7 +45,7 @@ static int l_lovrAudioGetMicrophoneNames(lua_State* L) {
     lua_createtable(L, count, 0);
   }
 
-  for (int i = 0; i < count; i++) {
+  for (u32 i = 0; i < count; i++) {
     lua_pushstring(L, names[i]);
     lua_rawseti(L, -2, i + 1);
   }
@@ -54,7 +54,7 @@ static int l_lovrAudioGetMicrophoneNames(lua_State* L) {
 }
 
 static int l_lovrAudioGetOrientation(lua_State* L) {
-  float orientation[4], angle, ax, ay, az;
+  f32 orientation[4], angle, ax, ay, az;
   lovrAudioGetOrientation(orientation);
   quat_getAngleAxis(orientation, &angle, &ax, &ay, &az);
   lua_pushnumber(L, angle);
@@ -65,7 +65,7 @@ static int l_lovrAudioGetOrientation(lua_State* L) {
 }
 
 static int l_lovrAudioGetPose(lua_State* L) {
-  float position[3], orientation[4], angle, ax, ay, az;
+  f32 position[3], orientation[4], angle, ax, ay, az;
   lovrAudioGetPosition(position);
   lovrAudioGetOrientation(orientation);
   quat_getAngleAxis(orientation, &angle, &ax, &ay, &az);
@@ -80,7 +80,7 @@ static int l_lovrAudioGetPose(lua_State* L) {
 }
 
 static int l_lovrAudioGetPosition(lua_State* L) {
-  float position[3];
+  f32 position[3];
   lovrAudioGetPosition(position);
   lua_pushnumber(L, position[0]);
   lua_pushnumber(L, position[1]);
@@ -89,7 +89,7 @@ static int l_lovrAudioGetPosition(lua_State* L) {
 }
 
 static int l_lovrAudioGetVelocity(lua_State* L) {
-  float velocity[3];
+  f32 velocity[3];
   lovrAudioGetVelocity(velocity);
   lua_pushnumber(L, velocity[0]);
   lua_pushnumber(L, velocity[1]);
@@ -109,10 +109,10 @@ static int l_lovrAudioIsSpatialized(lua_State* L) {
 
 static int l_lovrAudioNewMicrophone(lua_State* L) {
   const char* name = luaL_optstring(L, 1, NULL);
-  int samples = luaL_optinteger(L, 2, 1024);
-  int sampleRate = luaL_optinteger(L, 3, 8000);
-  int bitDepth = luaL_optinteger(L, 4, 16);
-  int channelCount = luaL_optinteger(L, 5, 1);
+  usize samples = luax_optu32(L, 2, 1024);
+  u32 sampleRate = luax_optu32(L, 3, 8000);
+  u32 bitDepth = luax_optu32(L, 4, 16);
+  u32 channelCount = luax_optu32(L, 5, 1);
   Microphone* microphone = lovrMicrophoneCreate(name, samples, sampleRate, bitDepth, channelCount);
   luax_pushobject(L, microphone);
   lovrRelease(Microphone, microphone);
@@ -175,21 +175,21 @@ static int l_lovrAudioRewind(lua_State* L) {
 }
 
 static int l_lovrAudioSetDopplerEffect(lua_State* L) {
-  float factor = luax_optfloat(L, 1, 1.f);
-  float speedOfSound = luax_optfloat(L, 2, 343.29f);
+  f32 factor = luax_optfloat(L, 1, 1.f);
+  f32 speedOfSound = luax_optfloat(L, 2, 343.29f);
   lovrAudioSetDopplerEffect(factor, speedOfSound);
   return 0;
 }
 
 static int l_lovrAudioSetOrientation(lua_State* L) {
-  float orientation[4];
+  f32 orientation[4];
   luax_readquat(L, 1, orientation, NULL);
   lovrAudioSetOrientation(orientation);
   return 0;
 }
 
 static int l_lovrAudioSetPose(lua_State* L) {
-  float position[3], orientation[4];
+  f32 position[3], orientation[4];
   int index = 1;
   index = luax_readvec3(L, index, position, NULL);
   index = luax_readquat(L, index, orientation, NULL);
@@ -199,21 +199,21 @@ static int l_lovrAudioSetPose(lua_State* L) {
 }
 
 static int l_lovrAudioSetPosition(lua_State* L) {
-  float position[3];
+  f32 position[3];
   luax_readvec3(L, 1, position, NULL);
   lovrAudioSetPosition(position);
   return 0;
 }
 
 static int l_lovrAudioSetVelocity(lua_State* L) {
-  float velocity[3];
+  f32 velocity[3];
   luax_readvec3(L, 1, velocity, NULL);
   lovrAudioSetVelocity(velocity);
   return 0;
 }
 
 static int l_lovrAudioSetVolume(lua_State* L) {
-  float volume = luax_checkfloat(L, 1);
+  f32 volume = luax_checkfloat(L, 1);
   lovrAudioSetVolume(volume);
   return 0;
 }
