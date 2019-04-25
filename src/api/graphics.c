@@ -919,7 +919,7 @@ static int l_lovrGraphicsCompute(lua_State* L) {
 
 static int l_lovrGraphicsNewAnimator(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
-  Animator* animator = lovrAnimatorCreate(model->data);
+  Animator* animator = lovrAnimatorInit(lovrNew(Animator), model->data);
   luax_pushobject(L, animator);
   lovrRelease(Animator, animator);
   return 1;

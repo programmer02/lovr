@@ -2,6 +2,8 @@
 #include "event/event.h"
 #include "thread/thread.h"
 #include "thread/channel.h"
+#include <string.h>
+#include <stdlib.h>
 
 static int threadRunner(void* data) {
   Thread* thread = (Thread*) data;

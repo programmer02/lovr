@@ -1,10 +1,10 @@
 #include "util.h"
-#include "types.h"
 
 #pragma once
 
 #define MAX_EVENT_NAME_LENGTH 32
 
+struct Ref;
 struct Thread;
 
 typedef enum {
@@ -26,10 +26,10 @@ typedef union {
   bool boolean;
   f64 number;
   char* string;
-  Ref* ref;
+  struct Ref* ref;
 } VariantValue;
 
-typedef struct {
+typedef struct Variant {
   VariantType type;
   VariantValue value;
 } Variant;

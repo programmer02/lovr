@@ -25,7 +25,7 @@ static int l_lovrChannelPush(lua_State* L) {
   luax_checkvariant(L, 2, &variant);
   luax_checktimeout(L, 3, &timeout);
   u64 id;
-  bool read = lovrChannelPush(channel, variant, timeout, &id);
+  bool read = lovrChannelPush(channel, &variant, timeout, &id);
   lua_pushnumber(L, id);
   lua_pushboolean(L, read);
   return 2;

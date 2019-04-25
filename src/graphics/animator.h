@@ -1,38 +1,16 @@
 #include "util.h"
-#include "types.h"
-#include "lib/maf.h"
-#include "lib/map/map.h"
-#include "lib/vec/vec.h"
 
 #pragma once
 
 struct ModelData;
 
-typedef struct {
-  f32 time;
-  f32 speed;
-  f32 alpha;
-  i32 priority;
-  bool playing;
-  bool looping;
-} Track;
-
-typedef vec_t(Track) vec_track_t;
-
-typedef struct Animator {
-  Ref ref;
-  struct ModelData* data;
-  map_t(u32) animations;
-  vec_track_t tracks;
-  f32 speed;
-} Animator;
-
+typedef struct Animator Animator;
+extern const usize sizeof_Animator;
 Animator* lovrAnimatorInit(Animator* animator, struct ModelData* modelData);
-#define lovrAnimatorCreate(...) lovrAnimatorInit(lovrAlloc(Animator), __VA_ARGS__)
 void lovrAnimatorDestroy(void* ref);
 void lovrAnimatorReset(Animator* animator);
 void lovrAnimatorUpdate(Animator* animator, f32 dt);
-bool lovrAnimatorEvaluate(Animator* animator, u32 nodeIndex, mat4 transform);
+bool lovrAnimatorEvaluate(Animator* animator, u32 nodeIndex, f32 transform[16]);
 u32 lovrAnimatorGetAnimationCount(Animator* animator);
 u32* lovrAnimatorGetAnimationIndex(Animator* animator, const char* name);
 const char* lovrAnimatorGetAnimationName(Animator* animator, u32 index);

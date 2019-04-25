@@ -1,5 +1,4 @@
 #include "util.h"
-#include "types.h"
 
 #pragma once
 
@@ -18,21 +17,12 @@ typedef enum {
   UNIT_SAMPLES
 } TimeUnit;
 
-typedef struct Source {
-  Ref ref;
-  SourceType type;
-  struct SoundData* soundData;
-  struct AudioStream* stream;
-  u32 id;
-  u32 buffers[SOURCE_BUFFERS];
-  bool isLooping;
-} Source;
-
+typedef struct Source Source;
+extern const usize sizeof_Source;
 Source* lovrSourceInitStatic(Source* source, struct SoundData* soundData);
 Source* lovrSourceInitStream(Source* source, struct AudioStream* stream);
-#define lovrSourceCreateStatic(...) lovrSourceInitStatic(lovrAlloc(Source), __VA_ARGS__)
-#define lovrSourceCreateStream(...) lovrSourceInitStream(lovrAlloc(Source), __VA_ARGS__)
 void lovrSourceDestroy(void* ref);
+u32 lovrSourceGetId(Source* source);
 SourceType lovrSourceGetType(Source* source);
 u32 lovrSourceGetBitDepth(Source* source);
 u32 lovrSourceGetChannelCount(Source* source);

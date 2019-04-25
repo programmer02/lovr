@@ -1,5 +1,6 @@
 #include "event/event.h"
 #include "platform.h"
+#include "types.h"
 #include "lib/vec/vec.h"
 #include <stdlib.h>
 #include <string.h>

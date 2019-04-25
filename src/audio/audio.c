@@ -76,23 +76,23 @@ void lovrAudioDestroy() {
 void lovrAudioUpdate() {
   i32 i; Source* source;
   vec_foreach_rev(&state.sources, source, i) {
-    if (source->type == SOURCE_STATIC) {
+    if (lovrSourceGetType(source) == SOURCE_STATIC) {
       continue;
     }
 
+    u32 id = lovrSourceGetId(source);
     bool isStopped = lovrSourceIsStopped(source);
     ALint processed;
-    alGetSourcei(source->id, AL_BUFFERS_PROCESSED, &processed);
+    alGetSourcei(id, AL_BUFFERS_PROCESSED, &processed);
 
     if (processed) {
       ALuint buffers[SOURCE_BUFFERS];
-      alSourceUnqueueBuffers(source->id, processed, buffers);
+      alSourceUnqueueBuffers(id, processed, buffers);
       lovrSourceStream(source, buffers, processed);
       if (isStopped) {
-        alSourcePlay(source->id);
+        alSourcePlay(id);
       }
     } else if (isStopped) {
-      lovrAudioStreamRewind(source->stream);
       vec_splice(&state.sources, i, 1);
       lovrRelease(Source, source);
     }

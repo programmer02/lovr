@@ -1,5 +1,20 @@
 #include "thread/channel.h"
+#include "event/event.h"
+#include "types.h"
+#include "lib/tinycthread/tinycthread.h"
+#include "lib/vec/vec.h"
 #include <math.h>
+
+struct Channel {
+  Ref ref;
+  mtx_t lock;
+  cnd_t cond;
+  vec_t(Variant) messages;
+  u64 sent;
+  u64 received;
+};
+
+const usize sizeof_Channel = sizeof(Channel);
 
 Channel* lovrChannelInit(Channel* channel) {
   vec_init(&channel->messages);
@@ -16,7 +31,7 @@ void lovrChannelDestroy(void* ref) {
   cnd_destroy(&channel->cond);
 }
 
-bool lovrChannelPush(Channel* channel, Variant variant, f64 timeout, u64* id) {
+bool lovrChannelPush(Channel* channel, Variant* variant, f64 timeout, u64* id) {
   mtx_lock(&channel->lock);
 
   if (channel->messages.length == INT32_MAX) {
@@ -28,7 +43,7 @@ bool lovrChannelPush(Channel* channel, Variant variant, f64 timeout, u64* id) {
     lovrRetain(channel);
   }
 
-  vec_insert(&channel->messages, 0, variant);
+  vec_insert(&channel->messages, 0, *variant);
   *id = ++channel->sent;
   cnd_broadcast(&channel->cond);
 

@@ -1,7 +1,30 @@
 #include "graphics/animator.h"
 #include "data/modelData.h"
+#include "types.h"
+#include "lib/maf.h"
+#include "lib/map/map.h"
+#include "lib/vec/vec.h"
 #include <stdlib.h>
 #include <math.h>
+
+typedef struct {
+  f32 time;
+  f32 speed;
+  f32 alpha;
+  i32 priority;
+  bool playing;
+  bool looping;
+} Track;
+
+struct Animator {
+  Ref ref;
+  struct ModelData* data;
+  map_t(u32) animations;
+  vec_t(Track) tracks;
+  f32 speed;
+};
+
+const usize sizeof_Animator = sizeof(Animator);
 
 static int trackSortCallback(const void* a, const void* b) {
   return ((Track*) a)->priority < ((Track*) b)->priority;

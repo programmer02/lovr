@@ -2,10 +2,23 @@
 #include "audio/audio.h"
 #include "data/audioStream.h"
 #include "data/soundData.h"
+#include "types.h"
 #include "lib/maf.h"
 #include <stdlib.h>
 #include <AL/al.h>
 #include <AL/alc.h>
+
+struct Source {
+  Ref ref;
+  SourceType type;
+  struct SoundData* soundData;
+  struct AudioStream* stream;
+  u32 id;
+  u32 buffers[SOURCE_BUFFERS];
+  bool isLooping;
+};
+
+const usize sizeof_Source = sizeof(Source);
 
 static ALenum lovrSourceGetState(Source* source) {
   ALenum state;
@@ -40,6 +53,10 @@ void lovrSourceDestroy(void* ref) {
   alDeleteBuffers(source->type == SOURCE_STATIC ? 1 : SOURCE_BUFFERS, source->buffers);
   lovrRelease(SoundData, source->soundData);
   lovrRelease(AudioStream, source->stream);
+}
+
+u32 lovrSourceGetId(Source* source) {
+  return source->id;
 }
 
 SourceType lovrSourceGetType(Source* source) {

@@ -1,6 +1,7 @@
 #include "thread/thread.h"
 #include "thread/channel.h"
 #include "lib/map/map.h"
+#include <stdlib.h>
 
 static struct {
   bool initialized;
@@ -31,7 +32,7 @@ Channel* lovrThreadGetChannel(const char* name) {
   if (channel) {
     return *channel;
   } else {
-    Channel* channel = lovrChannelCreate();
+    Channel* channel = lovrChannelInit(lovrNew(Channel));
     map_set(&state.channels, name, channel);
     return channel;
   }

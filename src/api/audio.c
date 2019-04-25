@@ -113,7 +113,7 @@ static int l_lovrAudioNewMicrophone(lua_State* L) {
   u32 sampleRate = luax_optu32(L, 3, 8000);
   u32 bitDepth = luax_optu32(L, 4, 16);
   u32 channelCount = luax_optu32(L, 5, 1);
-  Microphone* microphone = lovrMicrophoneCreate(name, samples, sampleRate, bitDepth, channelCount);
+  Microphone* microphone = lovrMicrophoneInit(lovrNew(Microphone), name, samples, sampleRate, bitDepth, channelCount);
   luax_pushobject(L, microphone);
   lovrRelease(Microphone, microphone);
   return 1;
@@ -127,7 +127,7 @@ static int l_lovrAudioNewSource(lua_State* L) {
 
   if (isStatic) {
     if (soundData) {
-      source = lovrSourceCreateStatic(soundData);
+      source = lovrSourceInitStatic(lovrNew(Source), soundData);
     } else {
       if (stream) {
         soundData = lovrSoundDataCreateFromAudioStream(stream);
@@ -138,17 +138,17 @@ static int l_lovrAudioNewSource(lua_State* L) {
       }
 
       lovrAssert(soundData, "Could not create static Source");
-      source = lovrSourceCreateStatic(soundData);
+      source = lovrSourceInitStatic(lovrNew(Source), soundData);
       lovrRelease(SoundData, soundData);
     }
   } else {
     if (stream) {
-      source = lovrSourceCreateStream(stream);
+      source = lovrSourceInitStream(lovrNew(Source), stream);
     } else {
       Blob* blob = luax_readblob(L, 1, "Source");
       stream = lovrAudioStreamCreate(blob, 4096);
       lovrAssert(stream, "Could not create stream Source");
-      source = lovrSourceCreateStream(stream);
+      source = lovrSourceInitStream(lovrNew(Source), stream);
       lovrRelease(Blob, blob);
       lovrRelease(AudioStream, stream);
     }
