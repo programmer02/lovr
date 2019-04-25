@@ -6,7 +6,7 @@
 
 struct TempData {
   void* data;
-  int size;
+  usize size;
 };
 
 // Not thread safe
@@ -15,8 +15,8 @@ static struct TempData tempData;
 int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* dest, const char* debug) {
   Blob* blob = luax_totype(L, index, Blob);
   UniformType uniformType = uniform->type;
-  int components = uniform->components;
-  int count = uniform->count;
+  i32 components = uniform->components;
+  i32 count = uniform->count;
 
   if (uniformType == UNIFORM_MATRIX) {
     components *= components;
@@ -50,9 +50,9 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
 
   if (components == 1) {
     bool isTable = lua_istable(L, index);
-    int length = isTable ? luax_len(L, index) : count;
+    i32 length = (usize) (isTable ? luax_len(L, index) : count);
     length = MIN(length, count);
-    for (int i = 0; i < count; i++) {
+    for (i32 i = 0; i < count; i++) {
       int j = index + i;
       if (isTable) {
         lua_rawgeti(L, index, i + 1);
@@ -183,7 +183,7 @@ int luax_checkuniform(lua_State* L, int index, const Uniform* uniform, void* des
   return 0;
 }
 
-void luax_checkuniformtype(lua_State* L, int index, UniformType* baseType, int* components) {
+void luax_checkuniformtype(lua_State* L, int index, UniformType* baseType, u32* components) {
   size_t length;
   lovrAssert(lua_type(L, index) == LUA_TSTRING, "Uniform types must be strings, got %s", lua_typename(L, index));
   const char* type = lua_tolstring(L, index, &length);
@@ -195,7 +195,7 @@ void luax_checkuniformtype(lua_State* L, int index, UniformType* baseType, int* 
     *baseType = UNIFORM_INT;
     *components = 1;
   } else {
-    int n = type[length - 1] - '0';
+    i32 n = type[length - 1] - '0';
     lovrAssert(n >= 2 && n <= 4, "Unknown uniform type '%s'", type);
     if (type[0] == 'v' && type[1] == 'e' && type[2] == 'c' && length == 4) {
       *baseType = UNIFORM_FLOAT;

@@ -573,7 +573,7 @@ static int l_lovrGraphicsSetShader(lua_State* L) {
 
 static int l_lovrGraphicsGetStencilTest(lua_State* L) {
   CompareMode mode;
-  int value;
+  u8 value;
   lovrGraphicsGetStencilTest(&mode, &value);
   lua_pushstring(L, CompareModes[mode]);
   lua_pushinteger(L, value);
@@ -585,7 +585,7 @@ static int l_lovrGraphicsSetStencilTest(lua_State* L) {
     lovrGraphicsSetStencilTest(COMPARE_NONE, 0);
   } else {
     CompareMode mode = luaL_checkoption(L, 1, NULL, CompareModes);
-    int value = luaL_checkinteger(L, 2);
+    u8 value = luaL_checkinteger(L, 2);
     lovrGraphicsSetStencilTest(mode, value);
   }
   return 0;
@@ -673,8 +673,8 @@ static int l_lovrGraphicsClear(lua_State* L) {
   bool clearDepth = true;
   bool clearStencil = true;
   Color color = lovrGraphicsGetBackgroundColor();
-  float depth = 1.f;
-  int stencil = 0;
+  f32 depth = 1.f;
+  u8 stencil = 0;
 
   if (top == 1) {
     luax_readcolor(L, index, &color);
@@ -885,10 +885,10 @@ static int l_lovrGraphicsPrint(lua_State* L) {
 static int l_lovrGraphicsStencil(lua_State* L) {
   luaL_checktype(L, 1, LUA_TFUNCTION);
   StencilAction action = luaL_checkoption(L, 2, "replace", StencilActions);
-  int replaceValue = luaL_optinteger(L, 3, 1);
+  u8 replaceValue = luaL_optinteger(L, 3, 1);
   bool keepValues = lua_toboolean(L, 4);
   if (!keepValues) {
-    int clearTo = lua_isnumber(L, 4) ? lua_tonumber(L, 4) : 0;
+    u8 clearTo = lua_isnumber(L, 4) ? lua_tonumber(L, 4) : 0u;
     lovrGraphicsClear(NULL, NULL, &clearTo);
   }
   lua_settop(L, 1);
@@ -1343,7 +1343,7 @@ static int l_lovrGraphicsNewComputeShader(lua_State* L) {
 
 static int l_lovrGraphicsNewTexture(lua_State* L) {
   int index = 1;
-  int width, height, depth;
+  u32 width, height, depth;
   int argType = lua_type(L, index);
   bool blank = argType == LUA_TNUMBER;
   TextureType type = TEXTURE_2D;
@@ -1410,7 +1410,7 @@ static int l_lovrGraphicsNewTexture(lua_State* L) {
       }
     }
 
-    for (int i = 0; i < depth; i++) {
+    for (u32 i = 0; i < depth; i++) {
       lua_rawgeti(L, 1, i + 1);
       TextureData* textureData = luax_checktexturedata(L, -1, type != TEXTURE_CUBE);
       if (i == 0) {

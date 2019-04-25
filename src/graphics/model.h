@@ -1,3 +1,4 @@
+#include "util.h"
 #include "lib/maf.h"
 #include "types.h"
 
@@ -19,15 +20,15 @@ typedef struct {
   struct Texture** textures;
   struct Material** materials;
   struct Material* userMaterial;
-  float* globalNodeTransforms;
+  f32* globalNodeTransforms;
 } Model;
 
 Model* lovrModelInit(Model* model, struct ModelData* data);
 #define lovrModelCreate(...) lovrModelInit(lovrAlloc(Model), __VA_ARGS__)
 void lovrModelDestroy(void* ref);
-void lovrModelDraw(Model* model, mat4 transform, int instances);
+void lovrModelDraw(Model* model, mat4 transform, u32 instances);
 struct Animator* lovrModelGetAnimator(Model* model);
 void lovrModelSetAnimator(Model* model, struct Animator* animator);
 struct Material* lovrModelGetMaterial(Model* model);
 void lovrModelSetMaterial(Model* model, struct Material* material);
-void lovrModelGetAABB(Model* model, float aabb[6]);
+void lovrModelGetAABB(Model* model, f32 aabb[6]);

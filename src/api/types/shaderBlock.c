@@ -63,7 +63,7 @@ static int l_lovrShaderBlockRead(lua_State* L) {
   }
 
   lua_createtable(L, uniform->count, 0);
-  for (int i = 0; i < uniform->count; i++) {
+  for (u32 i = 0; i < uniform->count; i++) {
     if (components == 1) {
       switch (uniform->type) {
         case UNIFORM_FLOAT:

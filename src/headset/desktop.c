@@ -49,10 +49,7 @@ static HeadsetOrigin getOriginType(void) {
 }
 
 static void getDisplayDimensions(u32* width, u32* height) {
-  int w, h;
-  lovrPlatformGetFramebufferSize(&w, &h);
-  *width = (u32) w;
-  *height = (u32) h;
+  lovrPlatformGetFramebufferSize(width, height);
 }
 
 static void getClipDistance(f32* clipNear, f32* clipFar) {
@@ -171,7 +168,7 @@ static void update(f32 dt) {
   if (lovrPlatformIsMouseDown(MOUSE_LEFT)) {
     lovrPlatformSetMouseMode(MOUSE_MODE_GRABBED);
 
-    int width, height;
+    u32 width, height;
     lovrPlatformGetWindowSize(&width, &height);
 
     f64 mx, my;

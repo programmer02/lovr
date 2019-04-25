@@ -161,6 +161,7 @@ TextureData* lovrTextureDataInitFromBlob(TextureData* textureData, Blob* blob, b
   i32 size = (i32) blob->size;
   i32 width = (i32) textureData->width;
   i32 height = (i32) textureData->height;
+
   stbi_set_flip_vertically_on_load(flip);
   if (stbi_is_hdr_from_memory(blob->data, size)) {
     textureData->format = FORMAT_RGBA32F;
@@ -175,6 +176,9 @@ TextureData* lovrTextureDataInitFromBlob(TextureData* textureData, Blob* blob, b
     free(textureData);
     return NULL;
   }
+
+  textureData->width = width;
+  textureData->height = height;
 
   return textureData;
 }

@@ -1,5 +1,4 @@
-#include <stdint.h>
-#include <stdbool.h>
+#include "util.h"
 #include <lib/sds/sds.h>
 
 #pragma once
@@ -19,8 +18,8 @@
 #endif
 
 typedef struct {
-  uint32_t width;
-  uint32_t height;
+  u32 width;
+  u32 height;
   bool fullscreen;
   bool srgb;
   int vsync;
@@ -28,8 +27,8 @@ typedef struct {
   const char* title;
   struct {
     void* data;
-    uint32_t width;
-    uint32_t height;
+    u32 width;
+    u32 height;
   } icon;
 } WindowFlags;
 
@@ -62,7 +61,7 @@ typedef enum {
 } ButtonAction;
 
 typedef void (*windowCloseCallback)(void);
-typedef void (*windowResizeCallback)(int width, int height);
+typedef void (*windowResizeCallback)(u32 width, u32 height);
 typedef void (*mouseButtonCallback)(MouseButton button, ButtonAction action);
 
 typedef void (*gpuProc)(void);
@@ -76,8 +75,8 @@ double lovrPlatformGetTime(void);
 void lovrPlatformSetTime(double t);
 bool lovrPlatformCreateWindow(WindowFlags* flags);
 bool lovrPlatformHasWindow(void);
-void lovrPlatformGetWindowSize(int* width, int* height);
-void lovrPlatformGetFramebufferSize(int* width, int* height);
+void lovrPlatformGetWindowSize(u32* width, u32* height);
+void lovrPlatformGetFramebufferSize(u32* width, u32* height);
 void lovrPlatformSwapBuffers(void);
 void lovrPlatformOnWindowClose(windowCloseCallback callback);
 void lovrPlatformOnWindowResize(windowResizeCallback callback);

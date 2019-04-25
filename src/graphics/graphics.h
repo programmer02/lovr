@@ -77,27 +77,27 @@ typedef enum {
 typedef struct {
   bool stereo;
   struct Canvas* canvas;
-  float viewMatrix[2][16];
-  float projection[2][16];
+  f32 viewMatrix[2][16];
+  f32 projection[2][16];
 } Camera;
 
 typedef struct {
-  float transform[16];
+  f32 transform[16];
   Color color;
 } DrawData;
 
 typedef struct {
-  bool alphaSampling : 1;
-  uint8_t blendMode : 3; // BlendMode
-  uint8_t blendAlphaMode : 1; // BlendAlphaMode
-  bool culling : 1;
-  uint8_t depthTest : 3; // CompareMode
-  bool depthWrite : 1;
-  uint8_t lineWidth : 8;
-  uint8_t stencilValue: 8;
-  uint8_t stencilMode : 3; // CompareMode
-  uint8_t winding : 1; // Winding
-  bool wireframe : 1;
+  bit alphaSampling : 1;
+  bit blendMode : 3; // BlendMode
+  bit blendAlphaMode : 1; // BlendAlphaMode
+  bit culling : 1;
+  bit depthTest : 3; // CompareMode
+  bit depthWrite : 1;
+  bit lineWidth : 8;
+  bit stencilValue: 8;
+  bit stencilMode : 3; // CompareMode
+  bit winding : 1; // Winding
+  bit wireframe : 1;
 } Pipeline;
 
 typedef enum {
@@ -128,11 +128,11 @@ typedef union {
   struct { DrawStyle style; } triangles;
   struct { DrawStyle style; } plane;
   struct { DrawStyle style; } box;
-  struct { DrawStyle style; ArcMode mode; float r1; float r2; int segments; } arc;
-  struct { float r1; float r2; bool capped; int segments; } cylinder;
-  struct { int segments; } sphere;
-  struct { float u; float v; float w; float h; } fill;
-  struct { struct Mesh* object; DrawMode mode; uint32_t rangeStart; uint32_t rangeCount; uint32_t instances; float* pose; } mesh;
+  struct { DrawStyle style; ArcMode mode; f32 r1; f32 r2; u32 segments; } arc;
+  struct { f32 r1; f32 r2; bool capped; u32 segments; } cylinder;
+  struct { u32 segments; } sphere;
+  struct { f32 u; f32 v; f32 w; f32 h; } fill;
+  struct { struct Mesh* object; DrawMode mode; u32 rangeStart; u32 rangeCount; u32 instances; f32* pose; } mesh;
 } BatchParams;
 
 typedef struct {
@@ -145,11 +145,11 @@ typedef struct {
   struct Texture* diffuseTexture;
   struct Texture* environmentMap;
   mat4 transform;
-  uint32_t vertexCount;
-  uint32_t indexCount;
-  float** vertices;
-  uint16_t** indices;
-  uint16_t* baseVertex;
+  u32 vertexCount;
+  u32 indexCount;
+  f32** vertices;
+  u16** indices;
+  u16* baseVertex;
   bool instanced;
 } BatchRequest;
 
@@ -163,48 +163,19 @@ typedef struct {
   struct Material* material;
   mat4 transforms;
   Color* colors;
-  struct { uint32_t start; uint32_t count; } cursors[MAX_BUFFER_ROLES];
-  uint32_t count;
+  struct { u32 start; u32 count; } cursors[MAX_BUFFER_ROLES];
+  u32 count;
   bool instanced;
 } Batch;
-
-typedef struct {
-  bool initialized;
-  bool gammaCorrect;
-  int width;
-  int height;
-  Camera camera;
-  struct Shader* defaultShaders[MAX_DEFAULT_SHADERS];
-  struct Material* defaultMaterial;
-  struct Font* defaultFont;
-  TextureFilter defaultFilter;
-  float transforms[MAX_TRANSFORMS][16];
-  int transform;
-  Color backgroundColor;
-  struct Canvas* canvas;
-  Color color;
-  struct Font* font;
-  Pipeline pipeline;
-  float pointSize;
-  struct Shader* shader;
-  struct Mesh* mesh;
-  struct Mesh* instancedMesh;
-  struct Buffer* identityBuffer;
-  struct Buffer* buffers[MAX_BUFFER_ROLES];
-  uint32_t cursors[MAX_BUFFER_ROLES];
-  void* locks[MAX_BUFFER_ROLES][MAX_LOCKS];
-  Batch batches[MAX_BATCHES];
-  uint8_t batchCount;
-} GraphicsState;
 
 // Base
 bool lovrGraphicsInit(bool gammaCorrect);
 void lovrGraphicsDestroy(void);
 void lovrGraphicsPresent(void);
 void lovrGraphicsCreateWindow(WindowFlags* flags);
-int lovrGraphicsGetWidth(void);
-int lovrGraphicsGetHeight(void);
-float lovrGraphicsGetPixelDensity(void);
+u32 lovrGraphicsGetWidth(void);
+u32 lovrGraphicsGetHeight(void);
+f32 lovrGraphicsGetPixelDensity(void);
 void lovrGraphicsSetCamera(Camera* camera, bool clear);
 struct Buffer* lovrGraphicsGetIdentityBuffer(void);
 #define lovrGraphicsGetFeatures lovrGpuGetFeatures
@@ -232,14 +203,14 @@ void lovrGraphicsSetDepthTest(CompareMode depthTest, bool write);
 struct Font* lovrGraphicsGetFont(void);
 void lovrGraphicsSetFont(struct Font* font);
 bool lovrGraphicsIsGammaCorrect(void);
-float lovrGraphicsGetLineWidth(void);
-void lovrGraphicsSetLineWidth(uint8_t width);
-float lovrGraphicsGetPointSize(void);
-void lovrGraphicsSetPointSize(float size);
+u8 lovrGraphicsGetLineWidth(void);
+void lovrGraphicsSetLineWidth(u8 width);
+f32 lovrGraphicsGetPointSize(void);
+void lovrGraphicsSetPointSize(f32 size);
 struct Shader* lovrGraphicsGetShader(void);
 void lovrGraphicsSetShader(struct Shader* shader);
-void lovrGraphicsGetStencilTest(CompareMode* mode, int* value);
-void lovrGraphicsSetStencilTest(CompareMode mode, int value);
+void lovrGraphicsGetStencilTest(CompareMode* mode, u8* value);
+void lovrGraphicsSetStencilTest(CompareMode mode, u8 value);
 Winding lovrGraphicsGetWinding(void);
 void lovrGraphicsSetWinding(Winding winding);
 bool lovrGraphicsIsWireframe(void);
@@ -256,7 +227,7 @@ void lovrGraphicsMatrixTransform(mat4 transform);
 void lovrGraphicsSetProjection(mat4 projection);
 
 // Rendering
-void lovrGraphicsClear(Color* color, float* depth, int* stencil);
+void lovrGraphicsClear(Color* color, f32* depth, u8* stencil);
 void lovrGraphicsDiscard(bool color, bool depth, bool stencil);
 void lovrGraphicsBatch(BatchRequest* req);
 void lovrGraphicsFlush(void);
@@ -264,18 +235,18 @@ void lovrGraphicsFlushCanvas(struct Canvas* canvas);
 void lovrGraphicsFlushShader(struct Shader* shader);
 void lovrGraphicsFlushMaterial(struct Material* material);
 void lovrGraphicsFlushMesh(struct Mesh* mesh);
-void lovrGraphicsPoints(uint32_t count, float** vertices);
-void lovrGraphicsLine(uint32_t count, float** vertices);
-void lovrGraphicsTriangle(DrawStyle style, struct Material* material, uint32_t count, float** vertices);
-void lovrGraphicsPlane(DrawStyle style, struct Material* material, mat4 transform, float u, float v, float w, float h);
+void lovrGraphicsPoints(u32 count, f32** vertices);
+void lovrGraphicsLine(u32 count, f32** vertices);
+void lovrGraphicsTriangle(DrawStyle style, struct Material* material, u32 count, f32** vertices);
+void lovrGraphicsPlane(DrawStyle style, struct Material* material, mat4 transform, f32 u, f32 v, f32 w, f32 h);
 void lovrGraphicsBox(DrawStyle style, struct Material* material, mat4 transform);
-void lovrGraphicsArc(DrawStyle style, ArcMode mode, struct Material* material, mat4 transform, float r1, float r2, int segments);
-void lovrGraphicsCircle(DrawStyle style, struct Material* material, mat4 transform, int segments);
-void lovrGraphicsCylinder(struct Material* material, mat4 transform, float r1, float r2, bool capped, int segments);
-void lovrGraphicsSphere(struct Material* material, mat4 transform, int segments);
-void lovrGraphicsSkybox(struct Texture* texture, float angle, float ax, float ay, float az);
-void lovrGraphicsPrint(const char* str, size_t length, mat4 transform, float wrap, HorizontalAlign halign, VerticalAlign valign);
-void lovrGraphicsFill(struct Texture* texture, float u, float v, float w, float h);
+void lovrGraphicsArc(DrawStyle style, ArcMode mode, struct Material* material, mat4 transform, f32 r1, f32 r2, u32 segments);
+void lovrGraphicsCircle(DrawStyle style, struct Material* material, mat4 transform, u32 segments);
+void lovrGraphicsCylinder(struct Material* material, mat4 transform, f32 r1, f32 r2, bool capped, u32 segments);
+void lovrGraphicsSphere(struct Material* material, mat4 transform, u32 segments);
+void lovrGraphicsSkybox(struct Texture* texture, f32 angle, f32 ax, f32 ay, f32 az);
+void lovrGraphicsPrint(const char* str, usize length, mat4 transform, f32 wrap, HorizontalAlign halign, VerticalAlign valign);
+void lovrGraphicsFill(struct Texture* texture, f32 u, f32 v, f32 w, f32 h);
 #define lovrGraphicsStencil lovrGpuStencil
 #define lovrGraphicsCompute lovrGpuCompute
 
@@ -288,17 +259,17 @@ typedef struct {
 
 typedef struct {
   bool initialized;
-  float pointSizes[2];
-  int textureSize;
-  int textureMSAA;
-  float textureAnisotropy;
-  int blockSize;
-  int blockAlign;
+  f32 pointSizes[2];
+  u32 textureSize;
+  u32 textureMSAA;
+  f32 textureAnisotropy;
+  usize blockSize;
+  usize blockAlign;
 } GpuLimits;
 
 typedef struct {
-  int shaderSwitches;
-  int drawCalls;
+  u32 shaderSwitches;
+  u32 drawCalls;
 } GpuStats;
 
 typedef struct {
@@ -307,21 +278,21 @@ typedef struct {
   struct Shader* shader;
   Pipeline pipeline;
   DrawMode drawMode;
-  uint32_t instances;
-  uint32_t rangeStart;
-  uint32_t rangeCount;
-  uint32_t width : 15;
-  uint32_t height : 15;
-  bool stereo : 1;
+  u32 instances;
+  u32 rangeStart;
+  u32 rangeCount;
+  bit width : 15;
+  bit height : 15;
+  bit stereo : 1;
 } DrawCommand;
 
 void lovrGpuInit(bool srgb, getProcAddressProc getProcAddress);
 void lovrGpuDestroy(void);
-void lovrGpuClear(struct Canvas* canvas, Color* color, float* depth, int* stencil);
-void lovrGpuCompute(struct Shader* shader, int x, int y, int z);
+void lovrGpuClear(struct Canvas* canvas, Color* color, f32* depth, u8* stencil);
+void lovrGpuCompute(struct Shader* shader, u32 x, u32 y, u32 z);
 void lovrGpuDiscard(struct Canvas* canvas, bool color, bool depth, bool stencil);
 void lovrGpuDraw(DrawCommand* draw);
-void lovrGpuStencil(StencilAction action, int replaceValue, StencilCallback callback, void* userdata);
+void lovrGpuStencil(StencilAction action, u8 replaceValue, StencilCallback callback, void* userdata);
 void lovrGpuPresent(void);
 void lovrGpuDirtyTexture(void);
 void* lovrGpuLock(void);

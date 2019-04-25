@@ -7,30 +7,28 @@
 #include "lib/glad/glad.h"
 #endif
 
-#include <stdint.h>
-
 #pragma once
 
 #define GPU_BUFFER_FIELDS \
   GLsync lock; \
-  uint32_t id; \
-  uint8_t incoherent;
+  u32 id; \
+  u8 incoherent;
 
 #define GPU_CANVAS_FIELDS \
-  uint32_t framebuffer; \
-  uint32_t resolveBuffer; \
-  uint32_t depthBuffer; \
+  u32 framebuffer; \
+  u32 resolveBuffer; \
+  u32 depthBuffer; \
   bool immortal;
 
 #define GPU_MESH_FIELDS \
-  uint32_t vao; \
-  uint32_t ibo;
+  u32 vao; \
+  u32 ibo;
 
 #define GPU_SHADER_FIELDS \
-  uint32_t program;
+  u32 program;
 
 #define GPU_TEXTURE_FIELDS \
   GLuint id; \
   GLuint msaaId; \
   GLenum target; \
-  uint8_t incoherent;
+  u8 incoherent;

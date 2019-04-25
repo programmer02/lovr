@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static float* lovrFontAlignLine(float* x, float* lineEnd, float width, HorizontalAlign halign) {
-  while(x < lineEnd) {
+static f32* lovrFontAlignLine(f32* x, f32* lineEnd, f32 width, HorizontalAlign halign) {
+  while (x < lineEnd) {
     if (halign == ALIGN_CENTER) {
       *x -= width / 2.f;
     } else if (halign == ALIGN_RIGHT) {
@@ -24,11 +24,11 @@ Font* lovrFontInit(Font* font, Rasterizer* rasterizer) {
   lovrRetain(rasterizer);
   font->rasterizer = rasterizer;
   font->lineHeight = 1.f;
-  font->pixelDensity = (float) font->rasterizer->height;
+  font->pixelDensity = (f32) font->rasterizer->height;
   map_init(&font->kerning);
 
   // Atlas
-  int padding = 1;
+  u32 padding = 1;
   font->atlas.x = padding;
   font->atlas.y = padding;
   font->atlas.width = 128;
@@ -65,26 +65,26 @@ Rasterizer* lovrFontGetRasterizer(Font* font) {
   return font->rasterizer;
 }
 
-void lovrFontRender(Font* font, const char* str, size_t length, float wrap, HorizontalAlign halign, float* vertices, uint16_t* indices, uint16_t baseVertex) {
+void lovrFontRender(Font* font, const char* str, usize length, f32 wrap, HorizontalAlign halign, f32* vertices, u16* indices, u16 baseVertex) {
   FontAtlas* atlas = &font->atlas;
   bool flip = font->flip;
 
-  float cx = 0.f;
-  float cy = -font->rasterizer->height * .8f * (flip ? -1.f : 1.f);
-  float u = atlas->width;
-  float v = atlas->height;
-  float scale = 1.f / font->pixelDensity;
+  f32 cx = 0.f;
+  f32 cy = -font->rasterizer->height * .8f * (flip ? -1.f : 1.f);
+  f32 u = (f32) atlas->width;
+  f32 v = (f32) atlas->height;
+  f32 scale = 1.f / font->pixelDensity;
 
   const char* start = str;
   const char* end = str + length;
-  unsigned int previous = '\0';
-  unsigned int codepoint;
-  size_t bytes;
+  u32 previous = '\0';
+  u32 codepoint;
+  usize bytes;
 
-  float* vertexCursor = vertices;
-  uint16_t* indexCursor = indices;
-  float* lineStart = vertices;
-  uint16_t I = baseVertex;
+  f32* vertexCursor = vertices;
+  u16* indexCursor = indices;
+  f32* lineStart = vertices;
+  u16 I = baseVertex;
 
   while ((bytes = utf8_decode(str, end, &codepoint)) > 0) {
 
@@ -121,23 +121,23 @@ void lovrFontRender(Font* font, const char* str, size_t length, float wrap, Hori
 
     // Triangles
     if (glyph->w > 0 && glyph->h > 0) {
-      float x1 = cx + glyph->dx - GLYPH_PADDING;
-      float y1 = cy + (glyph->dy + GLYPH_PADDING) * (flip ? -1.f : 1.f);
-      float x2 = x1 + glyph->tw;
-      float y2 = y1 - glyph->th * (flip ? -1.f : 1.f);
-      float s1 = glyph->x / u;
-      float t1 = (glyph->y + glyph->th) / v;
-      float s2 = (glyph->x + glyph->tw) / u;
-      float t2 = glyph->y / v;
+      f32 x1 = cx + glyph->dx - GLYPH_PADDING;
+      f32 y1 = cy + (glyph->dy + GLYPH_PADDING) * (flip ? -1.f : 1.f);
+      f32 x2 = x1 + glyph->tw;
+      f32 y2 = y1 - glyph->th * (flip ? -1.f : 1.f);
+      f32 s1 = glyph->x / u;
+      f32 t1 = (glyph->y + glyph->th) / v;
+      f32 s2 = (glyph->x + glyph->tw) / u;
+      f32 t2 = glyph->y / v;
 
-      memcpy(vertexCursor, (float[32]) {
+      memcpy(vertexCursor, (f32[32]) {
         x1, y1, 0.f, 0.f, 0.f, 0.f, s1, t1,
         x1, y2, 0.f, 0.f, 0.f, 0.f, s1, t2,
         x2, y1, 0.f, 0.f, 0.f, 0.f, s2, t1,
         x2, y2, 0.f, 0.f, 0.f, 0.f, s2, t2
-      }, 32 * sizeof(float));
+      }, 32 * sizeof(f32));
 
-      memcpy(indexCursor, (uint16_t[6]) { I + 0, I + 1, I + 2, I + 2, I + 1, I + 3 }, 6 * sizeof(uint16_t));
+      memcpy(indexCursor, (u16[6]) { I + 0, I + 1, I + 2, I + 2, I + 1, I + 3 }, 6 * sizeof(u16));
 
       vertexCursor += 32;
       indexCursor += 6;
@@ -153,13 +153,13 @@ void lovrFontRender(Font* font, const char* str, size_t length, float wrap, Hori
   lovrFontAlignLine(lineStart, vertexCursor, cx, halign);
 }
 
-void lovrFontMeasure(Font* font, const char* str, size_t length, float wrap, float* width, uint32_t* lineCount, uint32_t* glyphCount) {
-  float x = 0.f;
+void lovrFontMeasure(Font* font, const char* str, usize length, f32 wrap, f32* width, u32* lineCount, u32* glyphCount) {
+  f32 x = 0.f;
   const char* end = str + length;
-  size_t bytes;
-  unsigned int previous = '\0';
-  unsigned int codepoint;
-  float scale = 1.f / font->pixelDensity;
+  usize bytes;
+  u32 previous = '\0';
+  u32 codepoint;
+  f32 scale = 1.f / font->pixelDensity;
   *width = 0.f;
   *lineCount = 0;
   *glyphCount = 0;
@@ -196,27 +196,27 @@ void lovrFontMeasure(Font* font, const char* str, size_t length, float wrap, flo
   *width = MAX(*width, x * scale);
 }
 
-float lovrFontGetHeight(Font* font) {
+f32 lovrFontGetHeight(Font* font) {
   return font->rasterizer->height / font->pixelDensity;
 }
 
-float lovrFontGetAscent(Font* font) {
+f32 lovrFontGetAscent(Font* font) {
   return font->rasterizer->ascent / font->pixelDensity;
 }
 
-float lovrFontGetDescent(Font* font) {
+f32 lovrFontGetDescent(Font* font) {
   return font->rasterizer->descent / font->pixelDensity;
 }
 
-float lovrFontGetBaseline(Font* font) {
+f32 lovrFontGetBaseline(Font* font) {
   return font->rasterizer->height * .8f / font->pixelDensity;
 }
 
-float lovrFontGetLineHeight(Font* font) {
+f32 lovrFontGetLineHeight(Font* font) {
   return font->lineHeight;
 }
 
-void lovrFontSetLineHeight(Font* font, float lineHeight) {
+void lovrFontSetLineHeight(Font* font, f32 lineHeight) {
   font->lineHeight = lineHeight;
 }
 
@@ -228,33 +228,33 @@ void lovrFontSetFlipEnabled(Font* font, bool flip) {
   font->flip = flip;
 }
 
-int lovrFontGetKerning(Font* font, unsigned int left, unsigned int right) {
+i32 lovrFontGetKerning(Font* font, u32 left, u32 right) {
   char key[12];
   snprintf(key, 12, "%d,%d", left, right);
 
-  int* entry = map_get(&font->kerning, key);
+  i32* entry = map_get(&font->kerning, key);
   if (entry) {
     return *entry;
   }
 
-  int kerning = lovrRasterizerGetKerning(font->rasterizer, left, right);
+  i32 kerning = lovrRasterizerGetKerning(font->rasterizer, left, right);
   map_set(&font->kerning, key, kerning);
   return kerning;
 }
 
-float lovrFontGetPixelDensity(Font* font) {
+f32 lovrFontGetPixelDensity(Font* font) {
   return font->pixelDensity;
 }
 
-void lovrFontSetPixelDensity(Font* font, float pixelDensity) {
-  if (pixelDensity <= 0) {
+void lovrFontSetPixelDensity(Font* font, f32 pixelDensity) {
+  if (pixelDensity <= 0.f) {
     pixelDensity = font->rasterizer->height;
   }
 
   font->pixelDensity = pixelDensity;
 }
 
-Glyph* lovrFontGetGlyph(Font* font, uint32_t codepoint) {
+Glyph* lovrFontGetGlyph(Font* font, u32 codepoint) {
   char key[6];
   snprintf(key, 6, "%d", codepoint);
 

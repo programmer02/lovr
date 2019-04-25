@@ -38,6 +38,7 @@ typedef uint64_t u64;
 typedef size_t usize;
 typedef float f32;
 typedef double f64;
+typedef unsigned bit;
 
 typedef char test_sizeof_int[sizeof(int) == sizeof(i32)];
 

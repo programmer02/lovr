@@ -7,51 +7,51 @@
 #include <math.h>
 
 Material* lovrMaterialInit(Material* material) {
-  for (int i = 0; i < MAX_MATERIAL_SCALARS; i++) {
+  for (u32 i = 0; i < MAX_MATERIAL_SCALARS; i++) {
     material->scalars[i] = 1.f;
   }
 
-  for (int i = 0; i < MAX_MATERIAL_COLORS; i++) {
+  for (u32 i = 0; i < MAX_MATERIAL_COLORS; i++) {
     if (i == COLOR_EMISSIVE) {
-      material->colors[i] = (Color) { 0, 0, 0, 0 };
+      material->colors[i] = (Color) { 0.f, 0.f, 0.f, 0.f };
     } else {
-      material->colors[i] = (Color) { 1, 1, 1, 1 };
+      material->colors[i] = (Color) { 1.f, 1.f, 1.f, 1.f };
     }
   }
 
-  lovrMaterialSetTransform(material, 0, 0, 1, 1, 0);
+  lovrMaterialSetTransform(material, 0.f, 0.f, 1.f, 1.f, 0.f);
   return material;
 }
 
 void lovrMaterialDestroy(void* ref) {
   Material* material = ref;
   lovrGraphicsFlushMaterial(material);
-  for (int i = 0; i < MAX_MATERIAL_TEXTURES; i++) {
+  for (u32 i = 0; i < MAX_MATERIAL_TEXTURES; i++) {
     lovrRelease(Texture, material->textures[i]);
   }
 }
 
 void lovrMaterialBind(Material* material, Shader* shader) {
-  for (int i = 0; i < MAX_MATERIAL_SCALARS; i++) {
+  for (u32 i = 0; i < MAX_MATERIAL_SCALARS; i++) {
     lovrShaderSetFloats(shader, lovrShaderScalarUniforms[i], &material->scalars[i], 0, 1);
   }
 
-  for (int i = 0; i < MAX_MATERIAL_COLORS; i++) {
+  for (u32 i = 0; i < MAX_MATERIAL_COLORS; i++) {
     lovrShaderSetColor(shader, lovrShaderColorUniforms[i], material->colors[i]);
   }
 
-  for (int i = 0; i < MAX_MATERIAL_TEXTURES; i++) {
+  for (u32 i = 0; i < MAX_MATERIAL_TEXTURES; i++) {
     lovrShaderSetTextures(shader, lovrShaderTextureUniforms[i], &material->textures[i], 0, 1);
   }
 
   lovrShaderSetMatrices(shader, "lovrMaterialTransform", material->transform, 0, 9);
 }
 
-float lovrMaterialGetScalar(Material* material, MaterialScalar scalarType) {
+f32 lovrMaterialGetScalar(Material* material, MaterialScalar scalarType) {
   return material->scalars[scalarType];
 }
 
-void lovrMaterialSetScalar(Material* material, MaterialScalar scalarType, float value) {
+void lovrMaterialSetScalar(Material* material, MaterialScalar scalarType, f32 value) {
   if (material->scalars[scalarType] != value) {
     lovrGraphicsFlushMaterial(material);
     material->scalars[scalarType] = value;
@@ -63,7 +63,7 @@ Color lovrMaterialGetColor(Material* material, MaterialColor colorType) {
 }
 
 void lovrMaterialSetColor(Material* material, MaterialColor colorType, Color color) {
-  if (memcmp(&material->colors[colorType], &color, 4 * sizeof(float))) {
+  if (memcmp(&material->colors[colorType], &color, 4 * sizeof(f32))) {
     lovrGraphicsFlushMaterial(material);
     material->colors[colorType] = color;
   }
@@ -82,7 +82,7 @@ void lovrMaterialSetTexture(Material* material, MaterialTexture textureType, Tex
   }
 }
 
-void lovrMaterialGetTransform(Material* material, float* ox, float* oy, float* sx, float* sy, float* angle) {
+void lovrMaterialGetTransform(Material* material, f32* ox, f32* oy, f32* sx, f32* sy, f32* angle) {
   *ox = material->transform[6];
   *oy = material->transform[7];
   *sx = sqrtf(material->transform[0] * material->transform[0] + material->transform[1] * material->transform[1]);
@@ -90,10 +90,10 @@ void lovrMaterialGetTransform(Material* material, float* ox, float* oy, float* s
   *angle = atan2f(-material->transform[3], material->transform[0]);
 }
 
-void lovrMaterialSetTransform(Material* material, float ox, float oy, float sx, float sy, float angle) {
+void lovrMaterialSetTransform(Material* material, f32 ox, f32 oy, f32 sx, f32 sy, f32 angle) {
   lovrGraphicsFlushMaterial(material);
-  float c = cosf(angle);
-  float s = sinf(angle);
+  f32 c = cosf(angle);
+  f32 s = sinf(angle);
   material->transform[0] = c * sx;
   material->transform[1] = s * sx;
   material->transform[2] = 0.f;

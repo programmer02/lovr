@@ -1,8 +1,7 @@
+#include "util.h"
 #include "data/rasterizer.h"
 #include "types.h"
 #include "lib/map/map.h"
-#include <stdint.h>
-#include <stdbool.h>
 
 #pragma once
 
@@ -48,20 +47,20 @@ Font* lovrFontInit(Font* font, struct Rasterizer* rasterizer);
 #define lovrFontCreate(...) lovrFontInit(lovrAlloc(Font), __VA_ARGS__)
 void lovrFontDestroy(void* ref);
 struct Rasterizer* lovrFontGetRasterizer(Font* font);
-void lovrFontRender(Font* font, const char* str, size_t length, float wrap, HorizontalAlign halign, float* vertices, uint16_t* indices, uint16_t baseVertex);
-void lovrFontMeasure(Font* font, const char* string, size_t length, float wrap, float* width, uint32_t* lineCount, uint32_t* glyphCount);
-float lovrFontGetHeight(Font* font);
-float lovrFontGetAscent(Font* font);
-float lovrFontGetDescent(Font* font);
-float lovrFontGetBaseline(Font* font);
-float lovrFontGetLineHeight(Font* font);
-void lovrFontSetLineHeight(Font* font, float lineHeight);
+void lovrFontRender(Font* font, const char* str, usize length, f32 wrap, HorizontalAlign halign, f32* vertices, u16* indices, u16 baseVertex);
+void lovrFontMeasure(Font* font, const char* string, usize length, f32 wrap, f32* width, u32* lineCount, u32* glyphCount);
+f32 lovrFontGetHeight(Font* font);
+f32 lovrFontGetAscent(Font* font);
+f32 lovrFontGetDescent(Font* font);
+f32 lovrFontGetBaseline(Font* font);
+f32 lovrFontGetLineHeight(Font* font);
+void lovrFontSetLineHeight(Font* font, f32 lineHeight);
 bool lovrFontIsFlipEnabled(Font* font);
 void lovrFontSetFlipEnabled(Font* font, bool flip);
-int lovrFontGetKerning(Font* font, unsigned int a, unsigned int b);
-float lovrFontGetPixelDensity(Font* font);
-void lovrFontSetPixelDensity(Font* font, float pixelDensity);
-Glyph* lovrFontGetGlyph(Font* font, uint32_t codepoint);
+i32 lovrFontGetKerning(Font* font, u32 a, u32 b);
+f32 lovrFontGetPixelDensity(Font* font);
+void lovrFontSetPixelDensity(Font* font, f32 pixelDensity);
+Glyph* lovrFontGetGlyph(Font* font, u32 codepoint);
 void lovrFontAddGlyph(Font* font, Glyph* glyph);
 void lovrFontExpandTexture(Font* font);
 void lovrFontCreateTexture(Font* font);

@@ -103,8 +103,8 @@ static int l_lovrDataNewSoundData(lua_State* L) {
 static int l_lovrDataNewTextureData(lua_State* L) {
   TextureData* textureData = NULL;
   if (lua_type(L, 1) == LUA_TNUMBER) {
-    int width = luaL_checkinteger(L, 1);
-    int height = luaL_checkinteger(L, 2);
+    u32 width = luaL_checkinteger(L, 1);
+    u32 height = luaL_checkinteger(L, 2);
     TextureFormat format = luaL_checkoption(L, 3, "rgba", TextureFormats);
     textureData = lovrTextureDataCreate(width, height, 0x0, format);
   } else {

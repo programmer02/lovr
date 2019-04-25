@@ -22,7 +22,7 @@ static void onWindowClose(GLFWwindow* window) {
 
 static void onWindowResize(GLFWwindow* window, int width, int height) {
   if (state.onWindowResize) {
-    state.onWindowResize(width, height);
+    state.onWindowResize((u32) width, (u32) height);
   }
 }
 
@@ -98,8 +98,8 @@ bool lovrPlatformCreateWindow(WindowFlags* flags) {
 
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  uint32_t width = flags->width ? flags->width : (uint32_t) mode->width;
-  uint32_t height = flags->height ? flags->height : (uint32_t) mode->height;
+  i32 width = flags->width ? (i32) flags->width : mode->width;
+  i32 height = flags->height ? (i32) flags->height : mode->height;
 
   if (flags->fullscreen) {
     glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -117,8 +117,8 @@ bool lovrPlatformCreateWindow(WindowFlags* flags) {
   if (flags->icon.data) {
     glfwSetWindowIcon(state.window, 1, &(GLFWimage) {
       .pixels = flags->icon.data,
-      .width = flags->icon.width,
-      .height = flags->icon.height
+      .width = (i32) flags->icon.width,
+      .height = (i32) flags->icon.height
     });
   }
 
@@ -134,18 +134,24 @@ bool lovrPlatformHasWindow() {
   return state.window;
 }
 
-void lovrPlatformGetWindowSize(int* width, int* height) {
+void lovrPlatformGetWindowSize(u32* width, u32* height) {
   if (state.window) {
-    glfwGetWindowSize(state.window, width, height);
+    int w, h;
+    glfwGetWindowSize(state.window, &w, &h);
+    *width = w;
+    *height = h;
   } else {
     if (*width) *width = 0;
     if (*height) *height = 0;
   }
 }
 
-void lovrPlatformGetFramebufferSize(int* width, int* height) {
+void lovrPlatformGetFramebufferSize(u32* width, u32* height) {
   if (state.window) {
-    glfwGetFramebufferSize(state.window, width, height);
+    int w, h;
+    glfwGetFramebufferSize(state.window, &w, &h);
+    *width = w;
+    *height = h;
   } else {
     if (*width) *width = 0;
     if (*height) *height = 0;

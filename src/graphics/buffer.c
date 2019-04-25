@@ -1,7 +1,6 @@
 #include "graphics/buffer.h"
-#include "util.h"
 
-size_t lovrBufferGetSize(Buffer* buffer) {
+usize lovrBufferGetSize(Buffer* buffer) {
   return buffer->size;
 }
 
@@ -13,8 +12,8 @@ BufferUsage lovrBufferGetUsage(Buffer* buffer) {
   return buffer->usage;
 }
 
-void lovrBufferMarkRange(Buffer* buffer, size_t offset, size_t size) {
-  size_t end = offset + size;
+void lovrBufferMarkRange(Buffer* buffer, usize offset, usize size) {
+  usize end = offset + size;
   buffer->flushFrom = MIN(buffer->flushFrom, offset);
   buffer->flushTo = MAX(buffer->flushTo, end);
 }

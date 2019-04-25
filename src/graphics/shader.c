@@ -5,8 +5,8 @@
 #include "resources/shaders.h"
 #include <math.h>
 
-static size_t getUniformTypeLength(const Uniform* uniform) {
-  size_t size = 0;
+static usize getUniformTypeLength(const Uniform* uniform) {
+  usize size = 0;
 
   if (uniform->count > 1) {
     size += 2 + floor(log10(uniform->count)) + 1; // "[count]"
@@ -72,9 +72,8 @@ ShaderType lovrShaderGetType(Shader* shader) {
   return shader->type;
 }
 
-int lovrShaderGetAttributeLocation(Shader* shader, const char* name) {
-  int* location = map_get(&shader->attributes, name);
-  return location ? *location : -1;
+u32* lovrShaderGetAttributeLocation(Shader* shader, const char* name) {
+  return map_get(&shader->attributes, name);
 }
 
 bool lovrShaderHasUniform(Shader* shader, const char* name) {
@@ -82,16 +81,12 @@ bool lovrShaderHasUniform(Shader* shader, const char* name) {
 }
 
 const Uniform* lovrShaderGetUniform(Shader* shader, const char* name) {
-  int* index = map_get(&shader->uniformMap, name);
-  if (!index) {
-    return false;
-  }
-
-  return &shader->uniforms.data[*index];
+  u32* index = map_get(&shader->uniformMap, name);
+  return index ? &shader->uniforms.data[*index] : false;
 }
 
-static void lovrShaderSetUniform(Shader* shader, const char* name, UniformType type, void* data, int start, int count, int size, const char* debug) {
-  int* index = map_get(&shader->uniformMap, name);
+static void lovrShaderSetUniform(Shader* shader, const char* name, UniformType type, void* data, usize start, usize count, usize size, const char* debug) {
+  u32* index = map_get(&shader->uniformMap, name);
   if (!index) {
     return;
   }
@@ -108,23 +103,23 @@ static void lovrShaderSetUniform(Shader* shader, const char* name, UniformType t
   }
 }
 
-void lovrShaderSetFloats(Shader* shader, const char* name, float* data, int start, int count) {
-  lovrShaderSetUniform(shader, name, UNIFORM_FLOAT, data, start, count, sizeof(float), "float");
+void lovrShaderSetFloats(Shader* shader, const char* name, f32* data, usize start, usize count) {
+  lovrShaderSetUniform(shader, name, UNIFORM_FLOAT, data, start, count, sizeof(f32), "float");
 }
 
-void lovrShaderSetInts(Shader* shader, const char* name, int* data, int start, int count) {
-  lovrShaderSetUniform(shader, name, UNIFORM_INT, data, start, count, sizeof(int), "int");
+void lovrShaderSetInts(Shader* shader, const char* name, i32* data, usize start, usize count) {
+  lovrShaderSetUniform(shader, name, UNIFORM_INT, data, start, count, sizeof(i32), "int");
 }
 
-void lovrShaderSetMatrices(Shader* shader, const char* name, float* data, int start, int count) {
-  lovrShaderSetUniform(shader, name, UNIFORM_MATRIX, data, start, count, sizeof(float), "float");
+void lovrShaderSetMatrices(Shader* shader, const char* name, f32* data, usize start, usize count) {
+  lovrShaderSetUniform(shader, name, UNIFORM_MATRIX, data, start, count, sizeof(f32), "float");
 }
 
-void lovrShaderSetTextures(Shader* shader, const char* name, Texture** data, int start, int count) {
+void lovrShaderSetTextures(Shader* shader, const char* name, Texture** data, usize start, usize count) {
   lovrShaderSetUniform(shader, name, UNIFORM_SAMPLER, data, start, count, sizeof(Texture*), "texture");
 }
 
-void lovrShaderSetImages(Shader* shader, const char* name, Image* data, int start, int count) {
+void lovrShaderSetImages(Shader* shader, const char* name, Image* data, usize start, usize count) {
   lovrShaderSetUniform(shader, name, UNIFORM_IMAGE, data, start, count, sizeof(Image), "image");
 }
 
@@ -135,15 +130,15 @@ void lovrShaderSetColor(Shader* shader, const char* name, Color color) {
     color.b = lovrMathGammaToLinear(color.b);
   }
 
-  lovrShaderSetUniform(shader, name, UNIFORM_FLOAT, (float*) &color, 0, 4, sizeof(float), "float");
+  lovrShaderSetUniform(shader, name, UNIFORM_FLOAT, &color.r, 0, 4, sizeof(f32), "float");
 }
 
-void lovrShaderSetBlock(Shader* shader, const char* name, Buffer* buffer, size_t offset, size_t size, UniformAccess access) {
-  int* id = map_get(&shader->blockMap, name);
+void lovrShaderSetBlock(Shader* shader, const char* name, Buffer* buffer, usize offset, usize size, UniformAccess access) {
+  u32* id = map_get(&shader->blockMap, name);
   if (!id) return;
 
-  int type = *id & 1;
-  int index = *id >> 1;
+  u32 type = *id & 1;
+  u32 index = *id >> 1;
   UniformBlock* block = &shader->blocks[type].data[index];
 
   if (block->source != buffer || block->offset != offset || block->size != size) {
@@ -160,11 +155,11 @@ void lovrShaderSetBlock(Shader* shader, const char* name, Buffer* buffer, size_t
 // ShaderBlock
 
 // Calculates uniform size and byte offsets using std140 rules, returning the total buffer size
-size_t lovrShaderComputeUniformLayout(vec_uniform_t* uniforms) {
-  size_t size = 0;
-  Uniform* uniform; int i;
+usize lovrShaderComputeUniformLayout(vec_uniform_t* uniforms) {
+  usize size = 0;
+  Uniform* uniform; i32 i;
   vec_foreach_ptr(uniforms, uniform, i) {
-    int align;
+    usize align;
     if (uniform->count > 1 || uniform->type == UNIFORM_MATRIX) {
       align = 16 * (uniform->type == UNIFORM_MATRIX ? uniform->components : 1);
       uniform->size = align * uniform->count;
@@ -182,7 +177,7 @@ ShaderBlock* lovrShaderBlockInit(ShaderBlock* block, BlockType type, Buffer* buf
   vec_init(&block->uniforms);
   map_init(&block->uniformMap);
 
-  Uniform* uniform; int i;
+  Uniform* uniform; i32 i;
   vec_extend(&block->uniforms, uniforms);
   vec_foreach_ptr(&block->uniforms, uniform, i) {
     map_set(&block->uniformMap, uniform->name, i);
@@ -206,11 +201,11 @@ BlockType lovrShaderBlockGetType(ShaderBlock* block) {
 }
 
 // TODO use sds!
-char* lovrShaderBlockGetShaderCode(ShaderBlock* block, const char* blockName, size_t* length) {
+char* lovrShaderBlockGetShaderCode(ShaderBlock* block, const char* blockName, usize* length) {
 
   // Calculate
-  size_t size = 0;
-  size_t tab = 2;
+  usize size = 0;
+  usize tab = 2;
   size += 15; // "layout(std140) "
   size += block->type == BLOCK_UNIFORM ? 7 : 6; // "uniform" || "buffer"
   size += 1; // " "
@@ -248,10 +243,8 @@ char* lovrShaderBlockGetShaderCode(ShaderBlock* block, const char* blockName, si
 }
 
 const Uniform* lovrShaderBlockGetUniform(ShaderBlock* block, const char* name) {
-  int* index = map_get(&block->uniformMap, name);
-  if (!index) return NULL;
-
-  return &block->uniforms.data[*index];
+  u32* index = map_get(&block->uniformMap, name);
+  return index ? &block->uniforms.data[*index] : NULL;
 }
 
 Buffer* lovrShaderBlockGetBuffer(ShaderBlock* block) {
