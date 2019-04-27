@@ -287,13 +287,13 @@ static ModelData* newModelData(const char* path) {
 
   if (!state.deviceModels[device]) {
     while (state.renderModels->LoadRenderModel_Async(renderModelName, &state.deviceModels[device]) == EVRRenderModelError_VRRenderModelError_Loading) {
-      lovrSleep(.001);
+      lovrPlatformSleep(.001);
     }
   }
 
   if (!state.deviceTextures[device]) {
     while (state.renderModels->LoadTexture_Async(state.deviceModels[device]->diffuseTextureId, &state.deviceTextures[device]) == EVRRenderModelError_VRRenderModelError_Loading) {
-      lovrSleep(.001);
+      lovrPlatformSleep(.001);
     }
   }
 

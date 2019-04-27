@@ -134,7 +134,7 @@ void lovrFilesystemGetDirectoryItems(const char* path, getDirectoryItemsCallback
 }
 
 bool lovrFilesystemGetExecutablePath(char* path, usize size) {
-  return !lovrGetExecutablePath(path, size);
+  return !lovrPlatformGetExecutablePath(path, size);
 }
 
 const char* lovrFilesystemGetIdentity() {

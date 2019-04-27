@@ -59,5 +59,5 @@ u32 lovrTimerGetFPS() {
 }
 
 void lovrTimerSleep(f64 seconds) {
-  lovrSleep(seconds);
+  lovrPlatformSleep(seconds);
 }
