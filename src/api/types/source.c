@@ -18,7 +18,7 @@ static int l_lovrSourceGetChannelCount(lua_State* L) {
 
 static int l_lovrSourceGetCone(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float innerAngle, outerAngle, outerGain;
+  f32 innerAngle, outerAngle, outerGain;
   lovrSourceGetCone(source, &innerAngle, &outerAngle, &outerGain);
   lua_pushnumber(L, innerAngle);
   lua_pushnumber(L, outerAngle);
@@ -29,10 +29,10 @@ static int l_lovrSourceGetCone(lua_State* L) {
 static int l_lovrSourceGetDuration(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
   TimeUnit unit = luaL_checkoption(L, 2, "seconds", TimeUnits);
-  int duration = lovrSourceGetDuration(source);
+  usize duration = lovrSourceGetDuration(source);
 
   if (unit == UNIT_SECONDS) {
-    lua_pushnumber(L, (float) duration / lovrSourceGetSampleRate(source));
+    lua_pushnumber(L, (f32) duration / lovrSourceGetSampleRate(source));
   } else {
     lua_pushinteger(L, duration);
   }
@@ -42,7 +42,7 @@ static int l_lovrSourceGetDuration(lua_State* L) {
 
 static int l_lovrSourceGetFalloff(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float reference, max, rolloff;
+  f32 reference, max, rolloff;
   lovrSourceGetFalloff(source, &reference, &max, &rolloff);
   lua_pushnumber(L, reference);
   lua_pushnumber(L, max);
@@ -51,7 +51,7 @@ static int l_lovrSourceGetFalloff(lua_State* L) {
 }
 
 static int l_lovrSourceGetOrientation(lua_State* L) {
-  float orientation[4], angle, ax, ay, az;
+  f32 orientation[4], angle, ax, ay, az;
   Source* source = luax_checktype(L, 1, Source);
   lovrSourceGetOrientation(source, orientation);
   quat_getAngleAxis(orientation, &angle, &ax, &ay, &az);
@@ -69,7 +69,7 @@ static int l_lovrSourceGetPitch(lua_State* L) {
 }
 
 static int l_lovrSourceGetPose(lua_State* L) {
-  float position[3], orientation[4], angle, ax, ay, az;
+  f32 position[3], orientation[4], angle, ax, ay, az;
   Source* source = luax_checktype(L, 1, Source);
   lovrSourceGetPosition(source, position);
   lovrSourceGetOrientation(source, orientation);
@@ -85,7 +85,7 @@ static int l_lovrSourceGetPose(lua_State* L) {
 }
 
 static int l_lovrSourceGetPosition(lua_State* L) {
-  float position[3];
+  f32 position[3];
   lovrSourceGetPosition(luax_checktype(L, 1, Source), position);
   lua_pushnumber(L, position[0]);
   lua_pushnumber(L, position[1]);
@@ -106,7 +106,7 @@ static int l_lovrSourceGetType(lua_State* L) {
 }
 
 static int l_lovrSourceGetVelocity(lua_State* L) {
-  float velocity[3];
+  f32 velocity[3];
   lovrSourceGetVelocity(luax_checktype(L, 1, Source), velocity);
   lua_pushnumber(L, velocity[0]);
   lua_pushnumber(L, velocity[1]);
@@ -122,7 +122,7 @@ static int l_lovrSourceGetVolume(lua_State* L) {
 
 static int l_lovrSourceGetVolumeLimits(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float min, max;
+  f32 min, max;
   lovrSourceGetVolumeLimits(source, &min, &max);
   lua_pushnumber(L, min);
   lua_pushnumber(L, max);
@@ -181,9 +181,9 @@ static int l_lovrSourceSeek(lua_State* L) {
   TimeUnit unit = luaL_checkoption(L, 3, "seconds", TimeUnits);
 
   if (unit == UNIT_SECONDS) {
-    float seconds = luax_checkfloat(L, 2);
-    int sampleRate = lovrSourceGetSampleRate(source);
-    lovrSourceSeek(source, (int) (seconds * sampleRate + .5f));
+    f32 seconds = luax_checkfloat(L, 2);
+    u32 sampleRate = lovrSourceGetSampleRate(source);
+    lovrSourceSeek(source, (u32) (seconds * sampleRate + .5f));
   } else {
     lovrSourceSeek(source, luaL_checkinteger(L, 2));
   }
@@ -193,18 +193,18 @@ static int l_lovrSourceSeek(lua_State* L) {
 
 static int l_lovrSourceSetCone(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float innerAngle = luax_checkfloat(L, 1);
-  float outerAngle = luax_checkfloat(L, 2);
-  float outerGain = luax_checkfloat(L, 3);
+  f32 innerAngle = luax_checkfloat(L, 1);
+  f32 outerAngle = luax_checkfloat(L, 2);
+  f32 outerGain = luax_checkfloat(L, 3);
   lovrSourceSetCone(source, innerAngle, outerAngle, outerGain);
   return 0;
 }
 
 static int l_lovrSourceSetFalloff(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float reference = luax_checkfloat(L, 2);
-  float max = luax_checkfloat(L, 3);
-  float rolloff = luax_checkfloat(L, 4);
+  f32 reference = luax_checkfloat(L, 2);
+  f32 max = luax_checkfloat(L, 3);
+  f32 rolloff = luax_checkfloat(L, 4);
   lovrSourceSetFalloff(source, reference, max, rolloff);
   return 0;
 }
@@ -216,7 +216,7 @@ static int l_lovrSourceSetLooping(lua_State* L) {
 
 static int l_lovrSourceSetOrientation(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float orientation[4];
+  f32 orientation[4];
   luax_readquat(L, 2, orientation, NULL);
   lovrSourceSetOrientation(source, orientation);
   return 0;
@@ -228,7 +228,7 @@ static int l_lovrSourceSetPitch(lua_State* L) {
 }
 
 static int l_lovrSourceSetPose(lua_State* L) {
-  float position[3], orientation[4];
+  f32 position[3], orientation[4];
   int index = 2;
   Source* source = luax_checktype(L, 1, Source);
   index = luax_readvec3(L, index, position, NULL);
@@ -240,7 +240,7 @@ static int l_lovrSourceSetPose(lua_State* L) {
 
 static int l_lovrSourceSetPosition(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float position[3];
+  f32 position[3];
   luax_readvec3(L, 2, position, NULL);
   lovrSourceSetPosition(source, position);
   return 0;
@@ -255,7 +255,7 @@ static int l_lovrSourceSetRelative(lua_State* L) {
 
 static int l_lovrSourceSetVelocity(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  float velocity[3];
+  f32 velocity[3];
   luax_readvec3(L, 2, velocity, NULL);
   lovrSourceSetVelocity(source, velocity);
   return 0;
@@ -279,10 +279,10 @@ static int l_lovrSourceStop(lua_State* L) {
 static int l_lovrSourceTell(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
   TimeUnit unit = luaL_checkoption(L, 2, "seconds", TimeUnits);
-  int offset = lovrSourceTell(source);
+  usize offset = lovrSourceTell(source);
 
   if (unit == UNIT_SECONDS) {
-    lua_pushnumber(L, (float) offset / lovrSourceGetSampleRate(source));
+    lua_pushnumber(L, (f32) offset / lovrSourceGetSampleRate(source));
   } else {
     lua_pushinteger(L, offset);
   }

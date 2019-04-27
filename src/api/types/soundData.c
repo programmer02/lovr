@@ -15,13 +15,13 @@ static int l_lovrSoundDataGetChannelCount(lua_State* L) {
 
 static int l_lovrSoundDataGetDuration(lua_State* L) {
   SoundData* soundData = luax_checktype(L, 1, SoundData);
-  lua_pushnumber(L, soundData->samples / (float) soundData->sampleRate);
+  lua_pushnumber(L, soundData->samples / (f32) soundData->sampleRate);
   return 1;
 }
 
 static int l_lovrSoundDataGetSample(lua_State* L) {
   SoundData* soundData = luax_checktype(L, 1, SoundData);
-  int index = luaL_checkinteger(L, 2);
+  usize index = luax_checku32(L, 2);
   lua_pushnumber(L, lovrSoundDataGetSample(soundData, index));
   return 1;
 }
@@ -40,8 +40,8 @@ static int l_lovrSoundDataGetSampleRate(lua_State* L) {
 
 static int l_lovrSoundDataSetSample(lua_State* L) {
   SoundData* soundData = luax_checktype(L, 1, SoundData);
-  int index = luaL_checkinteger(L, 2);
-  float value = luax_checkfloat(L, 3);
+  usize index = luax_checku32(L, 2);
+  f32 value = luax_checkfloat(L, 3);
   lovrSoundDataSetSample(soundData, index, value);
   return 0;
 }

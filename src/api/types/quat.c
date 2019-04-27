@@ -3,7 +3,7 @@
 #include "math/math.h"
 
 int luax_readquat(lua_State* L, int index, quat q, const char* expected) {
-  float angle, ax, ay, az;
+  f32 angle, ax, ay, az;
   switch (lua_type(L, index)) {
     case LUA_TNIL:
     case LUA_TNONE:
@@ -31,7 +31,7 @@ static int l_lovrQuatUnpack(lua_State* L) {
     lua_pushnumber(L, q[2]);
     lua_pushnumber(L, q[3]);
   } else {
-    float angle, ax, ay, az;
+    f32 angle, ax, ay, az;
     quat_getAngleAxis(q, &angle, &ax, &ay, &az);
     lua_pushnumber(L, angle);
     lua_pushnumber(L, ax);
@@ -46,11 +46,11 @@ int l_lovrQuatSet(lua_State* L) {
   if (lua_isnoneornil(L, 2)) {
     quat_set(q, 0.f, 0.f, 0.f, 0.f);
   } else if (lua_type(L, 2) == LUA_TNUMBER) {
-    float x = lua_tonumber(L, 2);
+    f32 x = lua_tonumber(L, 2);
     if (lua_type(L, 3) == LUA_TNUMBER) {
-      float y = luax_checkfloat(L, 3);
-      float z = luax_checkfloat(L, 4);
-      float w = luax_checkfloat(L, 5);
+      f32 y = luax_checkfloat(L, 3);
+      f32 z = luax_checkfloat(L, 4);
+      f32 w = luax_checkfloat(L, 5);
       bool raw = lua_toboolean(L, 6);
       if (raw) {
         quat_set(q, x, y, z, w);
@@ -63,7 +63,7 @@ int l_lovrQuatSet(lua_State* L) {
     }
   } else {
     MathType type;
-    float* p = luax_tomathtype(L, 2, &type);
+    f32* p = luax_tomathtype(L, 2, &type);
     if (!p) return luaL_typerror(L, 2, "vec3, quat, or number");
 
     if (type == MATH_VEC3) {
@@ -71,7 +71,7 @@ int l_lovrQuatSet(lua_State* L) {
         vec3 u = luax_checkmathtype(L, 3, MATH_VEC3, "vec3");
         quat_between(q, p, u);
       } else {
-        quat_between(q, (float[3]) { 0.f, 0.f, -1.f }, p);
+        quat_between(q, (f32[3]) { 0.f, 0.f, -1.f }, p);
       }
     } else if (type == MATH_QUAT) {
       quat_init(q, p);
@@ -88,7 +88,7 @@ int l_lovrQuatSet(lua_State* L) {
 static int l_lovrQuatMul(lua_State* L) {
   quat q = luax_checkmathtype(L, 1, MATH_QUAT, NULL);
   MathType type;
-  float* r = luax_tomathtype(L, 2, &type);
+  f32* r = luax_tomathtype(L, 2, &type);
   if (!r || type == MATH_MAT4) return luaL_typerror(L, 2, "quat or vec3");
   if (type == MATH_VEC3) {
     quat_rotate(q, r);
@@ -116,7 +116,7 @@ static int l_lovrQuatNormalize(lua_State* L) {
 static int l_lovrQuatSlerp(lua_State* L) {
   quat q = luax_checkmathtype(L, 1, MATH_QUAT, NULL);
   quat r = luax_checkmathtype(L, 2, MATH_QUAT, NULL);
-  float t = luax_checkfloat(L, 3);
+  f32 t = luax_checkfloat(L, 3);
   quat_slerp(q, r, t);
   lua_settop(L, 1);
   return 1;
@@ -125,7 +125,7 @@ static int l_lovrQuatSlerp(lua_State* L) {
 static int l_lovrQuat__mul(lua_State* L) {
   quat q = luax_checkmathtype(L, 1, MATH_QUAT, NULL);
   MathType type;
-  float* r = luax_tomathtype(L, 2, &type);
+  f32* r = luax_tomathtype(L, 2, &type);
   if (!r) return luaL_typerror(L, 2, "quat or vec3");
   if (type == MATH_VEC3) {
     vec3 out = luax_newmathtype(L, MATH_VEC3);

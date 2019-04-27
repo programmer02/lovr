@@ -4,9 +4,9 @@
 #include "graphics/texture.h"
 #include "lib/err.h"
 
-int luax_optmipmap(lua_State* L, int index, Texture* texture) {
+u32 luax_optmipmap(lua_State* L, int index, Texture* texture) {
   u32 mipmap = luaL_optinteger(L, index, 1);
-  lovrAssert(mipmap <= lovrTextureGetMipmapCount(texture), "Invalid mipmap %d\n", mipmap);
+  lovrAssert(mipmap >= 1 && mipmap <= lovrTextureGetMipmapCount(texture), "Invalid mipmap %d\n", mipmap);
   return mipmap - 1;
 }
 
@@ -18,7 +18,7 @@ static int l_lovrTextureGetDepth(lua_State* L) {
 
 static int l_lovrTextureGetDimensions(lua_State* L) {
   Texture* texture = luax_checktype(L, 1, Texture);
-  int mipmap = luax_optmipmap(L, 2, texture);
+  u32 mipmap = luax_optmipmap(L, 2, texture);
   lua_pushinteger(L, lovrTextureGetWidth(texture, mipmap));
   lua_pushinteger(L, lovrTextureGetHeight(texture, mipmap));
   if (lovrTextureGetType(texture) != TEXTURE_2D) {
@@ -84,18 +84,18 @@ static int l_lovrTextureGetWrap(lua_State* L) {
 static int l_lovrTextureReplacePixels(lua_State* L) {
   Texture* texture = luax_checktype(L, 1, Texture);
   TextureData* textureData = luax_checktype(L, 2, TextureData);
-  int x = luaL_optinteger(L, 3, 0);
-  int y = luaL_optinteger(L, 4, 0);
-  int slice = luaL_optinteger(L, 5, 1) - 1;
-  int mipmap = luaL_optinteger(L, 6, 1) - 1;
-  lovrTextureReplacePixels(texture, textureData, x, y, slice, mipmap);
+  u32 x = luax_optu32(L, 3, 0);
+  u32 y = luax_optu32(L, 4, 0);
+  u32 slice = luax_optu32(L, 5, 1);
+  u32 mipmap = luax_optu32(L, 6, 1);
+  lovrTextureReplacePixels(texture, textureData, x, y, slice - 1, mipmap - 1);
   return 0;
 }
 
 static int l_lovrTextureSetFilter(lua_State* L) {
   Texture* texture = luax_checktype(L, 1, Texture);
   FilterMode mode = luaL_checkoption(L, 2, NULL, FilterModes);
-  float anisotropy = luax_optfloat(L, 3, 1.f);
+  f32 anisotropy = luax_optfloat(L, 3, 1.f);
   TextureFilter filter = { .mode = mode, .anisotropy = anisotropy };
   lovrTextureSetFilter(texture, filter);
   return 0;

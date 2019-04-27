@@ -406,7 +406,7 @@ void lovrGraphicsSetLineWidth(u8 width) {
   state.pipeline.lineWidth = width;
 }
 
-float lovrGraphicsGetPointSize() {
+f32 lovrGraphicsGetPointSize() {
   return state.pointSize;
 }
 

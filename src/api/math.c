@@ -87,7 +87,7 @@ static int l_lovrMathNewCurve(lua_State* L) {
       lua_rawgeti(L, 1, i + 0);
       lua_rawgeti(L, 1, i + 1);
       lua_rawgeti(L, 1, i + 2);
-      float point[3];
+      f32 point[3];
       int components = luax_readvec3(L, -3, point, "vec3 or number");
       lovrCurveAddPoint(curve, point, pointIndex++);
       i += 3 + components;

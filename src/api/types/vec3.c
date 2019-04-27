@@ -53,7 +53,7 @@ static int l_lovrVec3Unpack(lua_State* L) {
 int l_lovrVec3Set(lua_State* L) {
   vec3 v = luax_checkmathtype(L, 1, MATH_VEC3, NULL);
   if (lua_isnoneornil(L, 2) || lua_type(L, 2) == LUA_TNUMBER) {
-    float x = luax_optfloat(L, 2, 0.f);
+    f32 x = luax_optfloat(L, 2, 0.f);
     vec3_set(v, x, luax_optfloat(L, 3, x), luax_optfloat(L, 4, x));
   } else {
     vec3 u = luax_checkmathtype(L, 2, MATH_VEC3, "vec3 or number");
@@ -66,7 +66,7 @@ int l_lovrVec3Set(lua_State* L) {
 static int l_lovrVec3Add(lua_State* L) {
   vec3 v = luax_checkmathtype(L, 1, MATH_VEC3, NULL);
   if (lua_type(L, 2) == LUA_TNUMBER) {
-    float x = lua_tonumber(L, 2);
+    f32 x = lua_tonumber(L, 2);
     vec3_add(v, (float[3]) { x, luaL_optnumber(L, 3, x), luaL_optnumber(L, 4, x) });
   } else {
     vec3 u = luax_checkmathtype(L, 2, MATH_VEC3, "vec3 or number");
@@ -79,7 +79,7 @@ static int l_lovrVec3Add(lua_State* L) {
 static int l_lovrVec3Sub(lua_State* L) {
   vec3 v = luax_checkmathtype(L, 1, MATH_VEC3, NULL);
   if (lua_type(L, 2) == LUA_TNUMBER) {
-    float x = lua_tonumber(L, 2);
+    f32 x = lua_tonumber(L, 2);
     vec3_sub(v, (float[3]) { x, luaL_optnumber(L, 3, x), luaL_optnumber(L, 4, x) });
   } else {
     vec3 u = luax_checkmathtype(L, 2, MATH_VEC3, "vec3 or number");
@@ -151,7 +151,7 @@ static int l_lovrVec3Cross(lua_State* L) {
 static int l_lovrVec3Lerp(lua_State* L) {
   vec3 v = luax_checkmathtype(L, 1, MATH_VEC3, NULL);
   vec3 u = luax_checkmathtype(L, 2, MATH_VEC3, NULL);
-  float t = luax_checkfloat(L, 3);
+  f32 t = luax_checkfloat(L, 3);
   vec3_lerp(v, u, t);
   lua_settop(L, 1);
   return 1;

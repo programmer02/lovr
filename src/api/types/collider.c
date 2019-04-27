@@ -1,6 +1,5 @@
 #include "api.h"
 #include "physics/physics.h"
-#include <stdbool.h>
 
 static int l_lovrColliderDestroy(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
@@ -33,7 +32,7 @@ static int l_lovrColliderGetShapes(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
   lua_newtable(L);
   vec_void_t* shapes = lovrColliderGetShapes(collider);
-  for (int i = 0; i < shapes->length; i++) {
+  for (i32 i = 0; i < shapes->length; i++) {
     luax_pushobject(L, shapes->data[i]);
     lua_rawseti(L, -2, i + 1);
   }
@@ -44,7 +43,7 @@ static int l_lovrColliderGetJoints(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
   lua_newtable(L);
   vec_void_t* joints = lovrColliderGetJoints(collider);
-  for (int i = 0; i < joints->length; i++) {
+  for (i32 i = 0; i < joints->length; i++) {
     luax_pushobject(L, joints->data[i]);
     lua_rawseti(L, -2, i + 1);
   }
@@ -53,14 +52,14 @@ static int l_lovrColliderGetJoints(lua_State* L) {
 
 static int l_lovrColliderGetUserData(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  union { int i; void* p; } ref = { .p = lovrColliderGetUserData(collider) };
+  union { i32 i; void* p; } ref = { .p = lovrColliderGetUserData(collider) };
   lua_rawgeti(L, LUA_REGISTRYINDEX, ref.i);
   return 1;
 }
 
 static int l_lovrColliderSetUserData(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  union { int i; void* p; } ref = { .p = lovrColliderGetUserData(collider) };
+  union { i32 i; void* p; } ref = { .p = lovrColliderGetUserData(collider) };
   if (ref.i) {
     luaL_unref(L, LUA_REGISTRYINDEX, ref.i);
   }
@@ -135,22 +134,22 @@ static int l_lovrColliderGetMass(lua_State* L) {
 
 static int l_lovrColliderSetMass(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float mass = luax_checkfloat(L, 2);
+  f32 mass = luax_checkfloat(L, 2);
   lovrColliderSetMass(collider, mass);
   return 0;
 }
 
 static int l_lovrColliderGetMassData(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float cx, cy, cz, mass;
-  float inertia[6];
+  f32 cx, cy, cz, mass;
+  f32 inertia[6];
   lovrColliderGetMassData(collider, &cx, &cy, &cz, &mass, inertia);
   lua_pushnumber(L, cx);
   lua_pushnumber(L, cy);
   lua_pushnumber(L, cz);
   lua_pushnumber(L, mass);
   lua_newtable(L);
-  for (int i = 0; i < 6; i++) {
+  for (u32 i = 0; i < 6; i++) {
     lua_pushnumber(L, inertia[i]);
     lua_rawseti(L, -2, i + 1);
   }
@@ -159,13 +158,13 @@ static int l_lovrColliderGetMassData(lua_State* L) {
 
 static int l_lovrColliderSetMassData(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float cx = luax_checkfloat(L, 2);
-  float cy = luax_checkfloat(L, 3);
-  float cz = luax_checkfloat(L, 4);
-  float mass = luax_checkfloat(L, 5);
-  float inertia[6];
+  f32 cx = luax_checkfloat(L, 2);
+  f32 cy = luax_checkfloat(L, 3);
+  f32 cz = luax_checkfloat(L, 4);
+  f32 mass = luax_checkfloat(L, 5);
+  f32 inertia[6];
   if (lua_istable(L, 6) && luax_len(L, 6) >= 6) {
-    for (int i = 0; i < 6; i++) {
+    for (u32 i = 0; i < 6; i++) {
       lua_rawgeti(L, 6, i + 1);
       if (!lua_isnumber(L, -1)) {
         return luaL_argerror(L, 6, "Expected 6 numbers or a table with 6 numbers");
@@ -175,7 +174,7 @@ static int l_lovrColliderSetMassData(lua_State* L) {
       lua_pop(L, 1);
     }
   } else {
-    for (int i = 6; i < 12; i++) {
+    for (u32 i = 6; i < 12; i++) {
       if (lua_isnumber(L, i)) {
         inertia[i - 6] = lua_tonumber(L, i);
       } else {
@@ -189,7 +188,7 @@ static int l_lovrColliderSetMassData(lua_State* L) {
 
 static int l_lovrColliderGetPosition(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x, y, z;
+  f32 x, y, z;
   lovrColliderGetPosition(collider, &x, &y, &z);
   lua_pushnumber(L, x);
   lua_pushnumber(L, y);
@@ -199,16 +198,16 @@ static int l_lovrColliderGetPosition(lua_State* L) {
 
 static int l_lovrColliderSetPosition(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
   lovrColliderSetPosition(collider, x, y, z);
   return 0;
 }
 
 static int l_lovrColliderGetOrientation(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float angle, x, y, z;
+  f32 angle, x, y, z;
   lovrColliderGetOrientation(collider, &angle, &x, &y, &z);
   lua_pushnumber(L, angle);
   lua_pushnumber(L, x);
@@ -219,17 +218,17 @@ static int l_lovrColliderGetOrientation(lua_State* L) {
 
 static int l_lovrColliderSetOrientation(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float angle = luax_checkfloat(L, 2);
-  float x = luax_checkfloat(L, 3);
-  float y = luax_checkfloat(L, 4);
-  float z = luax_checkfloat(L, 5);
+  f32 angle = luax_checkfloat(L, 2);
+  f32 x = luax_checkfloat(L, 3);
+  f32 y = luax_checkfloat(L, 4);
+  f32 z = luax_checkfloat(L, 5);
   lovrColliderSetOrientation(collider, angle, x, y, z);
   return 0;
 }
 
 static int l_lovrColliderGetPose(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x, y, z, angle, ax, ay, az;
+  f32 x, y, z, angle, ax, ay, az;
   lovrColliderGetPosition(collider, &x, &y, &z);
   lovrColliderGetOrientation(collider, &angle, &ax, &ay, &az);
   lua_pushnumber(L, x);
@@ -244,13 +243,13 @@ static int l_lovrColliderGetPose(lua_State* L) {
 
 static int l_lovrColliderSetPose(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
-  float angle = luax_checkfloat(L, 5);
-  float ax = luax_checkfloat(L, 6);
-  float ay = luax_checkfloat(L, 7);
-  float az = luax_checkfloat(L, 8);
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
+  f32 angle = luax_checkfloat(L, 5);
+  f32 ax = luax_checkfloat(L, 6);
+  f32 ay = luax_checkfloat(L, 7);
+  f32 az = luax_checkfloat(L, 8);
   lovrColliderSetPosition(collider, x, y, z);
   lovrColliderSetOrientation(collider, angle, ax, ay, az);
   return 0;
@@ -258,7 +257,7 @@ static int l_lovrColliderSetPose(lua_State* L) {
 
 static int l_lovrColliderGetLinearVelocity(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x, y, z;
+  f32 x, y, z;
   lovrColliderGetLinearVelocity(collider, &x, &y, &z);
   lua_pushnumber(L, x);
   lua_pushnumber(L, y);
@@ -268,16 +267,16 @@ static int l_lovrColliderGetLinearVelocity(lua_State* L) {
 
 static int l_lovrColliderSetLinearVelocity(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
   lovrColliderSetLinearVelocity(collider, x, y, z);
   return 0;
 }
 
 static int l_lovrColliderGetAngularVelocity(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x, y, z;
+  f32 x, y, z;
   lovrColliderGetAngularVelocity(collider, &x, &y, &z);
   lua_pushnumber(L, x);
   lua_pushnumber(L, y);
@@ -287,16 +286,16 @@ static int l_lovrColliderGetAngularVelocity(lua_State* L) {
 
 static int l_lovrColliderSetAngularVelocity(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
   lovrColliderSetAngularVelocity(collider, x, y, z);
   return 0;
 }
 
 static int l_lovrColliderGetLinearDamping(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float damping, threshold;
+  f32 damping, threshold;
   lovrColliderGetLinearDamping(collider, &damping, &threshold);
   lua_pushnumber(L, damping);
   lua_pushnumber(L, threshold);
@@ -305,15 +304,15 @@ static int l_lovrColliderGetLinearDamping(lua_State* L) {
 
 static int l_lovrColliderSetLinearDamping(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float damping = luax_checkfloat(L, 2);
-  float threshold = luax_optfloat(L, 3, .01f);
+  f32 damping = luax_checkfloat(L, 2);
+  f32 threshold = luax_optfloat(L, 3, .01f);
   lovrColliderSetLinearDamping(collider, damping, threshold);
   return 0;
 }
 
 static int l_lovrColliderGetAngularDamping(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float damping, threshold;
+  f32 damping, threshold;
   lovrColliderGetAngularDamping(collider, &damping, &threshold);
   lua_pushnumber(L, damping);
   lua_pushnumber(L, threshold);
@@ -322,22 +321,22 @@ static int l_lovrColliderGetAngularDamping(lua_State* L) {
 
 static int l_lovrColliderSetAngularDamping(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float damping = luax_checkfloat(L, 2);
-  float threshold = luax_optfloat(L, 3, .01f);
+  f32 damping = luax_checkfloat(L, 2);
+  f32 threshold = luax_optfloat(L, 3, .01f);
   lovrColliderSetAngularDamping(collider, damping, threshold);
   return 0;
 }
 
 static int l_lovrColliderApplyForce(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
 
   if (lua_gettop(L) > 4) {
-    float cx = luax_checkfloat(L, 5);
-    float cy = luax_checkfloat(L, 6);
-    float cz = luax_checkfloat(L, 7);
+    f32 cx = luax_checkfloat(L, 5);
+    f32 cy = luax_checkfloat(L, 6);
+    f32 cz = luax_checkfloat(L, 7);
     lovrColliderApplyForceAtPosition(collider, x, y, z, cx, cy, cz);
   } else {
     lovrColliderApplyForce(collider, x, y, z);
@@ -348,16 +347,16 @@ static int l_lovrColliderApplyForce(lua_State* L) {
 
 static int l_lovrColliderApplyTorque(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
   lovrColliderApplyTorque(collider, x, y, z);
   return 0;
 }
 
 static int l_lovrColliderGetLocalCenter(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x, y, z;
+  f32 x, y, z;
   lovrColliderGetLocalCenter(collider, &x, &y, &z);
   lua_pushnumber(L, x);
   lua_pushnumber(L, y);
@@ -367,10 +366,10 @@ static int l_lovrColliderGetLocalCenter(lua_State* L) {
 
 static int l_lovrColliderGetLocalPoint(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float wx = luax_checkfloat(L, 2);
-  float wy = luax_checkfloat(L, 3);
-  float wz = luax_checkfloat(L, 4);
-  float x, y, z;
+  f32 wx = luax_checkfloat(L, 2);
+  f32 wy = luax_checkfloat(L, 3);
+  f32 wz = luax_checkfloat(L, 4);
+  f32 x, y, z;
   lovrColliderGetLocalPoint(collider, wx, wy, wz, &x, &y, &z);
   lua_pushnumber(L, x);
   lua_pushnumber(L, y);
@@ -380,10 +379,10 @@ static int l_lovrColliderGetLocalPoint(lua_State* L) {
 
 static int l_lovrColliderGetWorldPoint(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
-  float wx, wy, wz;
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
+  f32 wx, wy, wz;
   lovrColliderGetWorldPoint(collider, x, y, z, &wx, &wy, &wz);
   lua_pushnumber(L, wx);
   lua_pushnumber(L, wy);
@@ -393,10 +392,10 @@ static int l_lovrColliderGetWorldPoint(lua_State* L) {
 
 static int l_lovrColliderGetLocalVector(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float wx = luax_checkfloat(L, 2);
-  float wy = luax_checkfloat(L, 3);
-  float wz = luax_checkfloat(L, 4);
-  float x, y, z;
+  f32 wx = luax_checkfloat(L, 2);
+  f32 wy = luax_checkfloat(L, 3);
+  f32 wz = luax_checkfloat(L, 4);
+  f32 x, y, z;
   lovrColliderGetLocalVector(collider, wx, wy, wz, &x, &y, &z);
   lua_pushnumber(L, x);
   lua_pushnumber(L, y);
@@ -406,10 +405,10 @@ static int l_lovrColliderGetLocalVector(lua_State* L) {
 
 static int l_lovrColliderGetWorldVector(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
-  float wx, wy, wz;
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
+  f32 wx, wy, wz;
   lovrColliderGetWorldVector(collider, x, y, z, &wx, &wy, &wz);
   lua_pushnumber(L, wx);
   lua_pushnumber(L, wy);
@@ -419,10 +418,10 @@ static int l_lovrColliderGetWorldVector(lua_State* L) {
 
 static int l_lovrColliderGetLinearVelocityFromLocalPoint(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
-  float vx, vy, vz;
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
+  f32 vx, vy, vz;
   lovrColliderGetLinearVelocityFromLocalPoint(collider, x, y, z, &vx, &vy, &vz);
   lua_pushnumber(L, vx);
   lua_pushnumber(L, vy);
@@ -432,10 +431,10 @@ static int l_lovrColliderGetLinearVelocityFromLocalPoint(lua_State* L) {
 
 static int l_lovrColliderGetLinearVelocityFromWorldPoint(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float x = luax_checkfloat(L, 2);
-  float y = luax_checkfloat(L, 3);
-  float z = luax_checkfloat(L, 4);
-  float vx, vy, vz;
+  f32 x = luax_checkfloat(L, 2);
+  f32 y = luax_checkfloat(L, 3);
+  f32 z = luax_checkfloat(L, 4);
+  f32 vx, vy, vz;
   lovrColliderGetLinearVelocityFromWorldPoint(collider, x, y, z, &vx, &vy, &vz);
   lua_pushnumber(L, vx);
   lua_pushnumber(L, vy);
@@ -445,9 +444,9 @@ static int l_lovrColliderGetLinearVelocityFromWorldPoint(lua_State* L) {
 
 static int l_lovrColliderGetAABB(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float aabb[6];
+  f32 aabb[6];
   lovrColliderGetAABB(collider, aabb);
-  for (int i = 0; i < 6; i++) {
+  for (u32 i = 0; i < 6; i++) {
     lua_pushnumber(L, aabb[i]);
   }
   return 6;
@@ -461,7 +460,7 @@ static int l_lovrColliderGetFriction(lua_State* L) {
 
 static int l_lovrColliderSetFriction(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float friction = luax_checkfloat(L, 2);
+  f32 friction = luax_checkfloat(L, 2);
   lovrColliderSetFriction(collider, friction);
   return 0;
 }
@@ -474,7 +473,7 @@ static int l_lovrColliderGetRestitution(lua_State* L) {
 
 static int l_lovrColliderSetRestitution(lua_State* L) {
   Collider* collider = luax_checktype(L, 1, Collider);
-  float restitution = luax_checkfloat(L, 2);
+  f32 restitution = luax_checkfloat(L, 2);
   lovrColliderSetRestitution(collider, restitution);
   return 0;
 }

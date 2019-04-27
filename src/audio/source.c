@@ -114,7 +114,7 @@ void lovrSourceGetVelocity(Source* source, vec3 velocity) {
   alGetSourcefv(source->id, AL_VELOCITY, velocity);
 }
 
-float lovrSourceGetVolume(Source* source) {
+f32 lovrSourceGetVolume(Source* source) {
   f32 volume;
   alGetSourcef(source->id, AL_GAIN, &volume);
   return volume;
@@ -313,7 +313,7 @@ void lovrSourceStream(Source* source, ALuint* buffers, usize count) {
 usize lovrSourceTell(Source* source) {
   switch (source->type) {
     case SOURCE_STATIC: {
-      float offset;
+      f32 offset;
       alGetSourcef(source->id, AL_SAMPLE_OFFSET, &offset);
       return offset;
     }

@@ -116,7 +116,7 @@ static int l_lovrHeadsetSetClipDistance(lua_State* L) {
 }
 
 static int l_lovrHeadsetGetBoundsWidth(lua_State* L) {
-  float width, depth;
+  f32 width, depth;
   lovrHeadsetDriver->getBoundsDimensions(&width, &depth);
   lua_pushnumber(L, width);
   return 1;

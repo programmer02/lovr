@@ -43,7 +43,7 @@ static void parseMtl(char* path, vec_void_t* textures, vec_material_t* materials
       }));
       memset(&vec_last(materials).textures, 0xff, MAX_MATERIAL_TEXTURES * sizeof(int));
     } else if (STARTS_WITH(s, "Kd")) {
-      float r, g, b;
+      f32 r, g, b;
       int count = sscanf(s + 2, "%f %f %f\n%n", &r, &g, &b, &lineLength);
       lovrAssert(count == 3, "Bad OBJ: Expected 3 components for diffuse color");
       ModelMaterial* material = &vec_last(materials);
@@ -56,7 +56,7 @@ static void parseMtl(char* path, vec_void_t* textures, vec_material_t* materials
       lovrAssert(hasFilename, "Bad OBJ: Expected a texture filename");
       char path[1024];
       snprintf(path, 1023, "%s%s", base, filename);
-      size_t size = 0;
+      usize size = 0;
       void* data = lovrFilesystemRead(path, -1, &size);
       lovrAssert(data && size > 0, "Unable to read texture from %s", path);
       Blob* blob = lovrBlobCreate(data, size, NULL);
