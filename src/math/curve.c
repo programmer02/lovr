@@ -4,7 +4,7 @@
 #include <math.h>
 
 // Explicit curve evaluation, unroll simple cases to avoid pow overhead
-LOVR_EXPORT static void evaluate(float* P, u32 n, f32 t, vec3 p) {
+static void evaluate(float* P, u32 n, f32 t, vec3 p) {
   if (n == 2) {
     p[0] = P[0] + (P[3] - P[0]) * t;
     p[1] = P[1] + (P[4] - P[1]) * t;

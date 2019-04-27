@@ -1,14 +1,8 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <stdbool.h>
 
 #pragma once
-
-#ifdef _WIN32
-#define LOVR_EXPORT __declspec(dllexport)
-#else
-#define LOVR_EXPORT __attribute__((visibility("default")))
-#endif
 
 typedef int8_t i8;
 typedef uint8_t u8;
@@ -29,3 +23,11 @@ typedef unsigned bit;
 #define CLAMP(x, min, max) MAX(min, MIN(max, x))
 #define ALIGN(p, n) ((uintptr_t) (p) & -n)
 #define PRINT_SIZEOF(T) i32(*_o)[sizeof(T)]=1
+
+#ifdef _WIN32
+#define LOVR_EXPORT __declspec(dllexport)
+#define LOVR_THREAD_LOCAL __declspec(thread)
+#else
+#define LOVR_EXPORT __attribute__((visibility("default")))
+#define LOVR_THREAD_LOCAL __thread
+#endif

@@ -2,6 +2,7 @@
 #include "api/event.h"
 #include "event/event.h"
 #include "types.h"
+#include "util.h"
 #include "lib/err.h"
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +13,7 @@ const char* EventTypes[] = {
   [EVENT_THREAD_ERROR] = "threaderror",
 };
 
-static _Thread_local int pollRef;
+static LOVR_THREAD_LOCAL int pollRef;
 
 void luax_checkvariant(lua_State* L, int index, Variant* variant) {
   int type = lua_type(L, index);
