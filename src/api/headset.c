@@ -5,6 +5,8 @@
 #include "graphics/model.h"
 #include "graphics/texture.h"
 #include "lib/maf.h"
+#include "lib/vec/vec.h"
+#include <stdlib.h>
 
 #if defined(EMSCRIPTEN) || defined(LOVR_USE_OCULUS_MOBILE)
 #define LOVR_HEADSET_HELPER_USES_REGISTRY

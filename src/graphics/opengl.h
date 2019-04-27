@@ -9,26 +9,9 @@
 
 #pragma once
 
-#define GPU_BUFFER_FIELDS \
-  GLsync lock; \
-  u32 id; \
-  u8 incoherent;
-
-#define GPU_CANVAS_FIELDS \
-  u32 framebuffer; \
-  u32 resolveBuffer; \
-  u32 depthBuffer; \
-  bool immortal;
-
 #define GPU_MESH_FIELDS \
   u32 vao; \
   u32 ibo;
 
 #define GPU_SHADER_FIELDS \
   u32 program;
-
-#define GPU_TEXTURE_FIELDS \
-  GLuint id; \
-  GLuint msaaId; \
-  GLenum target; \
-  u8 incoherent;

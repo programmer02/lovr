@@ -1,32 +1,12 @@
 #include "util.h"
 #include "data/blob.h"
 #include "types.h"
+#include "lib/gpu.h"
 #include "lib/vec/vec.h"
 #include <stdint.h>
 #include <stdbool.h>
 
 #pragma once
-
-typedef enum {
-  FORMAT_RGB,
-  FORMAT_RGBA,
-  FORMAT_RGBA4,
-  FORMAT_RGBA16F,
-  FORMAT_RGBA32F,
-  FORMAT_R16F,
-  FORMAT_R32F,
-  FORMAT_RG16F,
-  FORMAT_RG32F,
-  FORMAT_RGB5A1,
-  FORMAT_RGB10A2,
-  FORMAT_RG11B10F,
-  FORMAT_D16,
-  FORMAT_D32F,
-  FORMAT_D24S8,
-  FORMAT_DXT1,
-  FORMAT_DXT3,
-  FORMAT_DXT5
-} TextureFormat;
 
 typedef struct {
   u32 width;

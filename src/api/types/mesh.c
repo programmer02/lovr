@@ -385,7 +385,7 @@ static int l_lovrMeshSetVertexMap(lua_State* L) {
       Buffer* vertexBuffer = lovrMeshGetVertexBuffer(mesh);
       BufferUsage usage = vertexBuffer ? lovrBufferGetUsage(vertexBuffer) : USAGE_DYNAMIC;
       bool readable = vertexBuffer ? lovrBufferIsReadable(vertexBuffer) : false;
-      indexBuffer = lovrBufferCreate(blob->size, blob->data, BUFFER_INDEX, usage, readable);
+      indexBuffer = lovrBufferInit(lovrNew(Buffer), blob->size, blob->data, BUFFER_INDEX, usage, readable);
       lovrMeshSetIndexBuffer(mesh, indexBuffer, count, size, 0);
     } else {
       void* indices = lovrBufferMap(indexBuffer, 0);
@@ -403,7 +403,7 @@ static int l_lovrMeshSetVertexMap(lua_State* L) {
       Buffer* vertexBuffer = lovrMeshGetVertexBuffer(mesh);
       BufferUsage usage = vertexBuffer ? lovrBufferGetUsage(vertexBuffer) : USAGE_DYNAMIC;
       bool readable = vertexBuffer ? lovrBufferIsReadable(vertexBuffer) : false;
-      indexBuffer = lovrBufferCreate(count * size, NULL, BUFFER_INDEX, usage, readable);
+      indexBuffer = lovrBufferInit(lovrNew(Buffer), count * size, NULL, BUFFER_INDEX, usage, readable);
     }
 
     union { void* raw; u16* shorts; u32* ints; } indices = { .raw = lovrBufferMap(indexBuffer, 0) };

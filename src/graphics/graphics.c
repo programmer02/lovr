@@ -90,12 +90,12 @@ static const BufferType BUFFER_TYPES[] = {
 
 static void lovrGraphicsInitBuffers() {
   for (u32 i = 0; i < MAX_BUFFER_ROLES; i++) {
-    state.buffers[i] = lovrBufferCreate(BUFFER_COUNTS[i] * BUFFER_STRIDES[i], NULL, BUFFER_TYPES[i], USAGE_STREAM, false);
+    state.buffers[i] = lovrBufferInit(lovrNew(Buffer), BUFFER_COUNTS[i] * BUFFER_STRIDES[i], NULL, BUFFER_TYPES[i], USAGE_STREAM, false);
   }
 
   // The identity buffer is used for autoinstanced meshes and instanced primitives and maps the
   // instance ID to a vertex attribute.  Its contents never change, so they are initialized here.
-  state.identityBuffer = lovrBufferCreate(MAX_DRAWS, NULL, BUFFER_VERTEX, USAGE_STATIC, false);
+  state.identityBuffer = lovrBufferInit(lovrNew(Buffer), MAX_DRAWS, NULL, BUFFER_VERTEX, USAGE_STATIC, false);
   u8* id = lovrBufferMap(state.identityBuffer, 0);
   for (usize i = 0; i < MAX_DRAWS; i++) id[i] = i;
   lovrBufferFlushRange(state.identityBuffer, 0, MAX_DRAWS);

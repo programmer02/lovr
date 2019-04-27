@@ -1,5 +1,6 @@
 #include "graphics/font.h"
 #include "graphics/shader.h"
+#include "lib/gpu.h"
 #include "lib/maf.h"
 #include "util.h"
 #include "platform.h"

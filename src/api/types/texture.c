@@ -1,5 +1,6 @@
 #include "api.h"
 #include "api/graphics.h"
+#include "data/textureData.h"
 #include "graphics/texture.h"
 #include "lib/err.h"
 

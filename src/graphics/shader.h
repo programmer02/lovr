@@ -1,4 +1,5 @@
 #include "util.h"
+#include "types.h"
 #include "graphics/texture.h"
 #include "graphics/opengl.h"
 #include "lib/map/map.h"

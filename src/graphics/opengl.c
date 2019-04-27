@@ -6,8 +6,8 @@
 #include "graphics/mesh.h"
 #include "graphics/shader.h"
 #include "graphics/texture.h"
+#include "data/textureData.h"
 #include "resources/shaders.h"
-#include "data/modelData.h"
 #include "lib/err.h"
 #include "lib/vec/vec.h"
 #include <math.h>
@@ -30,6 +30,65 @@
 #define LOVR_SHADER_BONES 5
 #define LOVR_SHADER_BONE_WEIGHTS 6
 #define LOVR_SHADER_DRAW_ID 7
+
+struct Buffer {
+  Ref ref;
+  void* data;
+  usize size;
+  usize flushFrom;
+  usize flushTo;
+  bool readable;
+  BufferType type;
+  BufferUsage usage;
+
+  GLsync lock;
+  GLuint id;
+  u8 incoherent;
+};
+
+const usize sizeof_Buffer = sizeof(Buffer);
+
+struct Texture {
+  Ref ref;
+  TextureType type;
+  TextureFormat format;
+  u32 width;
+  u32 height;
+  u32 depth;
+  u32 mipmapCount;
+  TextureFilter filter;
+  TextureWrap wrap;
+  u32 msaa;
+  bool srgb;
+  bool mipmaps;
+  bool allocated;
+
+  GLuint handle;
+  GLuint msaaId;
+  GLenum target;
+  u8 incoherent;
+};
+
+const usize sizeof_Texture = sizeof(Texture);
+
+struct Canvas {
+  Ref ref;
+  u32 width;
+  u32 height;
+  CanvasFlags flags;
+  Attachment attachments[MAX_CANVAS_ATTACHMENTS];
+  Attachment depth;
+  u32 attachmentCount;
+  bool needsAttach;
+  bool needsResolve;
+
+  GLuint framebuffer;
+  GLuint resolveBuffer;
+  GLuint depthBuffer;
+  bool immortal;
+};
+
+const usize sizeof_Canvas = sizeof(Canvas);
 
 typedef enum {
   BARRIER_BLOCK,
@@ -460,7 +519,7 @@ static void lovrGpuBindTexture(Texture* texture, u32 slot) {
       glActiveTexture(GL_TEXTURE0 + slot);
       state.activeTexture = slot;
     }
-    glBindTexture(texture->target, texture->id);
+    glBindTexture(texture->target, texture->handle);
   }
 }
 
@@ -483,7 +542,7 @@ static void lovrGpuBindImage(Image* image, u32 slot) {
 
     lovrRetain(texture);
     lovrRelease(Texture, state.images[slot].texture);
-    glBindImageTexture(slot, texture->id, image->mipmap, layered, slice, glAccess, glFormat);
+    glBindImageTexture(slot, texture->handle, image->mipmap, layered, slice, glAccess, glFormat);
     memcpy(state.images + slot, image, sizeof(Image));
   }
 }
@@ -593,10 +652,10 @@ static void lovrGpuBindCanvas(Canvas* canvas, bool willDraw) {
     }
 
     switch (texture->type) {
-      case TEXTURE_2D: glFramebufferTexture2D(GL_READ_FRAMEBUFFER, buffer, GL_TEXTURE_2D, texture->id, level); break;
-      case TEXTURE_CUBE: glFramebufferTexture2D(GL_READ_FRAMEBUFFER, buffer, GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice, texture->id, level); break;
-      case TEXTURE_ARRAY: glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, buffer, texture->id, level, slice); break;
-      case TEXTURE_VOLUME: glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, buffer, texture->id, level, slice); break;
+      case TEXTURE_2D: glFramebufferTexture2D(GL_READ_FRAMEBUFFER, buffer, GL_TEXTURE_2D, texture->handle, level); break;
+      case TEXTURE_CUBE: glFramebufferTexture2D(GL_READ_FRAMEBUFFER, buffer, GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice, texture->handle, level); break;
+      case TEXTURE_ARRAY: glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, buffer, texture->handle, level, slice); break;
+      case TEXTURE_VOLUME: glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, buffer, texture->handle, level, slice); break;
     }
   }
   glDrawBuffers(canvas->attachmentCount, buffers);
@@ -1217,7 +1276,7 @@ Texture* lovrTextureInit(Texture* texture, TextureType type, TextureData** slice
   texture->target = convertTextureTarget(type);
 
   WrapMode wrap = type == TEXTURE_CUBE ? WRAP_CLAMP : WRAP_REPEAT;
-  glGenTextures(1, &texture->id);
+  glGenTextures(1, &texture->handle);
   lovrGpuBindTexture(texture, 0);
   lovrTextureSetWrap(texture, (TextureWrap) { .s = wrap, .t = wrap, .r = wrap });
 
@@ -1238,7 +1297,7 @@ Texture* lovrTextureInit(Texture* texture, TextureType type, TextureData** slice
 
 Texture* lovrTextureInitFromHandle(Texture* texture, u32 handle, TextureType type) {
   texture->type = type;
-  texture->id = handle;
+  texture->handle = handle;
   texture->target = convertTextureTarget(type);
 
   i32 width, height;
@@ -1254,7 +1313,7 @@ Texture* lovrTextureInitFromHandle(Texture* texture, u32 handle, TextureType typ
 
 void lovrTextureDestroy(void* ref) {
   Texture* texture = ref;
-  glDeleteTextures(1, &texture->id);
+  glDeleteTextures(1, &texture->handle);
   glDeleteRenderbuffers(1, &texture->msaaId);
   lovrGpuDestroySyncResource(texture, texture->incoherent);
 }
@@ -1444,6 +1503,46 @@ void lovrTextureSetWrap(Texture* texture, TextureWrap wrap) {
   }
 }
 
+u32 lovrTextureGetHandle(Texture* texture) {
+  return texture->handle;
+}
+
+u32 lovrTextureGetWidth(Texture* texture, u32 mipmap) {
+  return MAX(texture->width >> mipmap, 1);
+}
+
+u32 lovrTextureGetHeight(Texture* texture, u32 mipmap) {
+  return MAX(texture->height >> mipmap, 1);
+}
+
+u32 lovrTextureGetDepth(Texture* texture, u32 mipmap) {
+  return texture->type == TEXTURE_VOLUME ? MAX(texture->depth >> mipmap, 1) : texture->depth;
+}
+
+u32 lovrTextureGetMipmapCount(Texture* texture) {
+  return texture->mipmapCount;
+}
+
+u32 lovrTextureGetMSAA(Texture* texture) {
+  return texture->msaa;
+}
+
+TextureType lovrTextureGetType(Texture* texture) {
+  return texture->type;
+}
+
+TextureFormat lovrTextureGetFormat(Texture* texture) {
+  return texture->format;
+}
+
+TextureFilter lovrTextureGetFilter(Texture* texture) {
+  return texture->filter;
+}
+
+TextureWrap lovrTextureGetWrap(Texture* texture) {
+  return texture->wrap;
+}
+
 // Canvas
 
 Canvas* lovrCanvasInit(Canvas* canvas, u32 width, u32 height, CanvasFlags flags) {
@@ -1460,7 +1559,7 @@ Canvas* lovrCanvasInit(Canvas* canvas, u32 width, u32 height, CanvasFlags flags)
     if (flags.depth.readable) {
       canvas->depth.texture = lovrTextureCreate(TEXTURE_2D, NULL, 0, false, flags.mipmaps, flags.msaa);
       lovrTextureAllocate(canvas->depth.texture, width, height, 1, flags.depth.format);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, canvas->depth.texture->id, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, canvas->depth.texture->handle, 0);
     } else {
       GLenum format = convertTextureFormatInternal(flags.depth.format, false);
       glGenRenderbuffers(1, &canvas->depthBuffer);
@@ -1570,6 +1669,67 @@ TextureData* lovrCanvasNewTextureData(Canvas* canvas, u32 index) {
   return textureData;
 }
 
+const Attachment* lovrCanvasGetAttachments(Canvas* canvas, u32* count) {
+  if (count) *count = canvas->attachmentCount;
+  return canvas->attachments;
+}
+
+void lovrCanvasSetAttachments(Canvas* canvas, Attachment* attachments, u32 count) {
+  lovrAssert(count > 0, "A Canvas must have at least one attached Texture");
+  lovrAssert(count <= MAX_CANVAS_ATTACHMENTS, "Only %d textures can be attached to a Canvas, got %d\n", MAX_CANVAS_ATTACHMENTS, count);
+
+  if (!canvas->needsAttach && count == canvas->attachmentCount && !memcmp(canvas->attachments, attachments, count * sizeof(Attachment))) {
+    return;
+  }
+
+  lovrGraphicsFlushCanvas(canvas);
+
+  for (u32 i = 0; i < count; i++) {
+    Texture* texture = attachments[i].texture;
+    u32 slice = attachments[i].slice;
+    u32 level = attachments[i].level;
+    u32 width = lovrTextureGetWidth(texture, level);
+    u32 height = lovrTextureGetHeight(texture, level);
+    u32 depth = lovrTextureGetDepth(texture, level);
+    u32 mipmaps = lovrTextureGetMipmapCount(texture);
+    bool hasDepthBuffer = canvas->flags.depth.enabled;
+    lovrAssert(slice < depth, "Invalid attachment slice (Texture has %d, got %d)", depth, slice + 1);
+    lovrAssert(level < mipmaps, "Invalid attachment mipmap level (Texture has %d, got %d)", mipmaps, level + 1);
+    lovrAssert(!hasDepthBuffer || width == canvas->width, "Texture width of %d does not match Canvas width (%d)", width, canvas->width);
+    lovrAssert(!hasDepthBuffer || height == canvas->height, "Texture height of %d does not match Canvas height (%d)", height, canvas->height);
+    lovrAssert(lovrTextureGetMSAA(texture) == canvas->flags.msaa, "Texture MSAA does not match Canvas MSAA");
+    lovrRetain(texture);
+  }
+
+  for (u32 i = 0; i < canvas->attachmentCount; i++) {
+    lovrRelease(Texture, canvas->attachments[i].texture);
+  }
+
+  memcpy(canvas->attachments, attachments, count * sizeof(Attachment));
+  canvas->attachmentCount = count;
+  canvas->needsAttach = true;
+}
+
+bool lovrCanvasIsStereo(Canvas* canvas) {
+  return canvas->flags.stereo;
+}
+
+u32 lovrCanvasGetWidth(Canvas* canvas) {
+  return canvas->width;
+}
+
+u32 lovrCanvasGetHeight(Canvas* canvas) {
+  return canvas->height;
+}
+
+u32 lovrCanvasGetMSAA(Canvas* canvas) {
+  return canvas->flags.msaa;
+}
+
+Texture* lovrCanvasGetDepthTexture(Canvas* canvas) {
+  return canvas->depth.texture;
+}
+
 // Buffer
 
 Buffer* lovrBufferInit(Buffer* buffer, usize size, void* data, BufferType type, BufferUsage usage, bool readable) {
@@ -1630,6 +1790,34 @@ void lovrBufferFlushRange(Buffer* buffer, usize offset, usize size) {
 #ifndef LOVR_WEBGL
   }
 #endif
+}
+
+usize lovrBufferGetSize(Buffer* buffer) {
+  return buffer->size;
+}
+
+bool lovrBufferIsReadable(Buffer* buffer) {
+  return buffer->readable;
+}
+
+BufferUsage lovrBufferGetUsage(Buffer* buffer) {
+  return buffer->usage;
+}
+
+void lovrBufferMarkRange(Buffer* buffer, usize offset, usize size) {
+  usize end = offset + size;
+  buffer->flushFrom = MIN(buffer->flushFrom, offset);
+  buffer->flushTo = MAX(buffer->flushTo, end);
+}
+
+void lovrBufferFlush(Buffer* buffer) {
+  if (buffer->flushTo <= buffer->flushFrom) {
+    return;
+  }
+
+  lovrBufferFlushRange(buffer, buffer->flushFrom, buffer->flushTo - buffer->flushFrom);
+  buffer->flushFrom = SIZE_MAX;
+  buffer->flushTo = 0;
 }
 
 // Shader

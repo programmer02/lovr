@@ -1,5 +1,6 @@
 #include "util.h"
 #include "types.h"
+#include "lib/gpu.h"
 
 #pragma once
 
@@ -18,40 +19,6 @@ typedef enum {
   ATTR_WEIGHTS,
   MAX_DEFAULT_ATTRIBUTES
 } DefaultAttribute;
-
-typedef enum {
-  DRAW_POINTS,
-  DRAW_LINES,
-  DRAW_LINE_LOOP,
-  DRAW_LINE_STRIP,
-  DRAW_TRIANGLES,
-  DRAW_TRIANGLE_STRIP,
-  DRAW_TRIANGLE_FAN
-} DrawMode;
-
-typedef enum {
-  FILTER_NEAREST,
-  FILTER_BILINEAR,
-  FILTER_TRILINEAR,
-  FILTER_ANISOTROPIC
-} FilterMode;
-
-typedef struct {
-  FilterMode mode;
-  f32 anisotropy;
-} TextureFilter;
-
-typedef enum {
-  WRAP_CLAMP,
-  WRAP_REPEAT,
-  WRAP_MIRRORED_REPEAT
-} WrapMode;
-
-typedef struct {
-  WrapMode s;
-  WrapMode t;
-  WrapMode r;
-} TextureWrap;
 
 typedef enum {
   SCALAR_METALNESS,

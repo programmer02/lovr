@@ -1,7 +1,7 @@
 #include "util.h"
 #include "types.h"
-#include "data/modelData.h"
 #include "graphics/opengl.h"
+#include "lib/gpu.h"
 #include "lib/map/map.h"
 
 #pragma once

@@ -14,6 +14,7 @@
 #include "data/textureData.h"
 #include "filesystem/filesystem.h"
 #include "util.h"
+#include "lib/gpu.h"
 #include "lib/err.h"
 #include <math.h>
 #include <stdbool.h>
@@ -977,7 +978,7 @@ static int l_lovrGraphicsNewShaderBlock(lua_State* L) {
 
   lovrAssert(type == BLOCK_UNIFORM || lovrGraphicsGetFeatures()->compute, "Compute blocks are not supported on this system");
   size_t size = lovrShaderComputeUniformLayout(&uniforms);
-  Buffer* buffer = lovrBufferCreate(size, NULL, type == BLOCK_COMPUTE ? BUFFER_SHADER_STORAGE : BUFFER_UNIFORM, usage, readable);
+  Buffer* buffer = lovrBufferInit(lovrNew(Buffer), size, NULL, type == BLOCK_COMPUTE ? BUFFER_SHADER_STORAGE : BUFFER_UNIFORM, usage, readable);
   ShaderBlock* block = lovrShaderBlockCreate(type, buffer, &uniforms);
   luax_pushobject(L, block);
   vec_deinit(&uniforms);
@@ -1058,7 +1059,7 @@ static int l_lovrGraphicsNewCanvas(lua_State* L) {
   }
 
   if (anonymous) {
-    Texture* texture = lovrTextureCreate(TEXTURE_2D, NULL, 0, true, flags.mipmaps, flags.msaa);
+    Texture* texture = lovrTextureInit(lovrNew(Texture), TEXTURE_2D, NULL, 0, true, flags.mipmaps, flags.msaa);
     lovrTextureAllocate(texture, width, height, 1, format);
     lovrTextureSetWrap(texture, (TextureWrap) { .s = WRAP_CLAMP, .t = WRAP_CLAMP, .r = WRAP_CLAMP });
     attachments[0] = (Attachment) { texture, 0, 0 };
@@ -1070,7 +1071,7 @@ static int l_lovrGraphicsNewCanvas(lua_State* L) {
     height = lovrTextureGetHeight(attachments[0].texture, attachments[0].level);
   }
 
-  Canvas* canvas = lovrCanvasCreate(width, height, flags);
+  Canvas* canvas = lovrCanvasInit(lovrNew(Canvas), width, height, flags);
 
   if (attachmentCount > 0) {
     lovrCanvasSetAttachments(canvas, attachments, attachmentCount);
@@ -1117,7 +1118,7 @@ static int l_lovrGraphicsNewMaterial(lua_State* L) {
   if (lua_type(L, index) == LUA_TSTRING) {
     Blob* blob = luax_readblob(L, index++, "Texture");
     TextureData* textureData = lovrTextureDataCreateFromBlob(blob, true);
-    Texture* texture = lovrTextureCreate(TEXTURE_2D, &textureData, 1, true, true, 0);
+    Texture* texture = lovrTextureInit(lovrNew(Texture), TEXTURE_2D, &textureData, 1, true, true, 0);
     lovrMaterialSetTexture(material, TEXTURE_DIFFUSE, texture);
     lovrRelease(Blob, blob);
     lovrRelease(TextureData, textureData);
@@ -1218,7 +1219,7 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
   DrawMode mode = luaL_checkoption(L, drawModeIndex, "fan", DrawModes);
   BufferUsage usage = luaL_checkoption(L, drawModeIndex + 1, "dynamic", BufferUsages);
   bool readable = lua_toboolean(L, drawModeIndex + 2);
-  Buffer* vertexBuffer = lovrBufferCreate(count * stride, NULL, BUFFER_VERTEX, usage, readable);
+  Buffer* vertexBuffer = lovrBufferInit(lovrNew(Buffer), count * stride, NULL, BUFFER_VERTEX, usage, readable);
   Mesh* mesh = lovrMeshCreate(mode, vertexBuffer, count);
 
   for (int i = 0; i < attributeCount; i++) {
@@ -1394,7 +1395,7 @@ static int l_lovrGraphicsNewTexture(lua_State* L) {
     lua_pop(L, 1);
   }
 
-  Texture* texture = lovrTextureCreate(type, NULL, 0, srgb, mipmaps, msaa);
+  Texture* texture = lovrTextureInit(lovrNew(Texture), type, NULL, 0, srgb, mipmaps, msaa);
   lovrTextureSetFilter(texture, lovrGraphicsGetDefaultFilter());
 
   if (blank) {

@@ -5,6 +5,7 @@
 #include "graphics/material.h"
 #include "graphics/mesh.h"
 #include "resources/shaders.h"
+#include "data/textureData.h"
 #include "lib/err.h"
 #include <float.h>
 
@@ -100,7 +101,7 @@ Model* lovrModelInit(Model* model, ModelData* data) {
 
           if (!model->buffers[attribute->buffer]) {
             ModelBuffer* buffer = &data->buffers[attribute->buffer];
-            model->buffers[attribute->buffer] = lovrBufferCreate(buffer->size, buffer->data, BUFFER_VERTEX, USAGE_STATIC, false);
+            model->buffers[attribute->buffer] = lovrBufferInit(lovrNew(Buffer), buffer->size, buffer->data, BUFFER_VERTEX, USAGE_STATIC, false);
           }
 
           lovrMeshAttachAttribute(model->meshes[i], lovrShaderAttributeNames[j], &(MeshAttribute) {
@@ -133,7 +134,7 @@ Model* lovrModelInit(Model* model, ModelData* data) {
 
         if (!model->buffers[attribute->buffer]) {
           ModelBuffer* buffer = &data->buffers[attribute->buffer];
-          model->buffers[attribute->buffer] = lovrBufferCreate(buffer->size, buffer->data, BUFFER_INDEX, USAGE_STATIC, false);
+          model->buffers[attribute->buffer] = lovrBufferInit(lovrNew(Buffer), buffer->size, buffer->data, BUFFER_INDEX, USAGE_STATIC, false);
         }
 
         usize indexSize = attribute->type == U16 ? 2 : 4;
@@ -169,7 +170,7 @@ Model* lovrModelInit(Model* model, ModelData* data) {
           if (!model->textures[index]) {
             TextureData* textureData = data->textures[index];
             bool srgb = j == TEXTURE_DIFFUSE || j == TEXTURE_EMISSIVE;
-            model->textures[index] = lovrTextureCreate(TEXTURE_2D, &textureData, 1, srgb, true, 0);
+            model->textures[index] = lovrTextureInit(lovrNew(Texture), TEXTURE_2D, &textureData, 1, srgb, true, 0);
             lovrTextureSetFilter(model->textures[index], data->materials[i].filters[j]);
             lovrTextureSetWrap(model->textures[index], data->materials[i].wraps[j]);
           }

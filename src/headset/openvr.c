@@ -1,4 +1,6 @@
 #include "headset/headset.h"
+#include "data/modelData.h"
+#include "data/textureData.h"
 #include "event/event.h"
 #include "graphics/graphics.h"
 #include "graphics/canvas.h"
@@ -386,8 +388,8 @@ static void renderTo(void (*callback)(void*), void* userdata) {
     u32 width, height;
     state.system->GetRecommendedRenderTargetSize(&width, &height);
     CanvasFlags flags = { .depth = { true, false, FORMAT_D24S8 }, .stereo = true, .mipmaps = true, .msaa = state.msaa };
-    state.canvas = lovrCanvasCreate(width * 2, height, flags);
-    Texture* texture = lovrTextureCreate(TEXTURE_2D, NULL, 0, true, true, state.msaa);
+    state.canvas = lovrCanvasInit(lovrNew(Canvas), width * 2, height, flags);
+    Texture* texture = lovrTextureInit(lovrNew(Texture), TEXTURE_2D, NULL, 0, true, true, state.msaa);
     lovrTextureAllocate(texture, width * 2, height, 1, FORMAT_RGBA);
     lovrTextureSetFilter(texture, lovrGraphicsGetDefaultFilter());
     lovrCanvasSetAttachments(state.canvas, &(Attachment) { texture, 0, 0 }, 1);
@@ -413,7 +415,7 @@ static void renderTo(void (*callback)(void*), void* userdata) {
 
   // Submit
   const Attachment* attachments = lovrCanvasGetAttachments(state.canvas, NULL);
-  ptrdiff_t id = attachments[0].texture->id;
+  ptrdiff_t id = lovrTextureGetHandle(attachments[0].texture);
   EColorSpace colorSpace = lovrGraphicsIsGammaCorrect() ? EColorSpace_ColorSpace_Linear : EColorSpace_ColorSpace_Gamma;
   Texture_t eyeTexture = { (void*) id, ETextureType_TextureType_OpenGL, colorSpace };
   VRTextureBounds_t left = { 0.f, 0.f, .5f, 1.f };

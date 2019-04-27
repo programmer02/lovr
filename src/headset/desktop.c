@@ -135,7 +135,7 @@ static bool vibrate(const char* path, f32 strength, f32 duration, f32 frequency)
   return false;
 }
 
-static ModelData* newModelData(const char* path) {
+static struct ModelData* newModelData(const char* path) {
   return NULL;
 }
 
