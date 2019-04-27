@@ -17,6 +17,11 @@ typedef float f32;
 typedef double f64;
 typedef unsigned bit;
 
+#define LOVR_VERSION_MAJOR 0
+#define LOVR_VERSION_MINOR 12
+#define LOVR_VERSION_PATCH 0
+#define LOVR_VERSION_ALIAS "Mushroom Detector"
+
 #define PI 3.14159265358979323846f
 #define MAX(a, b) (a > b ? a : b)
 #define MIN(a, b) (a < b ? a : b)
