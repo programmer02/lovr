@@ -5,6 +5,7 @@
 #include "resources/shaders.h"
 #include "lib/err.h"
 #include <math.h>
+#include <stdio.h>
 
 static usize getUniformTypeLength(const Uniform* uniform) {
   usize size = 0;

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "platform/log.c"
+
 bool lovrPlatformInit() {
   return true;
 }
