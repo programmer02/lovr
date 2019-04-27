@@ -29,7 +29,7 @@ static int l_lovrAnimatorReset(lua_State* L) {
 
 static int l_lovrAnimatorUpdate(lua_State* L) {
   Animator* animator = luax_checktype(L, 1, Animator);
-  f32 dt = luax_checkfloat(L, 2);
+  f32 dt = luax_checkf32(L, 2);
   lovrAnimatorUpdate(animator, dt);
   return 0;
 }
@@ -90,7 +90,7 @@ static int l_lovrAnimatorResume(lua_State* L) {
 static int l_lovrAnimatorSeek(lua_State* L) {
   Animator* animator = luax_checktype(L, 1, Animator);
   u32 animation = luax_checkanimation(L, 2, animator);
-  f32 time = luax_checkfloat(L, 3);
+  f32 time = luax_checkf32(L, 3);
   lovrAnimatorSeek(animator, animation, time);
   return 0;
 }
@@ -114,7 +114,7 @@ static int l_lovrAnimatorGetAlpha(lua_State* L) {
 static int l_lovrAnimatorSetAlpha(lua_State* L) {
   Animator* animator = luax_checktype(L, 1, Animator);
   u32 animation = luax_checkanimation(L, 2, animator);
-  f32 alpha = luax_checkfloat(L, 3);
+  f32 alpha = luax_checkf32(L, 3);
   lovrAnimatorSetAlpha(animator, animation, alpha);
   return 0;
 }
@@ -183,11 +183,11 @@ static int l_lovrAnimatorGetSpeed(lua_State* L) {
 static int l_lovrAnimatorSetSpeed(lua_State* L) {
   Animator* animator = luax_checktype(L, 1, Animator);
   if (lua_isnoneornil(L, 2)) {
-    f32 speed = luax_checkfloat(L, 2);
+    f32 speed = luax_checkf32(L, 2);
     lovrAnimatorSetSpeed(animator, ~0u, speed);
   } else {
     i32 animation = luax_checkanimation(L, 2, animator);
-    f32 speed = luax_checkfloat(L, 3);
+    f32 speed = luax_checkf32(L, 3);
     lovrAnimatorSetSpeed(animator, animation, speed);
   }
   return 0;

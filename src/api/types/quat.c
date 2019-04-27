@@ -10,10 +10,10 @@ int luax_readquat(lua_State* L, int index, quat q, const char* expected) {
       quat_set(q, 0, 0, 0, 0);
       return ++index;
     case LUA_TNUMBER:
-      angle = luax_optfloat(L, index++, 0.f);
-      ax = luax_optfloat(L, index++, 0.f);
-      ay = luax_optfloat(L, index++, 1.f);
-      az = luax_optfloat(L, index++, 0.f);
+      angle = luax_optf32(L, index++, 0.f);
+      ax = luax_optf32(L, index++, 0.f);
+      ay = luax_optf32(L, index++, 1.f);
+      az = luax_optf32(L, index++, 0.f);
       quat_fromAngleAxis(q, angle, ax, ay, az);
       return index;
     default:
@@ -48,9 +48,9 @@ int l_lovrQuatSet(lua_State* L) {
   } else if (lua_type(L, 2) == LUA_TNUMBER) {
     f32 x = lua_tonumber(L, 2);
     if (lua_type(L, 3) == LUA_TNUMBER) {
-      f32 y = luax_checkfloat(L, 3);
-      f32 z = luax_checkfloat(L, 4);
-      f32 w = luax_checkfloat(L, 5);
+      f32 y = luax_checkf32(L, 3);
+      f32 z = luax_checkf32(L, 4);
+      f32 w = luax_checkf32(L, 5);
       bool raw = lua_toboolean(L, 6);
       if (raw) {
         quat_set(q, x, y, z, w);
@@ -116,7 +116,7 @@ static int l_lovrQuatNormalize(lua_State* L) {
 static int l_lovrQuatSlerp(lua_State* L) {
   quat q = luax_checkmathtype(L, 1, MATH_QUAT, NULL);
   quat r = luax_checkmathtype(L, 2, MATH_QUAT, NULL);
-  f32 t = luax_checkfloat(L, 3);
+  f32 t = luax_checkf32(L, 3);
   quat_slerp(q, r, t);
   lua_settop(L, 1);
   return 1;

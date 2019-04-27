@@ -39,9 +39,9 @@ static void raycastCallback(Shape* shape, f32 x, f32 y, f32 z, f32 nx, f32 ny, f
 
 static int l_lovrWorldNewCollider(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 x = luax_optfloat(L, 2, 0.f);
-  f32 y = luax_optfloat(L, 3, 0.f);
-  f32 z = luax_optfloat(L, 4, 0.f);
+  f32 x = luax_optf32(L, 2, 0.f);
+  f32 y = luax_optf32(L, 3, 0.f);
+  f32 z = luax_optf32(L, 4, 0.f);
   Collider* collider = lovrColliderCreate(world, x, y, z);
   luax_pushobject(L, collider);
   lovrRelease(Collider, collider);
@@ -50,12 +50,12 @@ static int l_lovrWorldNewCollider(lua_State* L) {
 
 static int l_lovrWorldNewBoxCollider(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 x = luax_optfloat(L, 2, 0.f);
-  f32 y = luax_optfloat(L, 3, 0.f);
-  f32 z = luax_optfloat(L, 4, 0.f);
-  f32 sx = luax_optfloat(L, 5, 1.f);
-  f32 sy = luax_optfloat(L, 6, sx);
-  f32 sz = luax_optfloat(L, 7, sx);
+  f32 x = luax_optf32(L, 2, 0.f);
+  f32 y = luax_optf32(L, 3, 0.f);
+  f32 z = luax_optf32(L, 4, 0.f);
+  f32 sx = luax_optf32(L, 5, 1.f);
+  f32 sy = luax_optf32(L, 6, sx);
+  f32 sz = luax_optf32(L, 7, sx);
   Collider* collider = lovrColliderCreate(world, x, y, z);
   BoxShape* shape = lovrBoxShapeCreate(sx, sy, sz);
   lovrColliderAddShape(collider, shape);
@@ -67,11 +67,11 @@ static int l_lovrWorldNewBoxCollider(lua_State* L) {
 
 static int l_lovrWorldNewCapsuleCollider(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 x = luax_optfloat(L, 2, 0.f);
-  f32 y = luax_optfloat(L, 3, 0.f);
-  f32 z = luax_optfloat(L, 4, 0.f);
-  f32 radius = luax_optfloat(L, 5, 1.f);
-  f32 length = luax_optfloat(L, 6, 1.f);
+  f32 x = luax_optf32(L, 2, 0.f);
+  f32 y = luax_optf32(L, 3, 0.f);
+  f32 z = luax_optf32(L, 4, 0.f);
+  f32 radius = luax_optf32(L, 5, 1.f);
+  f32 length = luax_optf32(L, 6, 1.f);
   Collider* collider = lovrColliderCreate(world, x, y, z);
   CapsuleShape* shape = lovrCapsuleShapeCreate(radius, length);
   lovrColliderAddShape(collider, shape);
@@ -83,11 +83,11 @@ static int l_lovrWorldNewCapsuleCollider(lua_State* L) {
 
 static int l_lovrWorldNewCylinderCollider(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 x = luax_optfloat(L, 2, 0.f);
-  f32 y = luax_optfloat(L, 3, 0.f);
-  f32 z = luax_optfloat(L, 4, 0.f);
-  f32 radius = luax_optfloat(L, 5, 1.f);
-  f32 length = luax_optfloat(L, 6, 1.f);
+  f32 x = luax_optf32(L, 2, 0.f);
+  f32 y = luax_optf32(L, 3, 0.f);
+  f32 z = luax_optf32(L, 4, 0.f);
+  f32 radius = luax_optf32(L, 5, 1.f);
+  f32 length = luax_optf32(L, 6, 1.f);
   Collider* collider = lovrColliderCreate(world, x, y, z);
   CylinderShape* shape = lovrCylinderShapeCreate(radius, length);
   lovrColliderAddShape(collider, shape);
@@ -99,10 +99,10 @@ static int l_lovrWorldNewCylinderCollider(lua_State* L) {
 
 static int l_lovrWorldNewSphereCollider(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 x = luax_optfloat(L, 2, 0.f);
-  f32 y = luax_optfloat(L, 3, 0.f);
-  f32 z = luax_optfloat(L, 4, 0.f);
-  f32 radius = luax_optfloat(L, 5, 1.f);
+  f32 x = luax_optf32(L, 2, 0.f);
+  f32 y = luax_optf32(L, 3, 0.f);
+  f32 z = luax_optf32(L, 4, 0.f);
+  f32 radius = luax_optf32(L, 5, 1.f);
   Collider* collider = lovrColliderCreate(world, x, y, z);
   SphereShape* shape = lovrSphereShapeCreate(radius);
   lovrColliderAddShape(collider, shape);
@@ -121,7 +121,7 @@ static int l_lovrWorldDestroy(lua_State* L) {
 static int l_lovrWorldUpdate(lua_State* L) {
   lua_settop(L, 3);
   World* world = luax_checktype(L, 1, World);
-  f32 dt = luax_checkfloat(L, 2);
+  f32 dt = luax_checkf32(L, 2);
   CollisionResolver resolver = lua_type(L, 3) == LUA_TFUNCTION ? collisionResolver : NULL;
   lovrWorldUpdate(world, dt, resolver, L);
   return 0;
@@ -144,8 +144,8 @@ static int l_lovrWorldCollide(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
   Shape* a = luax_checktype(L, 2, Shape);
   Shape* b = luax_checktype(L, 3, Shape);
-  f32 friction = luax_optfloat(L, 4, -1.f);
-  f32 restitution = luax_optfloat(L, 5, -1.f);
+  f32 friction = luax_optf32(L, 4, -1.f);
+  f32 restitution = luax_optf32(L, 5, -1.f);
   lua_pushboolean(L, lovrWorldCollide(world, a, b, friction, restitution));
   return 1;
 }
@@ -162,9 +162,9 @@ static int l_lovrWorldGetGravity(lua_State* L) {
 
 static int l_lovrWorldSetGravity(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 x = luax_checkfloat(L, 2);
-  f32 y = luax_checkfloat(L, 3);
-  f32 z = luax_checkfloat(L, 4);
+  f32 x = luax_checkf32(L, 2);
+  f32 y = luax_checkf32(L, 3);
+  f32 z = luax_checkf32(L, 4);
   lovrWorldSetGravity(world, x, y, z);
   return 0;
 }
@@ -180,8 +180,8 @@ static int l_lovrWorldGetLinearDamping(lua_State* L) {
 
 static int l_lovrWorldSetLinearDamping(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 damping = luax_checkfloat(L, 2);
-  f32 threshold = luax_optfloat(L, 3, .01f);
+  f32 damping = luax_checkf32(L, 2);
+  f32 threshold = luax_optf32(L, 3, .01f);
   lovrWorldSetLinearDamping(world, damping, threshold);
   return 0;
 }
@@ -197,8 +197,8 @@ static int l_lovrWorldGetAngularDamping(lua_State* L) {
 
 static int l_lovrWorldSetAngularDamping(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 damping = luax_checkfloat(L, 2);
-  f32 threshold = luax_optfloat(L, 3, .01f);
+  f32 damping = luax_checkf32(L, 2);
+  f32 threshold = luax_optf32(L, 3, .01f);
   lovrWorldSetAngularDamping(world, damping, threshold);
   return 0;
 }
@@ -218,12 +218,12 @@ static int l_lovrWorldSetSleepingAllowed(lua_State* L) {
 
 static int l_lovrWorldRaycast(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
-  f32 x1 = luax_checkfloat(L, 2);
-  f32 y1 = luax_checkfloat(L, 3);
-  f32 z1 = luax_checkfloat(L, 4);
-  f32 x2 = luax_checkfloat(L, 5);
-  f32 y2 = luax_checkfloat(L, 6);
-  f32 z2 = luax_checkfloat(L, 7);
+  f32 x1 = luax_checkf32(L, 2);
+  f32 y1 = luax_checkf32(L, 3);
+  f32 z1 = luax_checkf32(L, 4);
+  f32 x2 = luax_checkf32(L, 5);
+  f32 y2 = luax_checkf32(L, 6);
+  f32 z2 = luax_checkf32(L, 7);
   luaL_checktype(L, 8, LUA_TFUNCTION);
   lua_settop(L, 8);
   lovrWorldRaycast(world, x1, y1, z1, x2, y2, z2, raycastCallback, L);

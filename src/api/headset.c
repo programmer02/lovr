@@ -109,8 +109,8 @@ static int l_lovrHeadsetGetClipDistance(lua_State* L) {
 }
 
 static int l_lovrHeadsetSetClipDistance(lua_State* L) {
-  f32 clipNear = luax_checkfloat(L, 1);
-  f32 clipFar = luax_checkfloat(L, 2);
+  f32 clipNear = luax_checkf32(L, 1);
+  f32 clipFar = luax_checkf32(L, 2);
   lovrHeadsetDriver->setClipDistance(clipNear, clipFar);
   return 0;
 }
@@ -296,9 +296,9 @@ int l_lovrHeadsetGetAxis(lua_State* L) {
 
 int l_lovrHeadsetVibrate(lua_State* L) {
   const char* path = luax_optpath(L, 1);
-  f32 strength = luax_optfloat(L, 2, 1.f);
-  f32 duration = luax_optfloat(L, 3, .5f);
-  f32 frequency = luax_optfloat(L, 4, 0.f);
+  f32 strength = luax_optf32(L, 2, 1.f);
+  f32 duration = luax_optf32(L, 3, .5f);
+  f32 frequency = luax_optf32(L, 4, 0.f);
   FOREACH_TRACKING_DRIVER(driver) {
     if (driver->vibrate(path, strength, duration, frequency)) {
       lua_pushboolean(L, true);
@@ -352,7 +352,7 @@ static int l_lovrHeadsetRenderTo(lua_State* L) {
 
 static int l_lovrHeadsetUpdate(lua_State* L) {
   if (lovrHeadsetDriver->update) {
-    lovrHeadsetDriver->update(luax_checkfloat(L, 1));
+    lovrHeadsetDriver->update(luax_checkf32(L, 1));
   }
 
   return 0;
@@ -423,7 +423,7 @@ int luaopen_lovr_headset(lua_State* L) {
 
     // Offset
     lua_getfield(L, -1, "offset");
-    offset = luax_optfloat(L, -1, 1.7f);
+    offset = luax_optf32(L, -1, 1.7f);
     lua_pop(L, 1);
 
     // MSAA

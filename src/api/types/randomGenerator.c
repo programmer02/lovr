@@ -79,8 +79,8 @@ int l_lovrRandomGeneratorRandom(lua_State* L) {
 
 int l_lovrRandomGeneratorRandomNormal(lua_State* L) {
   RandomGenerator* generator = luax_checktype(L, 1, RandomGenerator);
-  f32 sigma = luax_optfloat(L, 2, 1.f);
-  f32 mu = luax_optfloat(L, 3, 0.f);
+  f32 sigma = luax_optf32(L, 2, 1.f);
+  f32 mu = luax_optf32(L, 3, 0.f);
   lua_pushnumber(L, mu + lovrRandomGeneratorRandomNormal(generator) * sigma);
   return 1;
 }

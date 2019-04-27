@@ -41,7 +41,7 @@ static int l_lovrSoundDataGetSampleRate(lua_State* L) {
 static int l_lovrSoundDataSetSample(lua_State* L) {
   SoundData* soundData = luax_checktype(L, 1, SoundData);
   usize index = luax_checku32(L, 2);
-  f32 value = luax_checkfloat(L, 3);
+  f32 value = luax_checkf32(L, 3);
   lovrSoundDataSetSample(soundData, index, value);
   return 0;
 }

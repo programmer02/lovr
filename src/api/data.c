@@ -59,10 +59,10 @@ static int l_lovrDataNewRasterizer(lua_State* L) {
   f32 size;
 
   if (lua_type(L, 1) == LUA_TNUMBER || lua_isnoneornil(L, 1)) {
-    size = luax_optfloat(L, 1, 32.f);
+    size = luax_optf32(L, 1, 32.f);
   } else {
     blob = luax_readblob(L, 1, "Font");
-    size = luax_optfloat(L, 2, 32.f);
+    size = luax_optf32(L, 2, 32.f);
   }
 
   Rasterizer* rasterizer = lovrRasterizerCreate(blob, size);

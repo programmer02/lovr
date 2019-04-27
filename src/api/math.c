@@ -127,9 +127,9 @@ static int l_lovrMathNewRandomGenerator(lua_State* L) {
 }
 
 static int l_lovrMathLookAt(lua_State* L) {
-  f32 from[3] = { luax_checkfloat(L, 1), luax_checkfloat(L, 2), luax_checkfloat(L, 3) };
-  f32 to[3] = { luax_checkfloat(L, 4), luax_checkfloat(L, 5), luax_checkfloat(L, 6) };
-  f32 up[3] = { luax_optfloat(L, 7, 0.f), luax_optfloat(L, 8, 1.f), luax_optfloat(L, 9, 0.f) };
+  f32 from[3] = { luax_checkf32(L, 1), luax_checkf32(L, 2), luax_checkf32(L, 3) };
+  f32 to[3] = { luax_checkf32(L, 4), luax_checkf32(L, 5), luax_checkf32(L, 6) };
+  f32 up[3] = { luax_optf32(L, 7, 0.f), luax_optf32(L, 8, 1.f), luax_optf32(L, 9, 0.f) };
   f32 m[16], q[4], angle, ax, ay, az;
   mat4_lookAt(m, from, to, up);
   quat_fromMat4(q, m);
@@ -142,10 +142,10 @@ static int l_lovrMathLookAt(lua_State* L) {
 }
 
 static int l_lovrMathOrientationToDirection(lua_State* L) {
-  f32 angle = luax_checkfloat(L, 1.f);
-  f32 ax = luax_optfloat(L, 2, 0.f);
-  f32 ay = luax_optfloat(L, 3, 1.f);
-  f32 az = luax_optfloat(L, 4, 0.f);
+  f32 angle = luax_checkf32(L, 1.f);
+  f32 ax = luax_optf32(L, 2, 0.f);
+  f32 ay = luax_optf32(L, 3, 1.f);
+  f32 az = luax_optf32(L, 4, 0.f);
   f32 v[3];
   lovrMathOrientationToDirection(angle, ax, ay, az, v);
   lua_pushnumber(L, v[0]);
@@ -157,12 +157,12 @@ static int l_lovrMathOrientationToDirection(lua_State* L) {
 static int l_lovrMathNoise(lua_State* L) {
   switch (lua_gettop(L)) {
     case 0:
-    case 1: lua_pushnumber(L, lovrMathNoise1(luax_checkfloat(L, 1))); return 1;
-    case 2: lua_pushnumber(L, lovrMathNoise2(luax_checkfloat(L, 1), luax_checkfloat(L, 2))); return 1;
-    case 3: lua_pushnumber(L, lovrMathNoise3(luax_checkfloat(L, 1), luax_checkfloat(L, 2), luax_checkfloat(L, 3))); return 1;
+    case 1: lua_pushnumber(L, lovrMathNoise1(luax_checkf32(L, 1))); return 1;
+    case 2: lua_pushnumber(L, lovrMathNoise2(luax_checkf32(L, 1), luax_checkf32(L, 2))); return 1;
+    case 3: lua_pushnumber(L, lovrMathNoise3(luax_checkf32(L, 1), luax_checkf32(L, 2), luax_checkf32(L, 3))); return 1;
     case 4:
     default:
-      lua_pushnumber(L, lovrMathNoise4(luax_checkfloat(L, 1), luax_checkfloat(L, 2), luax_checkfloat(L, 3), luax_checkfloat(L, 4)));
+      lua_pushnumber(L, lovrMathNoise4(luax_checkf32(L, 1), luax_checkf32(L, 2), luax_checkf32(L, 3), luax_checkf32(L, 4)));
       return 1;
   }
 }
@@ -195,14 +195,14 @@ static int l_lovrMathGammaToLinear(lua_State* L) {
   if (lua_istable(L, 1)) {
     for (int i = 0; i < 3; i++) {
       lua_rawgeti(L, 1, i + 1);
-      lua_pushnumber(L, lovrMathGammaToLinear(luax_checkfloat(L, -1)));
+      lua_pushnumber(L, lovrMathGammaToLinear(luax_checkf32(L, -1)));
     }
     lua_pop(L, 3);
     return 3;
   } else {
     int n = CLAMP(lua_gettop(L), 1, 3);
     for (int i = 0; i < n; i++) {
-      lua_pushnumber(L, lovrMathGammaToLinear(luax_checkfloat(L, i + 1)));
+      lua_pushnumber(L, lovrMathGammaToLinear(luax_checkf32(L, i + 1)));
     }
     return n;
   }
@@ -212,14 +212,14 @@ static int l_lovrMathLinearToGamma(lua_State* L) {
   if (lua_istable(L, 1)) {
     for (int i = 0; i < 3; i++) {
       lua_rawgeti(L, 1, i + 1);
-      lua_pushnumber(L, lovrMathLinearToGamma(luax_checkfloat(L, -1)));
+      lua_pushnumber(L, lovrMathLinearToGamma(luax_checkf32(L, -1)));
     }
     lua_pop(L, 3);
     return 3;
   } else {
     int n = CLAMP(lua_gettop(L), 1, 3);
     for (int i = 0; i < n; i++) {
-      lua_pushnumber(L, lovrMathLinearToGamma(luax_checkfloat(L, i + 1)));
+      lua_pushnumber(L, lovrMathLinearToGamma(luax_checkf32(L, i + 1)));
     }
     return n;
   }

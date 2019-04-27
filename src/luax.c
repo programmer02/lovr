@@ -279,16 +279,16 @@ void luax_readcolor(lua_State* L, int index, Color* color) {
     for (i32 i = 1; i <= 4; i++) {
       lua_rawgeti(L, 1, i);
     }
-    color->r = luax_checkfloat(L, -4);
-    color->g = luax_checkfloat(L, -3);
-    color->b = luax_checkfloat(L, -2);
-    color->a = luax_optfloat(L, -1, 1.);
+    color->r = luax_checkf32(L, -4);
+    color->g = luax_checkf32(L, -3);
+    color->b = luax_checkf32(L, -2);
+    color->a = luax_optf32(L, -1, 1.);
     lua_pop(L, 4);
   } else if (lua_gettop(L) >= index + 2) {
-    color->r = luax_checkfloat(L, index);
-    color->g = luax_checkfloat(L, index + 1);
-    color->b = luax_checkfloat(L, index + 2);
-    color->a = luax_optfloat(L, index + 3, 1.);
+    color->r = luax_checkf32(L, index);
+    color->g = luax_checkf32(L, index + 1);
+    color->b = luax_checkf32(L, index + 2);
+    color->a = luax_optf32(L, index + 3, 1.);
   } else if (lua_gettop(L) == index) {
     u32 x = luax_checku32(L, index);
     color->r = ((x >> 16) & 0xff) / 255.f;

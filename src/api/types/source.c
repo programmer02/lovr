@@ -181,7 +181,7 @@ static int l_lovrSourceSeek(lua_State* L) {
   TimeUnit unit = luaL_checkoption(L, 3, "seconds", TimeUnits);
 
   if (unit == UNIT_SECONDS) {
-    f32 seconds = luax_checkfloat(L, 2);
+    f32 seconds = luax_checkf32(L, 2);
     u32 sampleRate = lovrSourceGetSampleRate(source);
     lovrSourceSeek(source, (u32) (seconds * sampleRate + .5f));
   } else {
@@ -193,18 +193,18 @@ static int l_lovrSourceSeek(lua_State* L) {
 
 static int l_lovrSourceSetCone(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  f32 innerAngle = luax_checkfloat(L, 1);
-  f32 outerAngle = luax_checkfloat(L, 2);
-  f32 outerGain = luax_checkfloat(L, 3);
+  f32 innerAngle = luax_checkf32(L, 1);
+  f32 outerAngle = luax_checkf32(L, 2);
+  f32 outerGain = luax_checkf32(L, 3);
   lovrSourceSetCone(source, innerAngle, outerAngle, outerGain);
   return 0;
 }
 
 static int l_lovrSourceSetFalloff(lua_State* L) {
   Source* source = luax_checktype(L, 1, Source);
-  f32 reference = luax_checkfloat(L, 2);
-  f32 max = luax_checkfloat(L, 3);
-  f32 rolloff = luax_checkfloat(L, 4);
+  f32 reference = luax_checkf32(L, 2);
+  f32 max = luax_checkf32(L, 3);
+  f32 rolloff = luax_checkf32(L, 4);
   lovrSourceSetFalloff(source, reference, max, rolloff);
   return 0;
 }
@@ -223,7 +223,7 @@ static int l_lovrSourceSetOrientation(lua_State* L) {
 }
 
 static int l_lovrSourceSetPitch(lua_State* L) {
-  lovrSourceSetPitch(luax_checktype(L, 1, Source), luax_checkfloat(L, 2));
+  lovrSourceSetPitch(luax_checktype(L, 1, Source), luax_checkf32(L, 2));
   return 0;
 }
 
@@ -262,12 +262,12 @@ static int l_lovrSourceSetVelocity(lua_State* L) {
 }
 
 static int l_lovrSourceSetVolume(lua_State* L) {
-  lovrSourceSetVolume(luax_checktype(L, 1, Source), luax_checkfloat(L, 2));
+  lovrSourceSetVolume(luax_checktype(L, 1, Source), luax_checkf32(L, 2));
   return 0;
 }
 
 static int l_lovrSourceSetVolumeLimits(lua_State* L) {
-  lovrSourceSetVolumeLimits(luax_checktype(L, 1, Source), luax_checkfloat(L, 2), luax_checkfloat(L, 3));
+  lovrSourceSetVolumeLimits(luax_checktype(L, 1, Source), luax_checkf32(L, 2), luax_checkf32(L, 3));
   return 0;
 }
 

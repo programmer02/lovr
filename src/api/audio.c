@@ -176,8 +176,8 @@ static int l_lovrAudioRewind(lua_State* L) {
 }
 
 static int l_lovrAudioSetDopplerEffect(lua_State* L) {
-  f32 factor = luax_optfloat(L, 1, 1.f);
-  f32 speedOfSound = luax_optfloat(L, 2, 343.29f);
+  f32 factor = luax_optf32(L, 1, 1.f);
+  f32 speedOfSound = luax_optf32(L, 2, 343.29f);
   lovrAudioSetDopplerEffect(factor, speedOfSound);
   return 0;
 }
@@ -214,7 +214,7 @@ static int l_lovrAudioSetVelocity(lua_State* L) {
 }
 
 static int l_lovrAudioSetVolume(lua_State* L) {
-  f32 volume = luax_checkfloat(L, 1);
+  f32 volume = luax_checkf32(L, 1);
   lovrAudioSetVolume(volume);
   return 0;
 }
