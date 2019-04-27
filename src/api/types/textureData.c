@@ -36,8 +36,8 @@ static int l_lovrTextureDataGetFormat(lua_State* L) {
 
 static int l_lovrTextureDataGetPixel(lua_State* L) {
   TextureData* textureData = luax_checktype(L, 1, TextureData);
-  int x = luaL_checkinteger(L, 2);
-  int y = luaL_checkinteger(L, 3);
+  u32 x = luax_checku32(L, 2);
+  u32 y = luax_checku32(L, 3);
   Color color = lovrTextureDataGetPixel(textureData, x, y);
   lua_pushnumber(L, color.r);
   lua_pushnumber(L, color.g);
@@ -48,8 +48,8 @@ static int l_lovrTextureDataGetPixel(lua_State* L) {
 
 static int l_lovrTextureDataSetPixel(lua_State* L) {
   TextureData* textureData = luax_checktype(L, 1, TextureData);
-  int x = luaL_checkinteger(L, 2);
-  int y = luaL_checkinteger(L, 3);
+  u32 x = luax_checku32(L, 2);
+  u32 y = luax_checku32(L, 3);
   Color color = {
     luax_optfloat(L, 4, 1.f),
     luax_optfloat(L, 5, 1.f),

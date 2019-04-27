@@ -33,7 +33,7 @@ static int l_lovrShaderBlockSend(lua_State* L) {
     const Uniform* uniform = lovrShaderBlockGetUniform(block, name);
     lovrAssert(uniform, "Unknown uniform for ShaderBlock '%s'", name);
     Buffer* buffer = lovrShaderBlockGetBuffer(block);
-    uint8_t* data = lovrBufferMap(buffer, uniform->offset);
+    u8* data = lovrBufferMap(buffer, uniform->offset);
     luax_checkuniform(L, 3, uniform, data, name);
     lovrBufferMarkRange(buffer, uniform->offset, uniform->size);
     return 0;
@@ -41,8 +41,8 @@ static int l_lovrShaderBlockSend(lua_State* L) {
     Blob* blob = luax_checktype(L, 1, Blob);
     Buffer* buffer = lovrShaderBlockGetBuffer(block);
     void* data = lovrBufferMap(buffer, 0);
-    size_t bufferSize = lovrBufferGetSize(buffer);
-    size_t copySize = MIN(bufferSize, blob->size);
+    usize bufferSize = lovrBufferGetSize(buffer);
+    usize copySize = MIN(bufferSize, blob->size);
     memcpy(data, blob->data, copySize);
     lovrBufferMarkRange(buffer, 0, copySize);
     lua_pushinteger(L, copySize);
@@ -57,8 +57,8 @@ static int l_lovrShaderBlockRead(lua_State* L) {
   lovrAssert(uniform, "Unknown uniform for ShaderBlock '%s'", name);
   Buffer* buffer = lovrShaderBlockGetBuffer(block);
   lovrAssert(lovrBufferIsReadable(buffer), "ShaderBlock:read requires the ShaderBlock to be created with the readable flag");
-  union { float* floats; int* ints; } data = { .floats = lovrBufferMap(buffer, uniform->offset) };
-  int components = uniform->components;
+  union { f32* floats; i32* ints; } data = { .floats = lovrBufferMap(buffer, uniform->offset) };
+  u32 components = uniform->components;
 
   if (uniform->type == UNIFORM_MATRIX) {
     components *= components;
@@ -80,7 +80,7 @@ static int l_lovrShaderBlockRead(lua_State* L) {
       }
     } else {
       lua_createtable(L, components, 0);
-      for (int j = 0; j < components; j++) {
+      for (u32 j = 0; j < components; j++) {
         switch (uniform->type) {
           case UNIFORM_FLOAT:
           case UNIFORM_MATRIX:
@@ -103,7 +103,7 @@ static int l_lovrShaderBlockRead(lua_State* L) {
 static int l_lovrShaderBlockGetShaderCode(lua_State* L) {
   ShaderBlock* block = luax_checktype(L, 1, ShaderBlock);
   const char* blockName = luaL_checkstring(L, 2);
-  size_t length;
+  usize length;
   char* code = lovrShaderBlockGetShaderCode(block, blockName, &length);
   lua_pushlstring(L, code, length);
   free(code);

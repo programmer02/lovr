@@ -208,7 +208,7 @@ static int l_lovrMeshSetVertex(lua_State* L) {
         case U16: *data.ubytes++ = luaL_optinteger(L, k, 0); break;
         case I32: *data.ints++ = luaL_optinteger(L, k, 0); break;
         case U32: *data.uints++ = luaL_optinteger(L, k, 0); break;
-        case F32: *data.floats++ = luaL_optnumber(L, k, 0.); break;
+        case F32: *data.floats++ = luax_optfloat(L, k, 0.); break;
       }
 
       if (table) {
@@ -270,7 +270,7 @@ static int l_lovrMeshSetVertexAttribute(lua_State* L) {
       case U16: *data.ushorts++ = luaL_optinteger(L, index, 0); break;
       case I32: *data.ints++ = luaL_optinteger(L, index, 0); break;
       case U32: *data.uints++ = luaL_optinteger(L, index, 0); break;
-      case F32: *data.floats++ = luaL_optnumber(L, index, 0.); break;
+      case F32: *data.floats++ = luax_optfloat(L, index, 0.); break;
     }
 
     if (table) {
@@ -286,8 +286,8 @@ static int l_lovrMeshSetVertices(lua_State* L) {
   u32 capacity = lovrMeshGetVertexCount(mesh);
   luaL_checktype(L, 2, LUA_TTABLE);
   u32 sourceSize = luax_len(L, 2);
-  u32 start = luaL_optinteger(L, 3, 1) - 1;
-  u32 count = luaL_optinteger(L, 4, sourceSize);
+  u32 start = luax_optu32(L, 3, 1) - 1;
+  u32 count = luax_optu32(L, 4, sourceSize);
   lovrAssert(start + count <= capacity, "Overflow in Mesh:setVertices: Mesh can only hold %d vertices", capacity);
   lovrAssert(count <= sourceSize, "Cannot set %d vertices on Mesh: source only has %d vertices", count, sourceSize);
 
@@ -318,7 +318,7 @@ static int l_lovrMeshSetVertices(lua_State* L) {
           case U16: *data.ushorts++ = luaL_optinteger(L, -1, 0); break;
           case I32: *data.ints++ = luaL_optinteger(L, -1, 0); break;
           case U32: *data.uints++ = luaL_optinteger(L, -1, 0); break;
-          case F32: *data.floats++ = luaL_optnumber(L, -1, 0.); break;
+          case F32: *data.floats++ = luax_optfloat(L, -1, 0.); break;
         }
 
         lua_pop(L, 1);
@@ -376,7 +376,7 @@ static int l_lovrMeshSetVertexMap(lua_State* L) {
 
   if (lua_type(L, 2) == LUA_TUSERDATA) {
     Blob* blob = luax_checktype(L, 2, Blob);
-    usize size = luaL_optinteger(L, 3, 4);
+    usize size = luax_optu32(L, 3, 4);
     lovrAssert(size == 2 || size == 4, "Size of Mesh indices should be 2 bytes or 4 bytes");
     lovrAssert(blob->size / size < UINT32_MAX, "Too many Mesh indices");
     u32 count = (u32) (blob->size / size);

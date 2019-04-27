@@ -275,7 +275,7 @@ void luax_readcolor(lua_State* L, int index, Color* color) {
   color->r = color->g = color->b = color->a = 1.f;
 
   if (lua_istable(L, 1)) {
-    for (int i = 1; i <= 4; i++) {
+    for (i32 i = 1; i <= 4; i++) {
       lua_rawgeti(L, 1, i);
     }
     color->r = luax_checkfloat(L, -4);
@@ -289,7 +289,7 @@ void luax_readcolor(lua_State* L, int index, Color* color) {
     color->b = luax_checkfloat(L, index + 2);
     color->a = luax_optfloat(L, index + 3, 1.);
   } else if (lua_gettop(L) == index) {
-    uint32_t x = luaL_checkinteger(L, index);
+    u32 x = luax_checku32(L, index);
     color->r = ((x >> 16) & 0xff) / 255.f;
     color->g = ((x >> 8) & 0xff) / 255.f;
     color->b = ((x >> 0) & 0xff) / 255.f;

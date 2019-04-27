@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "util.h"
 
 #pragma once
 
@@ -58,10 +59,10 @@ extern const TypeInfo lovrTypeInfo[T_MAX];
 
 typedef struct Ref {
   Type type;
-  unsigned int count;
+  u32 count;
 } Ref;
 
-Ref* _lovrAlloc(size_t size, Type type);
+Ref* _lovrAlloc(usize size, Type type);
 
 #define lovrAlloc(T) (T*) _lovrAlloc(sizeof(T), T_ ## T)
 #define lovrNew(T) (T*) _lovrAlloc(sizeof_ ## T, T_ ## T)

@@ -63,7 +63,7 @@ int l_lovrMat4Set(lua_State* L) {
   mat4 m = luax_checkmathtype(L, 1, MATH_MAT4, NULL);
   if (lua_gettop(L) >= 17) {
     for (usize i = 2; i <= 17; i++) {
-      *m++ = luaL_checknumber(L, i);
+      *m++ = luax_checkfloat(L, i);
     }
   } else {
     luax_readmat4(L, 2, m, 3);
@@ -143,9 +143,9 @@ static int l_lovrMat4Mul(lua_State* L) {
     lua_settop(L, 2);
     return 1;
   } else if (lua_type(L, 2) == LUA_TNUMBER) {
-    f32 x = luaL_checknumber(L, 2);
-    f32 y = luaL_optnumber(L, 3, 0.f);
-    f32 z = luaL_optnumber(L, 4, 0.f);
+    f32 x = luax_checkfloat(L, 2);
+    f32 y = luax_optfloat(L, 3, 0.f);
+    f32 z = luax_optfloat(L, 4, 0.f);
     mat4_transform(m, &x, &y, &z);
     lua_pushnumber(L, x);
     lua_pushnumber(L, y);

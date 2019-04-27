@@ -204,7 +204,7 @@ const char* WrapModes[] = {
   NULL
 };
 
-static uint32_t luax_getvertexcount(lua_State* L, int index) {
+static u32 luax_getvertexcount(lua_State* L, int index) {
   int type = lua_type(L, index);
   if (type == LUA_TTABLE) {
     int count = luax_len(L, index);
@@ -219,13 +219,13 @@ static uint32_t luax_getvertexcount(lua_State* L, int index) {
   }
 }
 
-static void luax_readvertices(lua_State* L, int index, float* v, uint32_t count) {
+static void luax_readvertices(lua_State* L, int index, f32* v, u32 count) {
   switch (lua_type(L, index)) {
     case LUA_TTABLE:
       lua_rawgeti(L, index, 1);
       if (lua_type(L, -1) == LUA_TNUMBER) {
         lua_pop(L, 1);
-        for (uint32_t i = 0; i < count; i++) {
+        for (u32 i = 0; i < count; i++) {
           for (int j = 0; j < 3; j++) {
             lua_rawgeti(L, index, 3 * i + j + 1);
             v[j] = lua_tonumber(L, -1);
@@ -236,7 +236,7 @@ static void luax_readvertices(lua_State* L, int index, float* v, uint32_t count)
         }
       } else {
         lua_pop(L, 1);
-        for (uint32_t i = 0; i < count; i++) {
+        for (u32 i = 0; i < count; i++) {
           lua_rawgeti(L, index, i + 1);
           vec3_init(v, luax_checkmathtype(L, -1, MATH_VEC3, NULL));
           lua_pop(L, 1);
@@ -247,8 +247,8 @@ static void luax_readvertices(lua_State* L, int index, float* v, uint32_t count)
       break;
 
     case LUA_TNUMBER:
-      for (uint32_t i = 0; i < count; i++) {
-        for (int j = 0; j < 3; j++) {
+      for (u32 i = 0; i < count; i++) {
+        for (u32 j = 0; j < 3; j++) {
           v[j] = lua_tonumber(L, index + 3 * i + j);
         }
         v[3] = v[4] = v[5] = v[6] = v[7] = 0.f;
@@ -257,7 +257,7 @@ static void luax_readvertices(lua_State* L, int index, float* v, uint32_t count)
       break;
 
     default:
-      for (uint32_t i = 0; i < count; i++) {
+      for (u32 i = 0; i < count; i++) {
         vec3_init(v, luax_checkmathtype(L, index + i, MATH_VEC3, NULL));
         v[3] = v[4] = v[5] = v[6] = v[7] = 0.f;
         v += 8;
@@ -296,11 +296,11 @@ static int l_lovrGraphicsCreateWindow(lua_State* L) {
   luaL_checktype(L, 1, LUA_TTABLE);
 
   lua_getfield(L, 1, "width");
-  flags.width = luaL_optinteger(L, -1, 1080);
+  flags.width = luax_optu32(L, -1, 1080);
   lua_pop(L, 1);
 
   lua_getfield(L, 1, "height");
-  flags.height = luaL_optinteger(L, -1, 600);
+  flags.height = luax_optu32(L, -1, 600);
   lua_pop(L, 1);
 
   lua_getfield(L, 1, "fullscreen");
@@ -500,7 +500,7 @@ static int l_lovrGraphicsGetDefaultFilter(lua_State* L) {
 
 static int l_lovrGraphicsSetDefaultFilter(lua_State* L) {
   FilterMode mode = luaL_checkoption(L, 1, NULL, FilterModes);
-  float anisotropy = luax_optfloat(L, 2, 1.f);
+  f32 anisotropy = luax_optfloat(L, 2, 1.f);
   lovrGraphicsSetDefaultFilter((TextureFilter) { .mode = mode, .anisotropy = anisotropy });
   return 0;
 }
@@ -545,7 +545,7 @@ static int l_lovrGraphicsGetLineWidth(lua_State* L) {
 }
 
 static int l_lovrGraphicsSetLineWidth(lua_State* L) {
-  uint8_t width = (uint8_t) luaL_optinteger(L, 1, 1);
+  u8 width = (u8) luaL_optinteger(L, 1, 1);
   lovrGraphicsSetLineWidth(width);
   return 0;
 }
@@ -556,7 +556,7 @@ static int l_lovrGraphicsGetPointSize(lua_State* L) {
 }
 
 static int l_lovrGraphicsSetPointSize(lua_State* L) {
-  float size = luax_optfloat(L, 1, 1.f);
+  f32 size = luax_optfloat(L, 1, 1.f);
   lovrGraphicsSetPointSize(size);
   return 0;
 }
@@ -631,35 +631,35 @@ static int l_lovrGraphicsOrigin(lua_State* L) {
 }
 
 static int l_lovrGraphicsTranslate(lua_State* L) {
-  float translation[3];
+  f32 translation[3];
   luax_readvec3(L, 1, translation, NULL);
   lovrGraphicsTranslate(translation);
   return 0;
 }
 
 static int l_lovrGraphicsRotate(lua_State* L) {
-  float rotation[4];
+  f32 rotation[4];
   luax_readquat(L, 1, rotation, NULL);
   lovrGraphicsRotate(rotation);
   return 0;
 }
 
 static int l_lovrGraphicsScale(lua_State* L) {
-  float scale[3];
+  f32 scale[3];
   luax_readscale(L, 1, scale, 3, NULL);
   lovrGraphicsScale(scale);
   return 0;
 }
 
 static int l_lovrGraphicsTransform(lua_State* L) {
-  float transform[16];
+  f32 transform[16];
   luax_readmat4(L, 1, transform, 3);
   lovrGraphicsMatrixTransform(transform);
   return 0;
 }
 
 static int l_lovrGraphicsSetProjection(lua_State* L) {
-  float transform[16];
+  f32 transform[16];
   luax_readmat4(L, 1, transform, 3);
   lovrGraphicsSetProjection(transform);
   return 0;
@@ -730,16 +730,16 @@ static int l_lovrGraphicsFlush(lua_State* L) {
 }
 
 static int l_lovrGraphicsPoints(lua_State* L) {
-  float* vertices;
-  uint32_t count = luax_getvertexcount(L, 1);
+  f32* vertices;
+  u32 count = luax_getvertexcount(L, 1);
   lovrGraphicsPoints(count, &vertices);
   luax_readvertices(L, 1, vertices, count);
   return 0;
 }
 
 static int l_lovrGraphicsLine(lua_State* L) {
-  float* vertices;
-  uint32_t count = luax_getvertexcount(L, 1);
+  f32* vertices;
+  u32 count = luax_getvertexcount(L, 1);
   lovrGraphicsLine(count, &vertices);
   luax_readvertices(L, 1, vertices, count);
   return 0;
@@ -754,8 +754,8 @@ static int l_lovrGraphicsTriangle(lua_State* L) {
     style = luaL_checkoption(L, 1, NULL, DrawStyles);
   }
 
-  float* vertices;
-  uint32_t count = luax_getvertexcount(L, 2);
+  f32* vertices;
+  u32 count = luax_getvertexcount(L, 2);
   lovrAssert(count % 3 == 0, "Triangle vertex count must be a multiple of 3");
   lovrGraphicsTriangle(style, material, count, &vertices);
   luax_readvertices(L, 2, vertices, count);
@@ -770,12 +770,12 @@ static int l_lovrGraphicsPlane(lua_State* L) {
   } else {
     style = luaL_checkoption(L, 1, NULL, DrawStyles);
   }
-  float transform[16];
+  f32 transform[16];
   int index = luax_readmat4(L, 2, transform, 2);
-  float u = luax_optfloat(L, index++, 0.f);
-  float v = luax_optfloat(L, index++, 0.f);
-  float w = luax_optfloat(L, index++, 1.f - u);
-  float h = luax_optfloat(L, index++, 1.f - v);
+  f32 u = luax_optfloat(L, index++, 0.f);
+  f32 v = luax_optfloat(L, index++, 0.f);
+  f32 w = luax_optfloat(L, index++, 1.f - u);
+  f32 h = luax_optfloat(L, index++, 1.f - v);
   lovrGraphicsPlane(style, material, transform, u, v, w, h);
   return 0;
 }
@@ -788,7 +788,7 @@ static int luax_rectangularprism(lua_State* L, int scaleComponents) {
   } else {
     style = luaL_checkoption(L, 1, NULL, DrawStyles);
   }
-  float transform[16];
+  f32 transform[16];
   luax_readmat4(L, 2, transform, scaleComponents);
   lovrGraphicsBox(style, material, transform);
   return 0;
@@ -815,11 +815,11 @@ static int l_lovrGraphicsArc(lua_State* L) {
   if (lua_type(L, index) == LUA_TSTRING) {
     mode = luaL_checkoption(L, index++, NULL, ArcModes);
   }
-  float transform[16];
+  f32 transform[16];
   index = luax_readmat4(L, index, transform, 1);
-  float r1 = luax_optfloat(L, index++, 0.f);
-  float r2 = luax_optfloat(L, index++, 2.f * M_PI);
-  int segments = luaL_optinteger(L, index, 64) * (MIN(fabsf(r2 - r1), 2 * M_PI) / (2 * M_PI));
+  f32 r1 = luax_optfloat(L, index++, 0.f);
+  f32 r2 = luax_optfloat(L, index++, 2.f * M_PI);
+  u32 segments = luax_optu32(L, index, 64) * (MIN(fabsf(r2 - r1), 2 * M_PI) / (2 * M_PI));
   lovrGraphicsArc(style, mode, material, transform, r1, r2, segments);
   return 0;
 }
@@ -832,52 +832,52 @@ static int l_lovrGraphicsCircle(lua_State* L) {
   } else {
     style = luaL_checkoption(L, 1, NULL, DrawStyles);
   }
-  float transform[16];
+  f32 transform[16];
   int index = luax_readmat4(L, 2, transform, 1);
-  int segments = luaL_optinteger(L, index, 32);
+  u32 segments = luax_optu32(L, index, 32);
   lovrGraphicsCircle(style, material, transform, segments);
   return 0;
 }
 
 static int l_lovrGraphicsCylinder(lua_State* L) {
-  float transform[16];
+  f32 transform[16];
   int index = 1;
   Material* material = lua_isuserdata(L, index) ? luax_checktype(L, index++, Material) : NULL;
   index = luax_readmat4(L, index, transform, 1);
-  float r1 = luax_optfloat(L, index++, 1.f);
-  float r2 = luax_optfloat(L, index++, 1.f);
+  f32 r1 = luax_optfloat(L, index++, 1.f);
+  f32 r2 = luax_optfloat(L, index++, 1.f);
   bool capped = lua_isnoneornil(L, index) ? true : lua_toboolean(L, index++);
-  int segments = luaL_optinteger(L, index, (lua_Integer) floorf(16 + 16 * MAX(r1, r2)));
+  u32 segments = luax_optu32(L, index, (lua_Integer) floorf(16 + 16 * MAX(r1, r2)));
   lovrGraphicsCylinder(material, transform, r1, r2, capped, segments);
   return 0;
 }
 
 static int l_lovrGraphicsSphere(lua_State* L) {
-  float transform[16];
+  f32 transform[16];
   int index = 1;
   Material* material = lua_isuserdata(L, index) ? luax_checktype(L, index++, Material) : NULL;
   index = luax_readmat4(L, index, transform, 1);
-  int segments = luaL_optinteger(L, index, 30);
+  u32 segments = luax_optu32(L, index, 30);
   lovrGraphicsSphere(material, transform, segments);
   return 0;
 }
 
 static int l_lovrGraphicsSkybox(lua_State* L) {
   Texture* texture = luax_checktexture(L, 1);
-  float angle = luax_optfloat(L, 2, 0.f);
-  float ax = luax_optfloat(L, 3, 0.f);
-  float ay = luax_optfloat(L, 4, 1.f);
-  float az = luax_optfloat(L, 5, 0.f);
+  f32 angle = luax_optfloat(L, 2, 0.f);
+  f32 ax = luax_optfloat(L, 3, 0.f);
+  f32 ay = luax_optfloat(L, 4, 1.f);
+  f32 az = luax_optfloat(L, 5, 0.f);
   lovrGraphicsSkybox(texture, angle, ax, ay, az);
   return 0;
 }
 
 static int l_lovrGraphicsPrint(lua_State* L) {
-  size_t length;
+  usize length;
   const char* str = luaL_checklstring(L, 1, &length);
-  float transform[16];
+  f32 transform[16];
   int index = luax_readmat4(L, 2, transform, 1);
-  float wrap = luax_optfloat(L, index++, 0.f);
+  f32 wrap = luax_optfloat(L, index++, 0.f);
   HorizontalAlign halign = luaL_checkoption(L, index++, "center", HorizontalAligns);
   VerticalAlign valign = luaL_checkoption(L, index++, "middle", VerticalAligns);
   lovrGraphicsPrint(str, length, transform, wrap, halign, valign);
@@ -900,19 +900,19 @@ static int l_lovrGraphicsStencil(lua_State* L) {
 
 static int l_lovrGraphicsFill(lua_State* L) {
   Texture* texture = lua_isnoneornil(L, 1) ? NULL : luax_checktexture(L, 1);
-  float u = luax_optfloat(L, 2, 0.f);
-  float v = luax_optfloat(L, 3, 0.f);
-  float w = luax_optfloat(L, 4, 1.f - u);
-  float h = luax_optfloat(L, 5, 1.f - v);
+  f32 u = luax_optfloat(L, 2, 0.f);
+  f32 v = luax_optfloat(L, 3, 0.f);
+  f32 w = luax_optfloat(L, 4, 1.f - u);
+  f32 h = luax_optfloat(L, 5, 1.f - v);
   lovrGraphicsFill(texture, u, v, w, h);
   return 0;
 }
 
 static int l_lovrGraphicsCompute(lua_State* L) {
   Shader* shader = luax_checktype(L, 1, Shader);
-  int x = luaL_optinteger(L, 2, 1);
-  int y = luaL_optinteger(L, 3, 1);
-  int z = luaL_optinteger(L, 4, 1);
+  u32 x = luax_optu32(L, 2, 1);
+  u32 y = luax_optu32(L, 3, 1);
+  u32 z = luax_optu32(L, 4, 1);
   lovrGraphicsCompute(shader, x, y, z);
   return 0;
 }
@@ -952,7 +952,7 @@ static int l_lovrGraphicsNewShaderBlock(lua_State* L) {
       lua_pop(L, 1);
 
       lua_rawgeti(L, -1, 2);
-      uniform.count = luaL_optinteger(L, -1, 1);
+      uniform.count = luax_optu32(L, -1, 1);
       lua_pop(L, 1);
     }
 
@@ -977,7 +977,7 @@ static int l_lovrGraphicsNewShaderBlock(lua_State* L) {
   }
 
   lovrAssert(type == BLOCK_UNIFORM || lovrGraphicsGetFeatures()->compute, "Compute blocks are not supported on this system");
-  size_t size = lovrShaderComputeUniformLayout(&uniforms);
+  usize size = lovrShaderComputeUniformLayout(&uniforms);
   Buffer* buffer = lovrBufferInit(lovrNew(Buffer), size, NULL, type == BLOCK_COMPUTE ? BUFFER_SHADER_STORAGE : BUFFER_UNIFORM, usage, readable);
   ShaderBlock* block = lovrShaderBlockCreate(type, buffer, &uniforms);
   luax_pushobject(L, block);
@@ -990,8 +990,8 @@ static int l_lovrGraphicsNewShaderBlock(lua_State* L) {
 static int l_lovrGraphicsNewCanvas(lua_State* L) {
   Attachment attachments[MAX_CANVAS_ATTACHMENTS];
   u32 attachmentCount = 0;
-  int width = 0;
-  int height = 0;
+  u32 width = 0;
+  u32 height = 0;
   int index;
 
   if (luax_totype(L, 1, Texture)) {
@@ -1004,8 +1004,8 @@ static int l_lovrGraphicsNewCanvas(lua_State* L) {
     luax_readattachments(L, 1, attachments, &attachmentCount);
     index = 2;
   } else {
-    width = luaL_checkinteger(L, 1);
-    height = luaL_checkinteger(L, 2);
+    width = luax_checku32(L, 1);
+    height = luax_checku32(L, 2);
     index = 3;
   }
 
@@ -1043,7 +1043,7 @@ static int l_lovrGraphicsNewCanvas(lua_State* L) {
     lua_pop(L, 1);
 
     lua_getfield(L, index, "msaa");
-    flags.msaa = lua_isnil(L, -1) ? flags.msaa : luaL_checkinteger(L, -1);
+    flags.msaa = lua_isnil(L, -1) ? flags.msaa : luax_checku32(L, -1);
     lua_pop(L, 1);
 
     lua_getfield(L, index, "mipmaps");
@@ -1090,13 +1090,13 @@ static int l_lovrGraphicsNewFont(lua_State* L) {
 
   if (!rasterizer) {
     Blob* blob = NULL;
-    float size;
+    f32 size;
 
     if (lua_type(L, 1) == LUA_TNUMBER || lua_isnoneornil(L, 1)) {
-      size = luaL_optinteger(L, 1, 32);
+      size = luax_optfloat(L, 1, 32.f);
     } else {
       blob = luax_readblob(L, 1, "Font");
-      size = luaL_optinteger(L, 2, 32);
+      size = luax_optfloat(L, 2, 32.f);
     }
 
     rasterizer = lovrRasterizerCreate(blob, size);
@@ -1141,31 +1141,31 @@ static int l_lovrGraphicsNewMaterial(lua_State* L) {
 }
 
 static int l_lovrGraphicsNewMesh(lua_State* L) {
-  uint32_t count;
+  u32 count;
   int dataIndex = 0;
   int formatIndex = 0;
   int drawModeIndex = 2;
   Blob* blob = NULL;
 
   if (lua_isnumber(L, 1)) {
-    count = lua_tointeger(L, 1);
+    count = luax_checku32(L, 1);
   } else if (lua_istable(L, 1)) {
     if (lua_isnumber(L, 2)) {
       drawModeIndex++;
       formatIndex = 1;
-      count = lua_tointeger(L, 2);
+      count = luax_checku32(L, 2);
       dataIndex = 0;
     } else if (lua_istable(L, 2)) {
       drawModeIndex++;
       formatIndex = 1;
-      count = luax_len(L, 2);
+      count = lua_objlen(L, 2);
       dataIndex = 2;
     } else if ((blob = luax_totype(L, 2, Blob)) != NULL) {
       drawModeIndex++;
       formatIndex = 1;
       dataIndex = 2;
     } else {
-      count = luax_len(L, 1);
+      count = lua_objlen(L, 1);
       dataIndex = 1;
     }
   } else {
@@ -1175,8 +1175,8 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
 
   MeshAttribute attributes[MAX_ATTRIBUTES];
   const char* attributeNames[MAX_ATTRIBUTES];
-  int attributeCount = 0;
-  size_t stride = 0;
+  u32 attributeCount = 0;
+  usize stride = 0;
 
   if (formatIndex == 0) {
     stride = 32;
@@ -1188,9 +1188,9 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
     attributeNames[1] = "lovrNormal";
     attributeNames[2] = "lovrTexCoord";
   } else {
-    attributeCount = luax_len(L, formatIndex);
+    attributeCount = lua_objlen(L, formatIndex);
     lovrAssert(attributeCount >= 0 && attributeCount <= MAX_ATTRIBUTES, "Attribute count must be between 0 and %d", MAX_ATTRIBUTES);
-    for (int i = 0; i < attributeCount; i++) {
+    for (u32 i = 0; i < attributeCount; i++) {
       lua_rawgeti(L, formatIndex, i + 1);
       lovrAssert(lua_type(L, -1) == LUA_TTABLE, "Attribute definitions must be tables containing name, type, and component count");
       lua_rawgeti(L, -1, 3);
@@ -1198,7 +1198,7 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
       lua_rawgeti(L, -3, 1);
 
       attributeNames[i] = lua_tostring(L, -1);
-      attributes[i].offset = (uint32_t) stride;
+      attributes[i].offset = (u32) stride;
       attributes[i].type = luaL_checkoption(L, -2, "float", AttributeTypes);
       attributes[i].components = luaL_optinteger(L, -3, 1);
 
@@ -1213,7 +1213,7 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
 
   if (blob) {
     lovrAssert(blob->size / stride < UINT32_MAX, "Too many vertices in Blob");
-    count = (uint32_t) (blob->size / stride);
+    count = (u32) (blob->size / stride);
   }
 
   DrawMode mode = luaL_checkoption(L, drawModeIndex, "fan", DrawModes);
@@ -1222,7 +1222,7 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
   Buffer* vertexBuffer = lovrBufferInit(lovrNew(Buffer), count * stride, NULL, BUFFER_VERTEX, usage, readable);
   Mesh* mesh = lovrMeshCreate(mode, vertexBuffer, count);
 
-  for (int i = 0; i < attributeCount; i++) {
+  for (u32 i = 0; i < attributeCount; i++) {
     lovrMeshAttachAttribute(mesh, attributeNames[i], &(MeshAttribute) {
       .buffer = vertexBuffer,
       .offset = attributes[i].offset,
@@ -1247,14 +1247,14 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
     if (blob) {
       memcpy(data.raw, blob->data, count * stride);
     } else {
-      for (uint32_t i = 0; i < count; i++) {
+      for (u32 i = 0; i < count; i++) {
         lua_rawgeti(L, dataIndex, i + 1);
         lovrAssert(lua_istable(L, -1), "Vertices should be specified as a table of tables");
 
         int component = 0;
-        for (int j = 0; j < attributeCount; j++) {
+        for (u32 j = 0; j < attributeCount; j++) {
           MeshAttribute* attribute = &attributes[j];
-          for (unsigned k = 0; k < attribute->components; k++) {
+          for (u32 k = 0; k < attribute->components; k++) {
             lua_rawgeti(L, -1, ++component);
             switch (attribute->type) {
               case I8: *data.bytes++ = luaL_optinteger(L, -1, 0); break;
@@ -1263,7 +1263,7 @@ static int l_lovrGraphicsNewMesh(lua_State* L) {
               case U16: *data.ushorts++ = luaL_optinteger(L, -1, 0); break;
               case I32: *data.ints++ = luaL_optinteger(L, -1, 0); break;
               case U32: *data.uints++ = luaL_optinteger(L, -1, 0); break;
-              case F32: *data.floats++ = luaL_optnumber(L, -1, 0.); break;
+              case F32: *data.floats++ = luax_optfloat(L, -1, 0.); break;
             }
             lua_pop(L, 1);
           }
@@ -1315,7 +1315,7 @@ static void luax_readshadersource(lua_State* L, int index) {
     return;
   }
 
-  size_t bytesRead;
+  usize bytesRead;
   char* contents = lovrFilesystemRead(source, -1, &bytesRead);
   lovrAssert(bytesRead > 0, "Could not read shader from file '%s'", source);
   lua_pushlstring(L, contents, bytesRead);
@@ -1351,9 +1351,9 @@ static int l_lovrGraphicsNewTexture(lua_State* L) {
   TextureType type = TEXTURE_2D;
 
   if (blank) {
-    width = lua_tointeger(L, index++);
-    height = luaL_checkinteger(L, index++);
-    depth = lua_type(L, index) == LUA_TNUMBER ? lua_tonumber(L, index++) : 0;
+    width = luax_checku32(L, index++);
+    height = luax_checku32(L, index++);
+    depth = lua_type(L, index) == LUA_TNUMBER ? luax_checku32(L, index++) : 0;
     lovrAssert(width > 0 && height > 0, "A Texture must have a positive width, height, and depth");
   } else if (argType != LUA_TTABLE) {
     lua_createtable(L, 1, 0);
@@ -1363,7 +1363,7 @@ static int l_lovrGraphicsNewTexture(lua_State* L) {
     depth = 1;
     index++;
   } else {
-    depth = luax_len(L, index++);
+    depth = lua_objlen(L, index++);
     type = depth > 0 ? TEXTURE_ARRAY : TEXTURE_CUBE;
   }
 
@@ -1371,7 +1371,7 @@ static int l_lovrGraphicsNewTexture(lua_State* L) {
   bool srgb = !blank;
   bool mipmaps = true;
   TextureFormat format = FORMAT_RGBA;
-  int msaa = 0;
+  u32 msaa = 0;
 
   if (hasFlags) {
     lua_getfield(L, index, "linear");
@@ -1391,7 +1391,7 @@ static int l_lovrGraphicsNewTexture(lua_State* L) {
     lua_pop(L, 1);
 
     lua_getfield(L, index, "msaa");
-    msaa = lua_isnil(L, -1) ? msaa : luaL_checkinteger(L, -1);
+    msaa = lua_isnil(L, -1) ? msaa : luax_checku32(L, -1);
     lua_pop(L, 1);
   }
 
@@ -1405,7 +1405,7 @@ static int l_lovrGraphicsNewTexture(lua_State* L) {
     if (type == TEXTURE_CUBE && depth == 0) {
       depth = 6;
       const char* faces[6] = { "right", "left", "top", "bottom", "back", "front" };
-      for (int i = 0; i < 6; i++) {
+      for (u32 i = 0; i < 6; i++) {
         lua_pushstring(L, faces[i]);
         lua_rawget(L, 1);
         lua_rawseti(L, 1, i + 1);

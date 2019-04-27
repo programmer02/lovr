@@ -12,7 +12,7 @@ struct Color;
 #define LUA_RIDX_MAINTHREAD 1
 #endif
 
-#define luax_len(L, i) (int) lua_objlen(L, i)
+#define luax_len(L, i) (i32) lua_objlen(L, i)
 #define luax_registertype(L, T) _luax_registertype(L, #T, lovr ## T)
 #define luax_extendtype(L, S, T) _luax_extendtype(L, #T, lovr ## S, lovr ## T)
 #define luax_totype(L, i, T) ((T*) _luax_totype(L, i, T_ ## T))

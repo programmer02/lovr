@@ -5,7 +5,7 @@
 #include "lib/err.h"
 
 u32 luax_optmipmap(lua_State* L, int index, Texture* texture) {
-  u32 mipmap = luaL_optinteger(L, index, 1);
+  u32 mipmap = luax_optu32(L, index, 1);
   lovrAssert(mipmap >= 1 && mipmap <= lovrTextureGetMipmapCount(texture), "Invalid mipmap %d\n", mipmap);
   return mipmap - 1;
 }

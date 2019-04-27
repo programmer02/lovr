@@ -22,7 +22,7 @@ typedef vec_t(objGroup) vec_group_t;
 #define STARTS_WITH(a, b) !strncmp(a, b, strlen(b))
 
 static void parseMtl(char* path, vec_void_t* textures, vec_material_t* materials, map_int_t* names, char* base) {
-  size_t length = 0;
+  usize length = 0;
   char* data = lovrFilesystemRead(path, -1, &length);
   lovrAssert(data && length > 0, "Unable to read mtl from '%s'", path);
   char* s = data;

@@ -317,8 +317,8 @@ static ModelData* newModelData(const char* path) {
 
   model->buffers[1] = (ModelBuffer) {
     .data = (char*) vrModel->rIndexData,
-    .size = vrModel->unTriangleCount * 3 * sizeof(uint16_t),
-    .stride = sizeof(uint16_t)
+    .size = vrModel->unTriangleCount * 3 * sizeof(u16),
+    .stride = sizeof(u16)
   };
 
   model->attributes[0] = (ModelAttribute) {
