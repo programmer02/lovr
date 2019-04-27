@@ -5,6 +5,10 @@
 #include "platform/glfw.h"
 #include "platform/log.c"
 
+const char* lovrPlatformGetName() {
+  return "Linux";
+}
+
 void lovrPlatformSleep(double seconds) {
   usleep((unsigned int) (seconds * 1000000));
 }

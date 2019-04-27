@@ -61,6 +61,7 @@ void lovrWarnv(const char* format, va_list args);
 
 bool lovrPlatformInit(void);
 void lovrPlatformDestroy(void);
+const char* lovrPlatformGetName();
 void lovrPlatformPollEvents(void);
 double lovrPlatformGetTime(void);
 void lovrPlatformSetTime(double t);
