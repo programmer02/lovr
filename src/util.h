@@ -23,11 +23,9 @@ typedef float f32;
 typedef double f64;
 typedef unsigned bit;
 
-typedef char test_sizeof_int[sizeof(int) == sizeof(i32)];
-
 #define PI 3.14159265358979323846f
 #define MAX(a, b) (a > b ? a : b)
 #define MIN(a, b) (a < b ? a : b)
 #define CLAMP(x, min, max) MAX(min, MIN(max, x))
 #define ALIGN(p, n) ((uintptr_t) (p) & -n)
-#define PRINT_SIZEOF(T) int(*_o)[sizeof(T)]=1
+#define PRINT_SIZEOF(T) i32(*_o)[sizeof(T)]=1
