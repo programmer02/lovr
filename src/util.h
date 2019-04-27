@@ -31,5 +31,3 @@ typedef char test_sizeof_int[sizeof(int) == sizeof(i32)];
 #define CLAMP(x, min, max) MAX(min, MIN(max, x))
 #define ALIGN(p, n) ((uintptr_t) (p) & -n)
 #define PRINT_SIZEOF(T) int(*_o)[sizeof(T)]=1
-
-typedef struct Color { float r, g, b, a; } Color;

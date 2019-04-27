@@ -1,5 +1,6 @@
 #include "luax.h"
 #include "platform.h"
+#include "lib/gpu.h"
 #include "lib/err.h"
 #include "lib/sds/sds.h"
 #include <stdlib.h>

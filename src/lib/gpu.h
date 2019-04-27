@@ -4,6 +4,8 @@
 
 struct Texture;
 
+typedef struct Color { float r, g, b, a; } Color;
+
 typedef enum {
   DRAW_POINTS,
   DRAW_LINES,
