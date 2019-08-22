@@ -1,0 +1,15 @@
+include_rules
+
+SRC_y += api.c l_lovr.c
+SRC_@(AUDIO) += l_audio.c l_microphone.c l_source.c
+SRC_@(DATA) += l_data.c l_audioStream.c l_blob.c l_modelData.c l_rasterizer.c l_soundData.c l_textureData.c
+SRC_@(EVENT) += l_event.c
+SRC_@(FILESYSTEM) += l_filesystem.c
+SRC_@(GRAPHICS) += l_graphics.c l_canvas.c l_font.c l_material.c l_mesh.c l_model.c l_shader.c l_shaderBlock.c l_texture.c
+SRC_@(HEADSET) += l_headset.c
+SRC_@(MATH) += l_math.c l_curve.c l_randomGenerator.c l_vectors.c
+SRC_@(PHYSICS) += l_physics.c l_collider.c l_joints.c l_shapes.c l_world.c
+SRC_@(THREAD) += l_thread_module.c l_channel.c l_thread.c
+SRC_@(TIMER) += l_timer.c
+
+: foreach $(SRC_y) |> !compile |>
