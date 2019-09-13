@@ -12,7 +12,7 @@ void luax_pushshape(lua_State* L, Shape* shape) {
 
 Shape* luax_checkshape(lua_State* L, int index) {
   Proxy* p = lua_touserdata(L, index);
-  if (!p || (p->hash != hash("SphereShape") && p->hash != hash("BoxShape") && p->hash != hash("CapsuleShape") && p->hash != hash("CylinderShape"))) {
+  if (!p || (p->hash != HASH("SphereShape") && p->hash != HASH("BoxShape") && p->hash != HASH("CapsuleShape") && p->hash != HASH("CylinderShape"))) {
     luaL_typerror(L, index, "Shape");
     return NULL;
   }

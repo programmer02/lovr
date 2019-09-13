@@ -101,7 +101,7 @@ typedef struct {
   void* object;
 } Proxy;
 
-static inline uint32_t hash(const char* str) {
+static inline uint32_t HASH(const char* str) {
   uint32_t x = 0;
   while (*str) {
     x = (x * 65599) + *str++;
@@ -115,9 +115,9 @@ static inline uint32_t hash(const char* str) {
 
 #define luax_len(L, i) (int) lua_objlen(L, i)
 #define luax_registertype(L, T) _luax_registertype(L, #T, lovr ## T, lovr ## T ## Destroy)
-#define luax_totype(L, i, T) (T*) _luax_totype(L, i, hash(#T))
-#define luax_checktype(L, i, T) (T*) _luax_checktype(L, i, hash(#T), #T)
-#define luax_pushtype(L, T, o) _luax_pushtype(L, #T, hash(#T), o)
+#define luax_totype(L, i, T) (T*) _luax_totype(L, i, HASH(#T))
+#define luax_checktype(L, i, T) (T*) _luax_checktype(L, i, HASH(#T), #T)
+#define luax_pushtype(L, T, o) _luax_pushtype(L, #T, HASH(#T), o)
 #define luax_checkfloat(L, i) (float) luaL_checknumber(L, i)
 #define luax_optfloat(L, i, x) (float) luaL_optnumber(L, i, x)
 #define luax_geterror(L) lua_getfield(L, LUA_REGISTRYINDEX, "_lovrerror")
