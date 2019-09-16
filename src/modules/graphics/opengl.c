@@ -8,6 +8,7 @@
 #include "graphics/texture.h"
 #include "resources/shaders.h"
 #include "data/modelData.h"
+#include "core/hash.h"
 #include "core/ref.h"
 #include "lib/map/map.h"
 #include <math.h>
@@ -1844,7 +1845,7 @@ static void lovrShaderSetupUniforms(Shader* shader) {
   int32_t blockCount;
   glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCKS, &blockCount);
   lovrAssert((size_t) blockCount <= MAX_BLOCK_BUFFERS, "Shader has too many uniform blocks (%d) the max is %d", blockCount, MAX_BLOCK_BUFFERS);
-  map_init(&shader->blockMap);
+  map_init(&shader->blockMap, blockCount);
   arr_block_t* uniformBlocks = &shader->blocks[BLOCK_UNIFORM];
   arr_init(uniformBlocks);
   arr_reserve(uniformBlocks, (size_t) blockCount);
@@ -1852,10 +1853,11 @@ static void lovrShaderSetupUniforms(Shader* shader) {
     UniformBlock block = { .slot = i, .source = NULL };
     glUniformBlockBinding(program, i, block.slot);
 
+    GLsizei length;
     char name[LOVR_MAX_UNIFORM_LENGTH];
-    glGetActiveUniformBlockName(program, i, LOVR_MAX_UNIFORM_LENGTH, NULL, name);
+    glGetActiveUniformBlockName(program, i, LOVR_MAX_UNIFORM_LENGTH, &length, name);
     int blockId = (i << 1) + BLOCK_UNIFORM;
-    map_set(&shader->blockMap, name, blockId);
+    map_set(&shader->blockMap, hash64(name, length), blockId);
     arr_push(uniformBlocks, block);
     arr_init(&uniformBlocks->data[uniformBlocks->length - 1].uniforms);
   }
@@ -1876,10 +1878,11 @@ static void lovrShaderSetupUniforms(Shader* shader) {
       glShaderStorageBlockBinding(program, i, block.slot);
       arr_init(&block.uniforms);
 
+      GLsizei length;
       char name[LOVR_MAX_UNIFORM_LENGTH];
-      glGetProgramResourceName(program, GL_SHADER_STORAGE_BLOCK, i, LOVR_MAX_UNIFORM_LENGTH, NULL, name);
+      glGetProgramResourceName(program, GL_SHADER_STORAGE_BLOCK, i, LOVR_MAX_UNIFORM_LENGTH, &length, name);
       int blockId = (i << 1) + BLOCK_COMPUTE;
-      map_set(&shader->blockMap, name, blockId);
+      map_set(&shader->blockMap, hash64(name, length), blockId);
       arr_push(computeBlocks, block);
     }
 
@@ -1913,14 +1916,14 @@ static void lovrShaderSetupUniforms(Shader* shader) {
   int32_t uniformCount;
   int textureSlot = 0;
   int imageSlot = 0;
-  map_init(&shader->uniformMap);
-  arr_init(&shader->uniforms);
-  arr_reserve(&shader->uniforms, 4);
   glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniformCount);
+  map_init(&shader->uniformMap, 0);
+  arr_init(&shader->uniforms);
   for (uint32_t i = 0; i < (uint32_t) uniformCount; i++) {
     Uniform uniform;
     GLenum glType;
-    glGetActiveUniform(program, i, LOVR_MAX_UNIFORM_LENGTH, NULL, &uniform.count, &glType, uniform.name);
+    GLsizei length;
+    glGetActiveUniform(program, i, LOVR_MAX_UNIFORM_LENGTH, &length, &uniform.count, &glType, uniform.name);
 
     char* subscript = strchr(uniform.name, '[');
     if (subscript) {
@@ -2021,7 +2024,7 @@ static void lovrShaderSetupUniforms(Shader* shader) {
       offset += uniform.components * (uniform.type == UNIFORM_MATRIX ? uniform.components : 1);
     }
 
-    map_set(&shader->uniformMap, uniform.name, (int) shader->uniforms.length);
+    map_set(&shader->uniformMap, hash64(uniform.name, length), shader->uniforms.length);
     arr_push(&shader->uniforms, uniform);
     textureSlot += uniform.type == UNIFORM_SAMPLER ? uniform.count : 0;
     imageSlot += uniform.type == UNIFORM_IMAGE ? uniform.count : 0;
@@ -2126,13 +2129,14 @@ Shader* lovrShaderInitGraphics(Shader* shader, const char* vertexSource, const c
   // Attribute cache
   int32_t attributeCount;
   glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &attributeCount);
-  map_init(&shader->attributes);
+  map_init(&shader->attributes, 0);
   for (int i = 0; i < attributeCount; i++) {
     char name[LOVR_MAX_ATTRIBUTE_LENGTH];
     GLint size;
     GLenum type;
-    glGetActiveAttrib(program, i, LOVR_MAX_ATTRIBUTE_LENGTH, NULL, &size, &type, name);
-    map_set(&shader->attributes, name, glGetAttribLocation(program, name));
+    GLsizei length;
+    glGetActiveAttrib(program, i, LOVR_MAX_ATTRIBUTE_LENGTH, &length, &size, &type, name);
+    map_set(&shader->attributes, hash64(name, length), glGetAttribLocation(program, name));
   }
 
   shader->multiview = multiview;
@@ -2176,9 +2180,9 @@ void lovrShaderDestroy(void* ref) {
   arr_free(&shader->uniforms);
   arr_free(&shader->blocks[BLOCK_UNIFORM]);
   arr_free(&shader->blocks[BLOCK_COMPUTE]);
-  map_deinit(&shader->attributes);
-  map_deinit(&shader->uniformMap);
-  map_deinit(&shader->blockMap);
+  map_free(&shader->attributes);
+  map_free(&shader->uniformMap);
+  map_free(&shader->blockMap);
 }
 
 // Mesh
@@ -2189,7 +2193,7 @@ Mesh* lovrMeshInit(Mesh* mesh, DrawMode mode, Buffer* vertexBuffer, uint32_t ver
   mesh->vertexCount = vertexCount;
   lovrRetain(mesh->vertexBuffer);
   glGenVertexArrays(1, &mesh->vao);
-  map_init(&mesh->attributeMap);
+  map_init(&mesh->attributeMap, MAX_ATTRIBUTES);
   memset(mesh->locations, 0xff, MAX_ATTRIBUTES * sizeof(uint8_t));
   return mesh;
 }
@@ -2201,7 +2205,7 @@ void lovrMeshDestroy(void* ref) {
   for (uint32_t i = 0; i < mesh->attributeCount; i++) {
     lovrRelease(Buffer, mesh->attributes[i].buffer);
   }
-  map_deinit(&mesh->attributeMap);
+  map_free(&mesh->attributeMap);
   lovrRelease(Buffer, mesh->vertexBuffer);
   lovrRelease(Buffer, mesh->indexBuffer);
   lovrRelease(Material, mesh->material);

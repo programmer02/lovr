@@ -3,6 +3,7 @@
 #include "graphics/buffer.h"
 #include "math/math.h"
 #include "resources/shaders.h"
+#include "core/hash.h"
 #include "core/ref.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -77,30 +78,26 @@ ShaderType lovrShaderGetType(Shader* shader) {
 }
 
 int lovrShaderGetAttributeLocation(Shader* shader, const char* name) {
-  int* location = map_get(&shader->attributes, name);
-  return location ? *location : -1;
+  uint64_t location = map_get(&shader->attributes, hash64(name, strlen(name)));
+  return location == MAP_NIL ? (int) location : -1;
 }
 
 bool lovrShaderHasUniform(Shader* shader, const char* name) {
-  return map_get(&shader->uniformMap, name) != NULL;
+  return map_get(&shader->uniformMap, hash64(name, strlen(name))) != MAP_NIL;
 }
 
 const Uniform* lovrShaderGetUniform(Shader* shader, const char* name) {
-  size_t* index = map_get(&shader->uniformMap, name);
-  if (!index) {
-    return false;
-  }
-
-  return &shader->uniforms.data[*index];
+  uint64_t index = map_get(&shader->uniformMap, hash64(name, strlen(name)));
+  return index == MAP_NIL ? NULL : &shader->uniforms.data[index];
 }
 
 static void lovrShaderSetUniform(Shader* shader, const char* name, UniformType type, void* data, int start, int count, int size, const char* debug) {
-  size_t* index = map_get(&shader->uniformMap, name);
-  if (!index) {
+  uint64_t index = map_get(&shader->uniformMap, hash(name, strlen(name)));
+  if (index == MAP_NIL) {
     return;
   }
 
-  Uniform* uniform = &shader->uniforms.data[*index];
+  Uniform* uniform = &shader->uniforms.data[index];
   lovrAssert(uniform->type == type, "Unable to send %ss to uniform %s", debug, name);
   lovrAssert((start + count) * size <= uniform->size, "Too many %ss for uniform %s, maximum is %d", debug, name, uniform->size / size);
 
@@ -248,10 +245,8 @@ char* lovrShaderBlockGetShaderCode(ShaderBlock* block, const char* blockName, si
 }
 
 const Uniform* lovrShaderBlockGetUniform(ShaderBlock* block, const char* name) {
-  size_t* index = map_get(&block->uniformMap, name);
-  if (!index) return NULL;
-
-  return &block->uniforms.data[*index];
+  uint64_t index = map_get(&block->uniformMap, hash64(name, strlen(name)));
+  return index == MAP_NIL ? NULL : &block->uniforms.data[index];
 }
 
 Buffer* lovrShaderBlockGetBuffer(ShaderBlock* block) {

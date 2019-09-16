@@ -6,7 +6,6 @@
 #include "core/maf.h"
 #include "core/map.h"
 #include "core/ref.h"
-#include "lib/map/map.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -35,7 +34,7 @@ static void parseMtl(char* path, arr_texturedata_t* textures, arr_material_t* ma
     if (STARTS_WITH(s, "newmtl ")) {
       char name[128];
       size_t length = sscanf(s + 7, "%s\n%n", name, &lineLength);
-      lovrAssert(hasName, "Bad OBJ: Expected a material name");
+      lovrAssert(length > 0, "Bad OBJ: Expected a material name");
       map_set(names, hash64(name, length), materials->length);
       arr_push(materials, ((ModelMaterial) {
         .scalars[SCALAR_METALNESS] = 1.f,

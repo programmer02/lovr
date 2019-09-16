@@ -1,5 +1,6 @@
 #include "data/rasterizer.h"
-#include "lib/map/map.h"
+#include "core/arr.h"
+#include "core/map.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -7,8 +8,6 @@
 
 struct Rasterizer;
 struct Texture;
-
-typedef map_t(Glyph) map_glyph_t;
 
 typedef enum {
   ALIGN_LEFT,
@@ -29,14 +28,15 @@ typedef struct {
   uint32_t height;
   uint32_t rowHeight;
   uint32_t padding;
-  map_glyph_t glyphs;
+  arr_t(Glyph) glyphs;
+  map_t glyphMap;
 } FontAtlas;
 
 typedef struct Font {
   struct Rasterizer* rasterizer;
   struct Texture* texture;
   FontAtlas atlas;
-  map_int_t kerning;
+  map_t kerning;
   float lineHeight;
   float pixelDensity;
   bool flip;
