@@ -2,6 +2,7 @@
 #include "data/blob.h"
 #include "data/textureData.h"
 #include "filesystem/filesystem.h"
+#include "core/hash.h"
 #include "core/maf.h"
 #include "core/ref.h"
 #include "lib/jsmn/jsmn.h"
@@ -633,9 +634,7 @@ ModelData* lovrModelDataInitGltf(ModelData* model, Blob* source) {
           token += NOM_VALUE(json, token);
         } else if (STR_EQ(key, "name")) {
           gltfString name = NOM_STR(json, token);
-          name.data[name.length] = '\0';
-          map_set(&model->animationMap, name.data, model->animationCount - i);
-          name.data[name.length] = '"';
+          map_set(&model->animationMap, hash64(name.data, name.length), model->animationCount - i);
         } else {
           token += NOM_VALUE(json, token);
         }
@@ -726,9 +725,7 @@ ModelData* lovrModelDataInitGltf(ModelData* model, Blob* source) {
           material->colors[COLOR_EMISSIVE].b = NOM_FLOAT(json, token);
         } else if (STR_EQ(key, "name")) {
           gltfString name = NOM_STR(json, token);
-          name.data[name.length] = '\0';
-          map_set(&model->materialMap, name.data, model->materialCount - i);
-          name.data[name.length] = '"';
+          map_set(&model->materialMap, hash64(name.data, name.length), model->materialCount - i);
         } else {
           token += NOM_VALUE(json, token);
         }
@@ -846,9 +843,7 @@ ModelData* lovrModelDataInitGltf(ModelData* model, Blob* source) {
           scale[2] = NOM_FLOAT(json, token);
         } else if (STR_EQ(key, "name")) {
           gltfString name = NOM_STR(json, token);
-          name.data[name.length] = '\0';
-          map_set(&model->nodeMap, name.data, model->nodeCount - i);
-          name.data[name.length] = '"';
+          map_set(&model->nodeMap, hash64(name.data, name.length), model->nodeCount - i);
         } else {
           token += NOM_VALUE(json, token);
         }

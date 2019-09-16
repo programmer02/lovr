@@ -1,5 +1,5 @@
 #include "util.h"
-#include "lib/map/map.h"
+#include "core/map.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -172,8 +172,6 @@ typedef struct {
   float* inverseBindMatrices;
 } ModelSkin;
 
-typedef map_t(uint32_t) map_u32_t;
-
 typedef struct ModelData {
   void* data;
   struct Blob** blobs;
@@ -204,9 +202,9 @@ typedef struct ModelData {
   uint32_t childCount;
   uint32_t jointCount;
 
-  map_u32_t animationMap;
-  map_u32_t materialMap;
-  map_u32_t nodeMap;
+  map_t animationMap;
+  map_t materialMap;
+  map_t nodeMap;
 } ModelData;
 
 ModelData* lovrModelDataInit(ModelData* model, struct Blob* blob);
