@@ -2,6 +2,7 @@
 #include "graphics/buffer.h"
 #include "graphics/graphics.h"
 #include "graphics/material.h"
+#include "core/hash.h"
 #include "core/ref.h"
 #include <stdlib.h>
 
@@ -45,38 +46,41 @@ void lovrMeshDetachAttribute(Mesh* mesh, const char* name) {
   MeshAttribute* attribute = &mesh->attributes[index];
   lovrGraphicsFlushMesh(mesh);
   lovrRelease(Buffer, attribute->buffer);
-  map_remove(&mesh->attributeMap, name);
-  mesh->attributeNames[*index][0] = '\0';
-  memmove(mesh->attributeNames + *index, mesh->attributeNames + *index + 1, (mesh->attributeCount - *index - 1) * MAX_ATTRIBUTE_NAME_LENGTH * sizeof(char));
-  memmove(mesh->attributes + *index, mesh->attributes + *index + 1, (mesh->attributeCount - *index - 1) * sizeof(MeshAttribute));
+  map_remove(&mesh->attributeMap, hash);
+  mesh->attributeNames[index][0] = '\0';
+  memmove(mesh->attributeNames + index, mesh->attributeNames + index + 1, (mesh->attributeCount - index - 1) * MAX_ATTRIBUTE_NAME_LENGTH * sizeof(char));
+  memmove(mesh->attributes + index, mesh->attributes + index + 1, (mesh->attributeCount - index - 1) * sizeof(MeshAttribute));
   mesh->attributeCount--;
   for (uint32_t i = 0; i < MAX_ATTRIBUTES; i++) {
-    if (mesh->locations[i] > *index) {
+    if (mesh->locations[i] > index) {
       mesh->locations[i]--;
-    } else if (mesh->locations[i] == *index) {
+    } else if (mesh->locations[i] == index) {
       mesh->locations[i] = 0xff;
     }
   }
 }
 
 const MeshAttribute* lovrMeshGetAttribute(Mesh* mesh, const char* name) {
-  int* index = map_get(&mesh->attributeMap, name);
-  return index ? &mesh->attributes[*index] : NULL;
+  uint64_t hash = hash64(name, strlen(name));
+  uint64_t index = map_get(&mesh->attributeMap, hash);
+  return index == MAP_NIL ? NULL : &mesh->attributes[index];
 }
 
 bool lovrMeshIsAttributeEnabled(Mesh* mesh, const char* name) {
-  int* index = map_get(&mesh->attributeMap, name);
-  lovrAssert(index, "Mesh does not have an attribute named '%s'", name);
-  return !mesh->attributes[*index].disabled;
+  uint64_t hash = hash64(name, strlen(name));
+  uint64_t index = map_get(&mesh->attributeMap, hash);
+  lovrAssert(index != MAP_NIL, "Mesh does not have an attribute named '%s'", name);
+  return !mesh->attributes[index].disabled;
 }
 
 void lovrMeshSetAttributeEnabled(Mesh* mesh, const char* name, bool enable) {
   bool disable = !enable;
-  int* index = map_get(&mesh->attributeMap, name);
-  lovrAssert(index, "Mesh does not have an attribute named '%s'", name);
-  if (mesh->attributes[*index].disabled != disable) {
+  uint64_t hash = hash64(name, strlen(name));
+  uint64_t index = map_get(&mesh->attributeMap, hash);
+  lovrAssert(index != MAP_NIL, "Mesh does not have an attribute named '%s'", name);
+  if (mesh->attributes[index].disabled != disable) {
     lovrGraphicsFlushMesh(mesh);
-    mesh->attributes[*index].disabled = disable;
+    mesh->attributes[index].disabled = disable;
   }
 }
 

@@ -57,7 +57,6 @@ typedef struct {
   uint32_t head;
   uint32_t tail;
   uint64_t nanoseconds;
-  bool active;
 } Timer;
 
 static struct {
@@ -92,6 +91,7 @@ static struct {
   arr_t(void*) incoherents[MAX_BARRIERS];
   QueryPool queryPool;
   arr_t(Timer) timers;
+  uint32_t activeTimer;
   map_t timerMap;
   GpuFeatures features;
   GpuLimits limits;
@@ -1105,6 +1105,7 @@ void lovrGpuInit(getProcAddressProc getProcAddress) {
   lovrTextureSetFilter(state.defaultTexture, (TextureFilter) { .mode = FILTER_NEAREST });
   lovrTextureSetWrap(state.defaultTexture, (TextureWrap) { WRAP_CLAMP, WRAP_CLAMP, WRAP_CLAMP });
   lovrRelease(TextureData, textureData);
+  state.activeTimer = ~0u;
 }
 
 void lovrGpuDestroy() {
@@ -1270,6 +1271,7 @@ void lovrGpuDirtyTexture() {
 
 void lovrGpuTick(const char* label) {
 #ifndef LOVR_WEBGL
+  lovrAssert(state.activeTimer == ~0u, "Attempt to start a new GPU timer while one is already active!");
   uint64_t hash = hash64(label, strlen(label));
   uint64_t index = map_get(&state.timerMap, hash);
 
@@ -1281,10 +1283,7 @@ void lovrGpuTick(const char* label) {
   }
 
   Timer* timer = &state.timers.data[index];
-
-  if (timer->active) {
-    // Already active, panic!!! or something
-  }
+  state.activeTimer = index;
 
   // The pool manages one allocation, where the first half is a contiguous list of queries and
   // the second half is a contiguous list of query indices.  The queries are contiguous so that
@@ -1313,7 +1312,6 @@ void lovrGpuTick(const char* label) {
   pool->next = pool->chain[query];
   pool->chain[timer->tail] = query;
   pool->chain[query] = ~0u;
-  timer->active = true;
   timer->tail = query;
 #endif
 }
@@ -1329,13 +1327,14 @@ double lovrGpuTock(const char* label) {
 
   Timer* timer = &state.timers.data[index];
 
-  if (!timer->active) {
+  if (state.activeTimer != index) {
     return timer->nanoseconds / 1e9;
   }
 
-  glEndQuery(GL_TIME_ELAPSED); // Hmmm maybe we should just have one global active query w/ its hash
+  glEndQuery(GL_TIME_ELAPSED);
+  state.activeTimer = ~0u;
 
-  while (1) {
+  while (timer->head != ~0u) {
     GLuint available;
     glGetQueryObjectuiv(state.queryPool.queries[timer->head], GL_QUERY_RESULT_AVAILABLE, &available);
 

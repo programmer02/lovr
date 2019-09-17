@@ -1,7 +1,16 @@
 #include "map.h"
+#include "util.h"
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
+
+static uint32_t floor2(uint32_t x) {
+  if (x == 0) return 1;
+#ifdef _WIN32
+  return 1 << (31 - _BitScanForward(x));
+#else
+  return 1 << (31 - __builtin_clz(x));
+#endif
+}
 
 static void map_rehash(map_t* map) {
   map_t old = *map;
@@ -36,19 +45,7 @@ static LOVR_INLINE uint64_t map_find(map_t* map, uint64_t hash) {
 }
 
 void map_init(map_t* map, uint32_t n) {
-
-  // Round down to a power of 2 (size gets doubled in map_rehash)
-  if (n == 0) {
-    n = 1;
-  } else {
-#ifdef _WIN32
-    // TODO
-#else
-    n = 1 << (31 - __builtin_clz(n));
-#endif
-  }
-
-  map->size = n;
+  map->size = floor2(n);
   map->used = 0;
   map->hashes = NULL;
   map_rehash(map);
@@ -73,4 +70,30 @@ void map_set(map_t* map, uint64_t hash, uint64_t value) {
   map->used++;
   map->hashes[h] = hash;
   map->values[h] = value;
+}
+
+void map_remove(map_t* map, uint64_t hash) {
+  uint64_t h = map_find(map, hash);
+
+  if (map->hashes[h] == MAP_NIL) {
+    return;
+  }
+
+  uint64_t mask = map->size - 1;
+  uint64_t i = h;
+
+  do {
+    i = (i + 1) & mask;
+    uint64_t x = map->hashes[i] & mask;
+    // Removing a key from an open-addressed hash table is complicated
+    if ((i > h && (x <= h || x > i)) || (i < h && (x <= h && x > i))) {
+      map->hashes[h] = map->hashes[i];
+      map->values[h] = map->values[i];
+      h = i;
+    }
+  } while (map->hashes[i] != MAP_NIL);
+
+  map->hashes[i] = MAP_NIL;
+  map->values[i] = MAP_NIL;
+  map->used--;
 }
