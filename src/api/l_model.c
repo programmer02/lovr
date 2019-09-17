@@ -4,6 +4,7 @@
 #include "data/modelData.h"
 #include "core/maf.h"
 
+/*
 static int luax_reverseModelDataNameMap(lua_State *L, ModelData *modelData, int idx, map_u32_t *t, int count, const char *noun) {
   lovrAssert(idx > 0 && idx <= count, "Model has no %s at index %d", idx, noun);
   map_iter_t iter = map_iter(t);
@@ -18,6 +19,7 @@ static int luax_reverseModelDataNameMap(lua_State *L, ModelData *modelData, int 
   lua_pushnil(L);
   return 1;
 }
+*/
 
 static uint32_t luax_checkanimation(lua_State* L, int index, Model* model) {
   switch (lua_type(L, index)) {
@@ -42,6 +44,7 @@ static int l_lovrModelDraw(lua_State* L) {
   return 0;
 }
 
+/*
 static int l_lovrModelAnimate(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
   uint32_t animation = luax_checkanimation(L, 2, model);
@@ -50,7 +53,9 @@ static int l_lovrModelAnimate(lua_State* L) {
   lovrModelAnimate(model, animation, time, alpha);
   return 0;
 }
+*/
 
+/*
 static int l_lovrModelPose(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
 
@@ -83,7 +88,9 @@ static int l_lovrModelPose(lua_State* L) {
   lovrModelPose(model, node, position, rotation, alpha);
   return 0;
 }
+*/
 
+/*
 static int l_lovrModelGetMaterial(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
 
@@ -107,6 +114,7 @@ static int l_lovrModelGetMaterial(lua_State* L) {
   luax_pushtype(L, Material, lovrModelGetMaterial(model, material));
   return 1;
 }
+*/
 
 static int l_lovrModelGetAABB(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
@@ -118,6 +126,7 @@ static int l_lovrModelGetAABB(lua_State* L) {
   return 6;
 }
 
+/*
 static int l_lovrModelGetNodePose(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
   uint32_t node;
@@ -150,7 +159,9 @@ static int l_lovrModelGetNodePose(lua_State* L) {
   lua_pushnumber(L, az);
   return 7;
 }
+*/
 
+/*
 static int l_lovrModelGetAnimationName(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
   int idx = luaL_checknumber(L, 2);
@@ -171,6 +182,7 @@ static int l_lovrModelGetNodeName(lua_State* L) {
   ModelData* modelData = lovrModelGetModelData(model);
   return luax_reverseModelDataNameMap(L, modelData, idx, &modelData->nodeMap, modelData->nodeCount, "node");
 }
+*/
 
 static int l_lovrModelGetAnimationCount(lua_State* L) {
   Model* model = luax_checktype(L, 1, Model);
@@ -199,14 +211,14 @@ static int l_lovrModelGetAnimationDuration(lua_State* L) {
 
 const luaL_Reg lovrModel[] = {
   { "draw", l_lovrModelDraw },
-  { "animate", l_lovrModelAnimate },
-  { "pose", l_lovrModelPose },
-  { "getMaterial", l_lovrModelGetMaterial },
+  //{ "animate", l_lovrModelAnimate },
+  //{ "pose", l_lovrModelPose },
+  //{ "getMaterial", l_lovrModelGetMaterial },
   { "getAABB", l_lovrModelGetAABB },
-  { "getNodePose", l_lovrModelGetNodePose },
-  { "getAnimationName", l_lovrModelGetAnimationName },
-  { "getMaterialName", l_lovrModelGetMaterialName },
-  { "getNodeName", l_lovrModelGetNodeName },
+  //{ "getNodePose", l_lovrModelGetNodePose },
+  //{ "getAnimationName", l_lovrModelGetAnimationName },
+  //{ "getMaterialName", l_lovrModelGetMaterialName },
+  //{ "getNodeName", l_lovrModelGetNodeName },
   { "getAnimationCount", l_lovrModelGetAnimationCount },
   { "getMaterialCount", l_lovrModelGetMaterialCount },
   { "getNodeCount", l_lovrModelGetNodeCount },

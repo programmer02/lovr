@@ -3,6 +3,7 @@
 #include "data/textureData.h"
 #include "filesystem/filesystem.h"
 #include "core/arr.h"
+#include "core/hash.h"
 #include "core/maf.h"
 #include "core/map.h"
 #include "core/ref.h"
@@ -147,11 +148,10 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
         char terminator = i == 2 ? '\n' : ' ';
         char* space = strchr(s, terminator);
         if (space) {
-          uint64_t hash = hash64(space - s);
-          *space = '\0'; // I'll be back
-          int* index = map_get(&vertexMap, hash);
-          if (index) {
-            arr_push(&indexBlob, *index);
+          uint64_t hash = hash64(s, space - s);
+          uint64_t index = map_get(&vertexMap, hash);
+          if (index != MAP_NIL) {
+            arr_push(&indexBlob, index);
           } else {
             int v, vt, vn;
             uint64_t newIndex = vertexBlob.length / 8;
@@ -178,7 +178,6 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
               lovrThrow("Bad OBJ: Unknown face format");
             }
           }
-          *space = terminator;
           s = space + 1;
         }
       }
@@ -194,7 +193,7 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
     } else if (STARTS_WITH(data, "usemtl ")) {
       char name[128];
       uint64_t length = sscanf(data + 7, "%s\n%n", name, &lineLength);
-      uint32_t* material = map_get(&materialMap, hash64(name, length));
+      uint64_t material = map_get(&materialMap, hash64(name, length));
       lovrAssert(length > 0, "Bad OBJ: Expected a valid material name");
 
       // If the last group didn't have any faces, just reuse it, otherwise make a new group
@@ -202,12 +201,12 @@ ModelData* lovrModelDataInitObj(ModelData* model, Blob* source) {
       if (group->count > 0) {
         int start = group->start + group->count; // Don't put this in the compound literal (realloc)
         arr_push(&groups, ((objGroup) {
-          .material = material ? *material : -1,
+          .material = material == MAP_NIL ? -1 : material,
           .start = start,
           .count = 0
         }));
       } else {
-        group->material = material ? *material : -1;
+        group->material = material == MAP_NIL ? -1 : material;
       }
     } else {
       char* newline = memchr(data, '\n', length);

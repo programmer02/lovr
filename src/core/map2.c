@@ -36,7 +36,19 @@ static LOVR_INLINE uint64_t map_find(map_t* map, uint64_t hash) {
 }
 
 void map_init(map_t* map, uint32_t n) {
-  map->size = n + !n;
+
+  // Round down to a power of 2 (size gets doubled in map_rehash)
+  if (n == 0) {
+    n = 1;
+  } else {
+#ifdef _WIN32
+    // TODO
+#else
+    n = 1 << (31 - __builtin_clz(n));
+#endif
+  }
+
+  map->size = n;
   map->used = 0;
   map->hashes = NULL;
   map_rehash(map);

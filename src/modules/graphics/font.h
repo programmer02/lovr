@@ -21,33 +21,13 @@ typedef enum {
   ALIGN_BOTTOM
 } VerticalAlign;
 
-typedef struct {
-  uint32_t x;
-  uint32_t y;
-  uint32_t width;
-  uint32_t height;
-  uint32_t rowHeight;
-  uint32_t padding;
-  arr_t(Glyph) glyphs;
-  map_t glyphMap;
-} FontAtlas;
-
-typedef struct Font {
-  struct Rasterizer* rasterizer;
-  struct Texture* texture;
-  FontAtlas atlas;
-  map_t kerning;
-  float lineHeight;
-  float pixelDensity;
-  bool flip;
-} Font;
-
-Font* lovrFontInit(Font* font, struct Rasterizer* rasterizer);
-#define lovrFontCreate(...) lovrFontInit(lovrAlloc(Font), __VA_ARGS__)
+typedef struct Font Font;
+Font* lovrFontCreate(struct Rasterizer* rasterizer);
 void lovrFontDestroy(void* ref);
 struct Rasterizer* lovrFontGetRasterizer(Font* font);
+struct Texture* lovrFontGetTexture(Font* font);
 void lovrFontRender(Font* font, const char* str, size_t length, float wrap, HorizontalAlign halign, float* vertices, uint16_t* indices, uint16_t baseVertex);
-void lovrFontMeasure(Font* font, const char* string, size_t length, float wrap, float* width, uint32_t* lineCount, uint32_t* glyphCount);
+void lovrFontMeasure(Font* font, const char* string, size_t length, float wrap, float* width, float* height, uint32_t* lineCount, uint32_t* glyphCount);
 float lovrFontGetHeight(Font* font);
 float lovrFontGetAscent(Font* font);
 float lovrFontGetDescent(Font* font);

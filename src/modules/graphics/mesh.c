@@ -26,21 +26,23 @@ size_t lovrMeshGetIndexSize(Mesh* mesh) {
 }
 
 void lovrMeshAttachAttribute(Mesh* mesh, const char* name, MeshAttribute* attribute) {
-  lovrAssert(!map_get(&mesh->attributeMap, name), "Mesh already has an attribute named '%s'", name);
+  uint64_t hash = hash64(name, strlen(name));
+  lovrAssert(map_get(&mesh->attributeMap, hash) == MAP_NIL, "Mesh already has an attribute named '%s'", name);
   lovrAssert(mesh->attributeCount < MAX_ATTRIBUTES, "Mesh already has the max number of attributes (%d)", MAX_ATTRIBUTES);
   lovrAssert(strlen(name) < MAX_ATTRIBUTE_NAME_LENGTH, "Mesh attribute name '%s' is too long (max is %d)", name, MAX_ATTRIBUTE_NAME_LENGTH);
   lovrGraphicsFlushMesh(mesh);
   int index = mesh->attributeCount++;
   mesh->attributes[index] = *attribute;
   strcpy(mesh->attributeNames[index], name);
-  map_set(&mesh->attributeMap, name, index);
+  map_set(&mesh->attributeMap, hash, index);
   lovrRetain(attribute->buffer);
 }
 
 void lovrMeshDetachAttribute(Mesh* mesh, const char* name) {
-  int* index = map_get(&mesh->attributeMap, name);
-  lovrAssert(index, "No attached attribute named '%s' was found", name);
-  MeshAttribute* attribute = &mesh->attributes[*index];
+  uint64_t hash = hash64(name, strlen(name));
+  uint64_t index = map_get(&mesh->attributeMap, hash);
+  lovrAssert(index != MAP_NIL, "No attached attribute named '%s' was found", name);
+  MeshAttribute* attribute = &mesh->attributes[index];
   lovrGraphicsFlushMesh(mesh);
   lovrRelease(Buffer, attribute->buffer);
   map_remove(&mesh->attributeMap, name);

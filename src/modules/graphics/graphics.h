@@ -195,8 +195,8 @@ typedef struct {
 } GpuLimits;
 
 typedef struct {
-  int shaderSwitches;
-  int drawCalls;
+  uint32_t shaderSwitches;
+  uint32_t drawCalls;
 } GpuStats;
 
 typedef struct {

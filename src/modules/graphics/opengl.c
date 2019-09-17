@@ -10,7 +10,6 @@
 #include "data/modelData.h"
 #include "core/hash.h"
 #include "core/ref.h"
-#include "lib/map/map.h"
 #include <math.h>
 #include <limits.h>
 #include <string.h>
@@ -48,11 +47,18 @@ typedef struct {
 } BlockBuffer;
 
 typedef struct {
-  size_t next;
-  size_t oldest;
-  GLuint timers[4];
-  uint64_t ns;
-} TimerList;
+  GLuint* queries;
+  uint32_t* chain;
+  uint32_t next;
+  uint32_t count;
+} QueryPool;
+
+typedef struct {
+  uint32_t head;
+  uint32_t tail;
+  uint64_t nanoseconds;
+  bool active;
+} Timer;
 
 static struct {
   Texture* defaultTexture;
@@ -84,7 +90,9 @@ static struct {
   float viewports[2][4];
   uint32_t viewportCount;
   arr_t(void*) incoherents[MAX_BARRIERS];
-  map_t(TimerList) timers;
+  QueryPool queryPool;
+  arr_t(Timer) timers;
+  map_t timerMap;
   GpuFeatures features;
   GpuLimits limits;
   GpuStats stats;
@@ -1262,42 +1270,89 @@ void lovrGpuDirtyTexture() {
 
 void lovrGpuTick(const char* label) {
 #ifndef LOVR_WEBGL
-  TimerList* timer = map_get(&state.timers, label);
+  uint64_t hash = hash64(label, strlen(label));
+  uint64_t index = map_get(&state.timerMap, hash);
 
-  if (!timer) {
-    map_set(&state.timers, label, ((TimerList) { .oldest = 0 }));
-    timer = map_get(&state.timers, label);
-    glGenQueries(sizeof(timer->timers) / sizeof(timer->timers[0]), timer->timers);
+  if (index == MAP_NIL) {
+    index = state.timers.length;
+    map_set(&state.timerMap, hash, state.timers.length);
+    arr_reserve(&state.timers, ++state.timers.length);
+    state.timers.data[index].head = ~0u;
   }
 
-  glBeginQuery(GL_TIME_ELAPSED, timer->timers[timer->next]);
+  Timer* timer = &state.timers.data[index];
 
-  size_t next = (timer->next + 1) % 4;
-  if (next != timer->oldest) {
-    timer->next = next;
+  if (timer->active) {
+    // Already active, panic!!! or something
   }
+
+  // The pool manages one allocation, where the first half is a contiguous list of queries and
+  // the second half is a contiguous list of query indices.  The queries are contiguous so that
+  // we can create/delete them with minimal calls to OpenGL.  The query indices are used for two
+  // purposes: A) constructing a free list of queries that are not in use and B) storing a chain
+  // of pending queries for a particular timer label.  When reallocating the query pool data, we
+  // need to copy the second half of the old allocation to the second half of the new allocation.
+  QueryPool* pool = &state.queryPool;
+  if (pool->next == ~0u) {
+    uint32_t n = pool->count;
+    pool->count = n == 0 ? 4 : (n << 1);
+    pool->queries = realloc(pool->queries, pool->count * (sizeof(GLuint) + sizeof(uint32_t)));
+    lovrAssert(pool->queries, "Out of memory");
+    memcpy(pool->queries + pool->count, pool->queries + n, n * sizeof(uint32_t));
+    pool->chain = pool->queries + pool->count;
+    glGenQueries(n ? n : pool->count, pool->queries + n);
+    for (uint32_t i = n; i < pool->count - 1; i++) {
+      pool->chain[i] = i + 1;
+    }
+    pool->chain[pool->count - 1] = ~0u;
+    pool->next = n;
+  }
+
+  uint32_t query = pool->next;
+  glBeginQuery(GL_TIME_ELAPSED, pool->queries[query]);
+  pool->next = pool->chain[query];
+  pool->chain[timer->tail] = query;
+  pool->chain[query] = ~0u;
+  timer->active = true;
+  timer->tail = query;
 #endif
 }
 
 double lovrGpuTock(const char* label) {
 #ifndef LOVR_WEBGL
-  TimerList* timer = map_get(&state.timers, label);
-  if (!timer) return 0.;
+  uint64_t hash = hash64(label, strlen(label));
+  uint64_t index = map_get(&state.timerMap, hash);
 
-  glEndQuery(GL_TIME_ELAPSED);
+  if (index == MAP_NIL) {
+    return 0.;
+  }
 
-  while (timer->oldest != timer->next) {
+  Timer* timer = &state.timers.data[index];
+
+  if (!timer->active) {
+    return timer->nanoseconds / 1e9;
+  }
+
+  glEndQuery(GL_TIME_ELAPSED); // Hmmm maybe we should just have one global active query w/ its hash
+
+  while (1) {
     GLuint available;
-    glGetQueryObjectuiv(timer->timers[timer->oldest], GL_QUERY_RESULT_AVAILABLE, &available);
+    glGetQueryObjectuiv(state.queryPool.queries[timer->head], GL_QUERY_RESULT_AVAILABLE, &available);
+
     if (!available) {
       break;
     }
 
-    glGetQueryObjectui64v(timer->timers[timer->oldest], GL_QUERY_RESULT, &timer->ns);
-    timer->oldest = (timer->oldest + 1) % 4;
+    glGetQueryObjectui64v(state.queryPool.queries[timer->head], GL_QUERY_RESULT, &timer->nanoseconds);
+    timer->head = state.queryPool.chain[timer->head];
+
+    if (timer->head == ~0u) {
+      timer->tail = ~0u;
+      break;
+    }
   }
 
-  return timer->ns / 1e9;
+  return timer->nanoseconds / 1e9;
 #endif
 }
 
