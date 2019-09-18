@@ -21,9 +21,13 @@ static void map_rehash(map_t* map) {
   memset(map->hashes, 0xff, 2 * map->size * sizeof(uint64_t));
 
   if (old.hashes) {
+    uint64_t mask = map->size - 1;
     for (uint32_t i = 0; i < old.size; i++) {
       if (old.hashes[i] != MAP_NIL) {
-        uint64_t index = old.hashes[i] & (map->size - 1);
+        uint64_t index = old.hashes[i] & mask;
+        while (map->hashes[index] != MAP_NIL) {
+          index = (index + 1) & mask;
+        }
         map->hashes[index] = old.hashes[i];
         map->values[index] = old.values[i];
       }
@@ -37,8 +41,7 @@ static LOVR_INLINE uint64_t map_find(map_t* map, uint64_t hash) {
   uint64_t h = hash & mask;
 
   while (map->hashes[h] != hash && map->hashes[h] != MAP_NIL) {
-    h++;
-    h &= mask;
+    h = (h + 1) & mask;
   }
 
   return h;

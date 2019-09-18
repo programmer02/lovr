@@ -32,7 +32,7 @@ void lovrMeshAttachAttribute(Mesh* mesh, const char* name, MeshAttribute* attrib
   lovrAssert(mesh->attributeCount < MAX_ATTRIBUTES, "Mesh already has the max number of attributes (%d)", MAX_ATTRIBUTES);
   lovrAssert(strlen(name) < MAX_ATTRIBUTE_NAME_LENGTH, "Mesh attribute name '%s' is too long (max is %d)", name, MAX_ATTRIBUTE_NAME_LENGTH);
   lovrGraphicsFlushMesh(mesh);
-  int index = mesh->attributeCount++;
+  uint64_t index = mesh->attributeCount++;
   mesh->attributes[index] = *attribute;
   strcpy(mesh->attributeNames[index], name);
   map_set(&mesh->attributeMap, hash, index);

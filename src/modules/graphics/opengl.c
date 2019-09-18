@@ -1119,6 +1119,10 @@ void lovrGpuDestroy() {
   for (int i = 0; i < MAX_BARRIERS; i++) {
     arr_free(&state.incoherents[i]);
   }
+  glDeleteQueries(state.queryPool.count, state.queryPool.queries);
+  free(state.queryPool.queries);
+  arr_free(&state.timers);
+  map_free(&state.timerMap);
   memset(&state, 0, sizeof(state));
 }
 

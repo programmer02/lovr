@@ -1,8 +1,6 @@
-#include "data/rasterizer.h"
-#include "core/arr.h"
-#include "core/map.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #pragma once
 
@@ -39,7 +37,3 @@ void lovrFontSetFlipEnabled(Font* font, bool flip);
 int32_t lovrFontGetKerning(Font* font, unsigned int a, unsigned int b);
 float lovrFontGetPixelDensity(Font* font);
 void lovrFontSetPixelDensity(Font* font, float pixelDensity);
-Glyph* lovrFontGetGlyph(Font* font, uint32_t codepoint);
-void lovrFontAddGlyph(Font* font, Glyph* glyph);
-void lovrFontExpandTexture(Font* font);
-void lovrFontCreateTexture(Font* font);

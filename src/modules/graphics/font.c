@@ -1,7 +1,10 @@
 #include "graphics/font.h"
 #include "graphics/texture.h"
+#include "data/rasterizer.h"
 #include "data/textureData.h"
+#include "core/arr.h"
 #include "core/hash.h"
+#include "core/map.h"
 #include "core/ref.h"
 #include "core/utf.h"
 #include <string.h>
@@ -42,6 +45,11 @@ static float* lovrFontAlignLine(float* x, float* lineEnd, float width, Horizonta
 
   return x;
 }
+
+static Glyph* lovrFontGetGlyph(Font* font, uint32_t codepoint);
+static void lovrFontAddGlyph(Font* font, Glyph* glyph);
+static void lovrFontExpandTexture(Font* font);
+static void lovrFontCreateTexture(Font* font);
 
 Font* lovrFontCreate(Rasterizer* rasterizer) {
   Font* font = lovrAlloc(Font);
@@ -280,7 +288,7 @@ void lovrFontSetPixelDensity(Font* font, float pixelDensity) {
   font->pixelDensity = pixelDensity;
 }
 
-Glyph* lovrFontGetGlyph(Font* font, uint32_t codepoint) {
+static Glyph* lovrFontGetGlyph(Font* font, uint32_t codepoint) {
   FontAtlas* atlas = &font->atlas;
   uint64_t hash = hash64(&codepoint, sizeof(codepoint));
   uint64_t index = map_get(&atlas->glyphMap, hash);
@@ -297,7 +305,7 @@ Glyph* lovrFontGetGlyph(Font* font, uint32_t codepoint) {
   return &atlas->glyphs.data[index];
 }
 
-void lovrFontAddGlyph(Font* font, Glyph* glyph) {
+static void lovrFontAddGlyph(Font* font, Glyph* glyph) {
   FontAtlas* atlas = &font->atlas;
 
   // Don't waste space on empty glyphs
@@ -330,7 +338,7 @@ void lovrFontAddGlyph(Font* font, Glyph* glyph) {
   atlas->rowHeight = MAX(atlas->rowHeight, glyph->th);
 }
 
-void lovrFontExpandTexture(Font* font) {
+static void lovrFontExpandTexture(Font* font) {
   FontAtlas* atlas = &font->atlas;
 
   if (atlas->width == atlas->height) {
@@ -359,7 +367,7 @@ void lovrFontExpandTexture(Font* font) {
 
 // TODO we only need the TextureData here to clear the texture, but it's a big waste of memory.
 // Could look into using glClearTexImage when supported to make this more efficient.
-void lovrFontCreateTexture(Font* font) {
+static void lovrFontCreateTexture(Font* font) {
   lovrRelease(Texture, font->texture);
   TextureData* textureData = lovrTextureDataCreate(font->atlas.width, font->atlas.height, 0x0, FORMAT_RGB);
   font->texture = lovrTextureCreate(TEXTURE_2D, &textureData, 1, false, false, 0);

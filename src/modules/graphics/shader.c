@@ -79,7 +79,7 @@ ShaderType lovrShaderGetType(Shader* shader) {
 
 int lovrShaderGetAttributeLocation(Shader* shader, const char* name) {
   uint64_t location = map_get(&shader->attributes, hash64(name, strlen(name)));
-  return location == MAP_NIL ? (int) location : -1;
+  return location == MAP_NIL ? -1 : (int) location;
 }
 
 bool lovrShaderHasUniform(Shader* shader, const char* name) {
