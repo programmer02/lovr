@@ -45,6 +45,7 @@ void lovrModelDataAllocate(ModelData* model) {
   totalSize += sizes[9] = model->channelCount * sizeof(ModelAnimationChannel);
   totalSize += sizes[10] = model->childCount * sizeof(uint32_t);
   totalSize += sizes[11] = model->jointCount * sizeof(uint32_t);
+  totalSize += sizes[12] = model->charCount * sizeof(char);
 
   size_t offset = 0;
   char* p = model->data = calloc(1, totalSize);
@@ -61,6 +62,7 @@ void lovrModelDataAllocate(ModelData* model) {
   model->channels = (ModelAnimationChannel*) (p + offset), offset += sizes[9];
   model->children = (uint32_t*) (p + offset), offset += sizes[10];
   model->joints = (uint32_t*) (p + offset), offset += sizes[11];
+  model->chars = (char*) (p + offset), offset += sizes[12];
 
   map_init(&model->animationMap, model->animationCount);
   map_init(&model->materialMap, model->materialCount);

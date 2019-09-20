@@ -133,12 +133,14 @@ typedef struct {
 } ModelAnimationChannel;
 
 typedef struct {
+  const char* name;
   ModelAnimationChannel* channels;
   uint32_t channelCount;
   float duration;
 } ModelAnimation;
 
 typedef struct {
+  const char* name;
   float scalars[MAX_MATERIAL_SCALARS];
   Color colors[MAX_MATERIAL_COLORS];
   uint32_t textures[MAX_MATERIAL_TEXTURES];
@@ -154,6 +156,7 @@ typedef struct {
 } ModelPrimitive;
 
 typedef struct {
+  const char* name;
   float transform[16];
   float translation[4];
   float rotation[4];
@@ -198,9 +201,11 @@ typedef struct ModelData {
   ModelAnimationChannel* channels;
   uint32_t* children;
   uint32_t* joints;
+  char* chars;
   uint32_t channelCount;
   uint32_t childCount;
   uint32_t jointCount;
+  uint32_t charCount;
 
   map_t animationMap;
   map_t materialMap;
