@@ -66,6 +66,7 @@ Font* lovrFontCreate(Rasterizer* rasterizer) {
   font->atlas.width = 128;
   font->atlas.height = 128;
   font->atlas.padding = padding;
+  arr_init(&font->atlas.glyphs);
   map_init(&font->atlas.glyphMap, 0);
 
   // Set initial atlas size
@@ -83,10 +84,9 @@ void lovrFontDestroy(void* ref) {
   Font* font = ref;
   lovrRelease(Rasterizer, font->rasterizer);
   lovrRelease(Texture, font->texture);
-  /*while ((key = map_next(&font->atlas.glyphs, &iter)) != NULL) {
-    Glyph* glyph = map_get(&font->atlas.glyphs, key);
-    lovrRelease(TextureData, glyph->data);
-  }*/
+  for (size_t i = 0; i < font->atlas.glyphs.length; i++) {
+    lovrRelease(TextureData, font->atlas.glyphs.data[i].data);
+  }
   map_free(&font->atlas.glyphMap);
   map_free(&font->kerning);
 }
