@@ -53,10 +53,10 @@ World* lovrWorldInit(World* world, float xg, float yg, float zg, bool allowSleep
   arr_init(&world->overlaps);
   lovrWorldSetGravity(world, xg, yg, zg);
   lovrWorldSetSleepingAllowed(world, allowSleep);
-  map_init(&world->tags);
-  for (int i = 0; i < tagCount; i++) {
+  map_init(&world->tags, 0);
+  /*for (int i = 0; i < tagCount; i++) {
     map_set(&world->tags, tags[i], i);
-  }
+  }*/
 
   for (int i = 0; i < MAX_TAGS; i++) {
     world->masks[i] = ~0;
@@ -69,7 +69,7 @@ void lovrWorldDestroy(void* ref) {
   World* world = ref;
   lovrWorldDestroyData(world);
   arr_free(&world->overlaps);
-  map_deinit(&world->tags);
+  map_free(&world->tags);
 }
 
 void lovrWorldDestroyData(World* world) {
@@ -226,49 +226,50 @@ const char* lovrWorldGetTagName(World* world, int tag) {
     return NULL;
   }
 
-  const char* key;
+  /*const char* key;
   map_iter_t iter = map_iter(&world->tags);
   while ((key = map_next(&world->tags, &iter))) {
     if (*map_get(&world->tags, key) == tag) {
       return key;
     }
-  }
+  }*/
 
   return NULL;
 }
 
 int lovrWorldDisableCollisionBetween(World* world, const char* tag1, const char* tag2) {
-  int* index1 = map_get(&world->tags, tag1);
+  /*int* index1 = map_get(&world->tags, tag1);
   int* index2 = map_get(&world->tags, tag2);
   if (!index1 || !index2) {
     return NO_TAG;
   }
 
   world->masks[*index1] &= ~(1 << *index2);
-  world->masks[*index2] &= ~(1 << *index1);
+  world->masks[*index2] &= ~(1 << *index1);*/
   return 0;
 }
 
 int lovrWorldEnableCollisionBetween(World* world, const char* tag1, const char* tag2) {
-  int* index1 = map_get(&world->tags, tag1);
+  /*int* index1 = map_get(&world->tags, tag1);
   int* index2 = map_get(&world->tags, tag2);
   if (!index1 || !index2) {
     return NO_TAG;
   }
 
   world->masks[*index1] |= (1 << *index2);
-  world->masks[*index2] |= (1 << *index1);
+  world->masks[*index2] |= (1 << *index1);*/
   return 0;
 }
 
 int lovrWorldIsCollisionEnabledBetween(World* world, const char* tag1, const char* tag2) {
-  int* index1 = map_get(&world->tags, tag1);
+  /*int* index1 = map_get(&world->tags, tag1);
   int* index2 = map_get(&world->tags, tag2);
   if (!index1 || !index2) {
     return NO_TAG;
   }
 
-  return (world->masks[*index1] & (1 << *index2)) && (world->masks[*index2] & (1 << *index1));
+  return (world->masks[*index1] & (1 << *index2)) && (world->masks[*index2] & (1 << *index1));*/
+  return 0;
 }
 
 Collider* lovrColliderInit(Collider* collider, World* world, float x, float y, float z) {
@@ -402,13 +403,13 @@ int lovrColliderSetTag(Collider* collider, const char* tag) {
     return 0;
   }
 
-  int* index = map_get(&collider->world->tags, tag);
+  /*int* index = map_get(&collider->world->tags, tag);
 
   if (!index) {
     return NO_TAG;
   }
 
-  collider->tag = *index;
+  collider->tag = *index;*/
   return 0;
 }
 

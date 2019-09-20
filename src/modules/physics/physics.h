@@ -1,5 +1,5 @@
 #include "core/arr.h"
-#include "lib/map/map.h"
+#include "core/map.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <ode/ode.h>
@@ -33,7 +33,7 @@ typedef struct {
   dSpaceID space;
   dJointGroupID contactGroup;
   arr_t(Shape*) overlaps;
-  map_int_t tags;
+  map_t tags;
   uint16_t masks[MAX_TAGS];
   Collider* head;
 } World;

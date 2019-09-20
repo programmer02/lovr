@@ -68,9 +68,7 @@ void map_set(map_t* map, uint64_t hash, uint64_t value) {
   }
 
   uint64_t h = map_find(map, hash);
-  lovrAssert(map->hashes[h] == MAP_NIL, "Collision!");
-
-  map->used++;
+  map->used += map->hashes[h] == MAP_NIL;
   map->hashes[h] = hash;
   map->values[h] = value;
 }
