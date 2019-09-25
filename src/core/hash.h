@@ -2,8 +2,6 @@
 #include <stdint.h>
 
 // FNV1a
-// TODO investigate using a block-based hash
-
 static LOVR_INLINE uint64_t hash64(const void* data, size_t length) {
   const uint8_t* bytes = data;
   uint64_t hash = 0xcbf29ce484222325;
