@@ -5,7 +5,6 @@ ifeq (@(DEBUG),y)
   CFLAGS += -g
 else
   CFLAGS += -Os
-  CFLAGS += -march=native
 endif
 
 # Warnings
