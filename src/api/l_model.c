@@ -2,7 +2,6 @@
 #include "graphics/material.h"
 #include "graphics/model.h"
 #include "data/modelData.h"
-#include "core/hash.h"
 #include "core/maf.h"
 
 static uint32_t luax_checkanimation(lua_State* L, int index, Model* model) {
