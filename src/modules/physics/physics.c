@@ -6,13 +6,7 @@
 #include <stdbool.h>
 
 static void defaultNearCallback(void* data, dGeomID a, dGeomID b) {
-  lovrWorldCollide((World*) data, dGeomGetData(a), dGeomGetData(b), -1, -1);
-}
-
-static void customNearCallback(void* data, dGeomID shapeA, dGeomID shapeB) {
-  World* world = data;
-  arr_push(&world->overlaps, dGeomGetData(shapeA));
-  arr_push(&world->overlaps, dGeomGetData(shapeB));
+  lovrWorldCollide((World*) data, dGeomGetData(a), dGeomGetData(b), -1, -1, false);
 }
 
 static void raycastCallback(void* data, dGeomID a, dGeomID b) {
@@ -96,11 +90,15 @@ void lovrWorldDestroyData(World* world) {
 }
 
 void lovrWorldUpdate(World* world, float dt, CollisionResolver resolver, void* userdata) {
-  if (resolver) {
-    resolver(world, userdata);
-  } else {
-    dSpaceCollide(world->space, world, defaultNearCallback);
-  }
+  CollisionData* data = world->pendingCollision;
+
+  data->resolver = resolver;
+  data->userdata = userdata;
+  dSpaceCollide(world->space, world, defaultNearCallback);
+  data->resolver = NULL;
+  data->userdata = NULL;
+  data->shapeA = NULL;
+  data->shapeB = NULL;
 
   if (dt > 0) {
     dWorldQuickStep(world->id, dt);
@@ -109,23 +107,7 @@ void lovrWorldUpdate(World* world, float dt, CollisionResolver resolver, void* u
   dJointGroupEmpty(world->contactGroup);
 }
 
-void lovrWorldComputeOverlaps(World* world) {
-  arr_clear(&world->overlaps);
-  dSpaceCollide(world->space, world, customNearCallback);
-}
-
-int lovrWorldGetNextOverlap(World* world, Shape** a, Shape** b) {
-  if (world->overlaps.length == 0) {
-    *a = *b = NULL;
-    return 0;
-  }
-
-  *a = arr_pop(&world->overlaps);
-  *b = arr_pop(&world->overlaps);
-  return 1;
-}
-
-int lovrWorldCollide(World* world, Shape* a, Shape* b, float friction, float restitution) {
+int lovrWorldCollide(World* world, Shape* a, Shape* b, float friction, float restitution, bool deferResolution) {
   if (!a || !b) {
     return false;
   }
@@ -139,6 +121,32 @@ int lovrWorldCollide(World* world, Shape* a, Shape* b, float friction, float res
     return false;
   }
 
+  data->contactCount = dCollide(a->id, b->id, MAX_CONTACTS, &data->contacts[0].geom, sizeof(dContact));
+  if (data->contactCount > 0) {
+    CollisionData* data = world->pendingCollision;
+
+    data->shapeA = a;
+    data->shapeB = b;
+
+    if (world->resolver) {
+      resolver(world);
+    } else if (!deferResolution) {
+      lovrWorldResolveCollision(world, friction, restitution);
+    }
+  }
+
+  return data->contactCount;
+}
+
+bool lovrWorldResolveCollision(World* world, float friction, float restitution) {
+  CollisionData* data = world->pendingCollision;
+  if (!data->shapeA || !data->shapeB) {
+    return false;
+  }
+
+  Collider* colliderA = data->shapeA->collider;
+  Collider* colliderB = data->shapeB->collider;
+
   if (friction < 0.f) {
     friction = sqrtf(colliderA->friction * colliderB->friction);
   }
@@ -147,26 +155,26 @@ int lovrWorldCollide(World* world, Shape* a, Shape* b, float friction, float res
     restitution = MAX(colliderA->restitution, colliderB->restitution);
   }
 
-  dContact contacts[MAX_CONTACTS];
-  for (int i = 0; i < MAX_CONTACTS; i++) {
-    contacts[i].surface.mode = 0;
-    contacts[i].surface.mu = friction;
-    contacts[i].surface.bounce = restitution;
-    contacts[i].surface.mu = dInfinity;
+  for (int i = 0; i < data->contactCount; i++) {
+    dContact* contact = &data->contacts[i];
+
+    contact->surface.mode = 0;
+    contact->surface.mu = friction;
+    contact->surface.bounce = restitution;
+    contact->surface.mu = dInfinity;
 
     if (restitution > 0) {
-      contacts[i].surface.mode |= dContactBounce;
+      contact->surface.mode |= dContactBounce;
     }
-  }
 
-  int contactCount = dCollide(a->id, b->id, MAX_CONTACTS, &contacts[0].geom, sizeof(dContact));
-
-  for (int i = 0; i < contactCount; i++) {
-    dJointID joint = dJointCreateContact(world->id, world->contactGroup, &contacts[i]);
+    dJointID joint = dJointCreateContact(world->id, world->contactGroup, contact);
     dJointAttach(joint, colliderA->body, colliderB->body);
   }
 
-  return contactCount;
+  data->shapeA = NULL;
+  data->shapeB = NULL;
+
+  return true;
 }
 
 void lovrWorldGetGravity(World* world, float* x, float* y, float* z) {
