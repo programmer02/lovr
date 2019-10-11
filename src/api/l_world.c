@@ -3,25 +3,13 @@
 #include "core/ref.h"
 #include <stdbool.h>
 
-static void collisionResolver(World* world, void* userdata) {
-  lua_State* L = userdata;
+static void collisionResolver(World* world) {
+  lua_State* L = world->pendingCollision->userdata;
   luaL_checktype(L, -1, LUA_TFUNCTION);
   luax_pushtype(L, World, world);
-  lua_call(L, 1, 0);
-}
-
-static int nextOverlap(lua_State* L) {
-  World* world = luax_checktype(L, lua_upvalueindex(1), World);
-  Shape* a;
-  Shape* b;
-  if (lovrWorldGetNextOverlap(world, &a, &b)) {
-    luax_pushshape(L, a);
-    luax_pushshape(L, b);
-    return 2;
-  } else {
-    lua_pushnil(L);
-    return 1;
-  }
+  luax_pushshape(L, world->pendingCollision->shapeA);
+  luax_pushshape(L, world->pendingCollision->shapeB);
+  lua_call(L, 3, 0);
 }
 
 static void raycastCallback(Shape* shape, float x, float y, float z, float nx, float ny, float nz, void* userdata) {
@@ -128,27 +116,25 @@ static int l_lovrWorldUpdate(lua_State* L) {
   return 0;
 }
 
-static int l_lovrWorldComputeOverlaps(lua_State* L) {
-  World* world = luax_checktype(L, 1, World);
-  lovrWorldComputeOverlaps(world);
-  return 0;
-}
-
-static int l_lovrWorldOverlaps(lua_State* L) {
-  luax_checktype(L, 1, World);
-  lua_settop(L, 1);
-  lua_pushcclosure(L, nextOverlap, 1);
-  return 1;
-}
-
 static int l_lovrWorldCollide(lua_State* L) {
   World* world = luax_checktype(L, 1, World);
   Shape* a = luax_checkshape(L, 2);
   Shape* b = luax_checkshape(L, 3);
   float friction = luax_optfloat(L, 4, -1.f);
   float restitution = luax_optfloat(L, 5, -1.f);
-  lua_pushboolean(L, lovrWorldCollide(world, a, b, friction, restitution));
+  bool deferResolution = lua_toboolean(L, 6);
+  lua_pushboolean(L, lovrWorldCollide(world, a, b, friction, restitution, deferResolution));
   return 1;
+}
+
+static int l_lovrWorldResolveCollision(lua_State* L) {
+  World* world = luax_checktype(L, 1, World);
+  float friction = luax_optfloat(L, 2, -1.f);
+  float restitution = luax_optfloat(L, 3, -1.f);
+  if (!lovrWorldResolveCollision(world, friction, restitution)) {
+    lovrThrow("No pending collision");
+  }
+  return 0;
 }
 
 static int l_lovrWorldGetGravity(lua_State* L) {
@@ -263,9 +249,8 @@ const luaL_Reg lovrWorld[] = {
   { "newSphereCollider", l_lovrWorldNewSphereCollider },
   { "destroy", l_lovrWorldDestroy },
   { "update", l_lovrWorldUpdate },
-  { "computeOverlaps", l_lovrWorldComputeOverlaps },
-  { "overlaps", l_lovrWorldOverlaps },
   { "collide", l_lovrWorldCollide },
+  { "resolveCollision", l_lovrWorldResolveCollision },
   { "getGravity", l_lovrWorldGetGravity },
   { "setGravity", l_lovrWorldSetGravity },
   { "getLinearDamping", l_lovrWorldGetLinearDamping },

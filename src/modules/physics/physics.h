@@ -27,16 +27,29 @@ typedef enum {
 typedef struct Collider Collider;
 typedef struct Shape Shape;
 typedef struct Joint Joint;
+typedef struct World World;
+
+typedef void (*CollisionResolver)(World* world);
+typedef void (*RaycastCallback)(Shape* shape, float x, float y, float z, float nx, float ny, float nz, void* userdata);
 
 typedef struct {
+  dContact contacts[MAX_CONTACTS];
+  Shape* shapeA;
+  Shape* shapeB;
+  int contactCount;
+  CollisionResolver resolver;
+  void* userdata;
+} CollisionData;
+
+struct World {
   dWorldID id;
   dSpaceID space;
   dJointGroupID contactGroup;
-  arr_t(Shape*) overlaps;
+  CollisionData pendingCollision;
   map_int_t tags;
   uint16_t masks[MAX_TAGS];
   Collider* head;
-} World;
+};
 
 struct Collider {
   dBodyID body;
@@ -74,9 +87,6 @@ typedef Joint DistanceJoint;
 typedef Joint HingeJoint;
 typedef Joint SliderJoint;
 
-typedef void (*CollisionResolver)(World* world, void* userdata);
-typedef void (*RaycastCallback)(Shape* shape, float x, float y, float z, float nx, float ny, float nz, void* userdata);
-
 typedef struct {
   RaycastCallback callback;
   void* userdata;
@@ -90,9 +100,8 @@ World* lovrWorldInit(World* world, float xg, float yg, float zg, bool allowSleep
 void lovrWorldDestroy(void* ref);
 void lovrWorldDestroyData(World* world);
 void lovrWorldUpdate(World* world, float dt, CollisionResolver resolver, void* userdata);
-void lovrWorldComputeOverlaps(World* world);
-int lovrWorldGetNextOverlap(World* world, Shape** a, Shape** b);
-int lovrWorldCollide(World* world, Shape* a, Shape* b, float friction, float restitution);
+int lovrWorldCollide(World* world, Shape* a, Shape* b, float friction, float restitution, bool deferResolution);
+bool lovrWorldResolveCollision(World* world, float friction, float restitution);
 void lovrWorldGetGravity(World* world, float* x, float* y, float* z);
 void lovrWorldSetGravity(World* world, float x, float y, float z);
 void lovrWorldGetLinearDamping(World* world, float* damping, float* threshold);
